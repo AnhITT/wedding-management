@@ -1,0 +1,372 @@
+body {
+    background-color: #121212;
+    font-family: "Roboto", sans-serif;
+    color: #ffffff;
+}
+
+.App {
+    text-align: center;
+    background-color: #121212;
+}
+
+.App-logo {
+    height: 40vmin;
+    pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .App-logo {
+        animation: App-logo-spin infinite 20s linear;
+    }
+}
+
+.App-header {
+    background-color: #282c34;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(10px + 2vmin);
+    color: white;
+}
+
+.App-link {
+    color: #000000;
+}
+
+@keyframes App-logo-spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.btn-primary {
+    background: #333;
+    border: 1px solid #ffffff;
+    color: #ffffff;
+}
+
+.btn-primary:hover {
+    background: #444;
+    border: 1px solid #ffffff;
+}
+
+.card {
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease;
+    color: #ffffff;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1);
+}
+
+.text-gradient {
+    background: linear-gradient(90deg, #ffffff 0%, #cccccc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: bold;
+}
+
+.form-control {
+    background-color: #333;
+    border: 1px solid #444;
+    color: #ffffff;
+}
+
+.form-control:focus {
+    background-color: #444;
+    border-color: #666;
+    color: #ffffff;
+}
+
+/* Styles cho modals */
+.modal-content {
+    background-color: #1e1e1e !important;
+    color: #ffffff !important;
+}
+
+.modal-header {
+    border-bottom: 1px solid #333 !important;
+}
+
+.modal-footer {
+    border-top: 1px solid #333 !important;
+}
+
+/* Styles cho tables */
+.table {
+    color: #ffffff !important;
+    background-color: #1e1e1e !important;
+}
+
+.table td,
+.table th {
+    border-color: #333 !important;
+}
+
+/* Styles cho forms */
+.form-control {
+    background-color: #333 !important;
+    border: 1px solid #444 !important;
+    color: #ffffff !important;
+}
+
+.form-control:focus {
+    background-color: #444 !important;
+    border-color: #666 !important;
+    color: #ffffff !important;
+}
+
+/* Styles cho cards */
+.card {
+    background-color: #1e1e1e !important;
+    border: 1px solid #333 !important;
+    color: #ffffff !important;
+}
+
+.card-header {
+    background-color: #333 !important;
+    border-bottom: 1px solid #444 !important;
+}
+
+.card-footer {
+    background-color: #333 !important;
+    border-top: 1px solid #444 !important;
+}
+
+/* Styles cho buttons */
+.btn-primary {
+    background-color: #333 !important;
+    border-color: #444 !important;
+    color: #ffffff !important;
+}
+
+.btn-primary:hover {
+    background-color: #444 !important;
+    border-color: #555 !important;
+}
+
+.btn-secondary {
+    background-color: #444 !important;
+    border-color: #555 !important;
+}
+
+/* Styles cho dropdowns */
+.dropdown-menu {
+    background-color: #1e1e1e !important;
+    border-color: #333 !important;
+}
+
+.dropdown-item {
+    color: #ffffff !important;
+}
+
+.dropdown-item:hover {
+    background-color: #333 !important;
+}
+
+/* Styles cho alerts */
+.alert {
+    background-color: #1e1e1e !important;
+    border-color: #333 !important;
+    color: #ffffff !important;
+}
+
+/* Styles cho pagination */
+.pagination {
+    background-color: #1e1e1e !important;
+}
+
+.page-item .page-link {
+    background-color: #333 !important;
+    border-color: #444 !important;
+    color: #ffffff !important;
+}
+
+/* Styles cho list groups */
+.list-group-item {
+    background-color: #1e1e1e !important;
+    border-color: #333 !important;
+    color: #ffffff !important;
+}
+
+/* Styles cho accordions */
+.accordion-item {
+    background-color: #1e1e1e !important;
+    border-color: #333 !important;
+}
+
+.accordion-button {
+    background-color: #333 !important;
+    color: #ffffff !important;
+}
+
+.accordion-body {
+    background-color: #1e1e1e !important;
+    color: #ffffff !important;
+}
+
+/* Styles cho date pickers */
+.react-datepicker {
+    background-color: #1e1e1e !important;
+    border-color: #333 !important;
+}
+
+.react-datepicker__header {
+    background-color: #333 !important;
+    border-bottom-color: #444 !important;
+}
+
+.react-datepicker__day {
+    color: #ffffff !important;
+}
+
+.react-datepicker__day:hover {
+    background-color: #444 !important;
+}
+
+/* Styles cho tooltips */
+.tooltip {
+    background-color: #1e1e1e !important;
+    color: #ffffff !important;
+}
+
+/* Styles cho badges */
+.badge {
+    background-color: #333 !important;
+}
+
+/* Styles cho progress bars */
+.progress {
+    background-color: #333 !important;
+}
+
+/* Styles cho spinners */
+.spinner-border {
+    color: #ffffff !important;
+}
+
+/* Styles cho backgrounds */
+.bg-light {
+    background-color: #1e1e1e !important;
+}
+
+.bg-dark {
+    background-color: #121212 !important;
+}
+
+/* Styles cho text */
+.text-dark {
+    color: #ffffff !important;
+}
+
+.text-muted {
+    color: #888 !important;
+}
+
+/* Styles cho borders */
+.border {
+    border-color: #333 !important;
+}
+
+/* Styles cho inputs */
+input,
+select,
+textarea {
+    background-color: #333 !important;
+    border-color: #444 !important;
+    color: #ffffff !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    background-color: #444 !important;
+    border-color: #555 !important;
+    color: #ffffff !important;
+}
+
+/* Styles cho placeholders */
+::placeholder {
+    color: #888 !important;
+}
+
+/* Styles cho scrollbars */
+::-webkit-scrollbar {
+    width: 10px;
+    background-color: #1e1e1e;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #333;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-track {
+    background-color: #1e1e1e;
+}
+
+/* Reset cursor - đặt ở cuối file và thêm !important */
+* {
+    cursor: default !important;
+}
+
+/* Chỉ định cursor pointer cho các phần tử có thể tương tác */
+a,
+button,
+.btn,
+input[type="submit"],
+input[type="button"],
+input[type="checkbox"],
+input[type="radio"],
+select,
+.nav-link,
+.clickable,
+.card:hover,
+.social-link,
+.feature-item:hover,
+.menu-item:hover {
+    cursor: pointer !important;
+}
+
+/* Chỉ định cursor text cho các phần tử nhập liệu */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+input[type="tel"],
+input[type="url"],
+textarea {
+    cursor: text !important;
+}
+
+/* Chỉ định cursor resize cho textarea */
+textarea {
+    cursor: auto !important;
+}
+
+/* Chỉ định cursor move cho các phần tử có thể kéo thả */
+[draggable="true"] {
+    cursor: move !important;
+}
+
+/* Chỉ định cursor not-allowed cho các button disabled */
+button:disabled,
+input:disabled {
+    cursor: not-allowed !important;
+}
+
+/* Chỉ định cursor help cho các phần tử có tooltip */
+[title] {
+    cursor: help !important;
+}

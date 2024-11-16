@@ -1,0 +1,211 @@
+﻿@page "/statistic"
+
+@using System.Globalization
+@using CodeFirst.Data
+@using CodeFirst.Models
+@using CodeFirst.Models.Entities
+@inject ApplicationDbContext dbContext
+
+<MudThemeProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+<MudBreadcrumbs Items="_items"></MudBreadcrumbs>
+@code {
+    private List<MudBlazor.BreadcrumbItem> _items = new List<MudBlazor.BreadcrumbItem>
+    {
+        new MudBlazor.BreadcrumbItem("Trang chủ", href: "/", icon: Icons.Material.Filled.Home),
+        new MudBlazor.BreadcrumbItem("Thống kê", href: "/statistic", icon: Icons.Material.Filled.BarChart),
+    };
+}
+<PageTitle>Statistic</PageTitle>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css">
+
+<h1>Thống kê số liệu</h1>
+<style>
+    .card {
+        border-radius: 13px;
+    }
+
+    .card-body {
+        border-top: none;
+        border-radius: 0 0 10px 10px;
+        position: relative;
+    }
+
+    .card-title {
+        padding: 10px;
+    }
+
+    .d-inline-block {
+        padding: 10px;
+    }
+
+    .float-right {
+        position: absolute;
+        top: 72px;
+        right: 20px;
+    }
+
+        .float-right i {
+            opacity: 0.6;
+            font-size: 40px;
+        }
+</style>
+<div class="container" style="background-color:transparent !important">
+    <div class="container-fluid mt-3">
+        <div class="row">
+            <div class="col-lg-3 col-sm-6">
+                <div class="card gradient-1">
+                    <div class="card-body">
+                        <h3 class="card-title text-white">Người dùng</h3>
+                        <div class="d-inline-block">
+                            <h2 class="text-white">@numberOfUsers.ToString()</h2>
+                            <p class="text-white mb-0 mt-1">Tháng @currentMonth.ToString() - Năm @currentYear.ToString()</p>
+
+                        </div>
+                        <span class="float-right display-5 opacity-5"><i class="fa fa-users"></i></span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-sm-6">
+                <div class="card gradient-2">
+                    <div class="card-body">
+                        <h3 class="card-title text-white">Hóa đơn</h3>
+                        <div class="d-inline-block">
+                            <h2 class="text-white">@numberOfInvoices.ToString()</h2>
+                            <p class="text-white mb-0 mt-1">Tháng @currentMonth.ToString() - Năm @currentYear.ToString()</p>
+
+                        </div>
+                        <span class="float-right display-5 opacity-5"><i class="fa-solid fa-file-invoice-dollar"></i></span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-sm-6">
+                <div class="card gradient-3">
+                    <div class="card-body">
+                        <h3 class="card-title text-white">Doanh thu</h3>
+                        <div class="d-inline-block">
+                            <h3 class="text-white">@total?.ToString("#,##0")</h3>
+                            <p class="text-white mb-0 mt-1">Tháng @currentMonth.ToString() - Năm @currentYear.ToString()</p>
+
+                        </div>
+                        <span class="float-right display-5 opacity-5"><i class="fa fa-money"></i></span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-sm-6">
+                <div class="card gradient-9">
+                    <div class="card-body">
+                        <h3 class="card-title text-white">Khách / Đơn</h3>
+                        <div class="d-inline-block">
+                            <h2 class="text-white">@numberOfCustomers.ToString()</h2>
+                            <p class="text-white mb-0 mt-1">Tháng @currentMonth.ToString() - Năm @currentYear.ToString()</p>
+
+                        </div>
+                        <span class="float-right display-5 opacity-5"><i class="fa fa-heart"></i></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+    <RadzenCard Style="max-width:350px" class="mt-4 w-100 mb-4 d-flex align-items-center">
+        <RadzenLabel Text="Thay đổi màu:" Style="margin-right: 8px; vertical-align: middle;" Component="ColorScheme" />
+        <RadzenDropDown Data="@colorSchemes" @bind-Value="@colorScheme" Name="ColorScheme">
+            <Template>
+                @Enum.GetName(typeof(ColorScheme), context)
+            </Template>
+        </RadzenDropDown>
+    </RadzenCard>
+    <div class="row my-5 d-flex justify-content-center">
+        <div style="border:2px solid #e8e9eb; border-radius:0px;box-shadow: -0.3rem 0.4rem 0 rgba(29, 30, 28, 0.26);border:3px solid black">
+            <RadzenChart ColorScheme="@colorScheme">
+                @foreach (var year in Enumerable.Range(2019, 8))
+                {
+                    var quarterlyRevenue = CalculateQuarterlyRevenue(year);
+                    <RadzenColumnSeries Data="@quarterlyRevenue" CategoryProperty="Quarter" Title="@year.ToString()" ValueProperty="Revenue" />
+                }
+                <RadzenColumnOptions Margin="0" />
+                <RadzenValueAxis Formatter="@FormatAsUSD" />
+            </RadzenChart>
+        </div>
+        <h4 style="margin-top:9px;text-align:center"><i style="margin-right:5px" class="fa-solid fa-chart-column"></i> Biểu đồ thống kê doanh thu mỗi quý theo từng năm</h4>
+
+    </div>
+</div>
+
+@code {
+    IEnumerable<ColorScheme> colorSchemes = Enum.GetValues(typeof(ColorScheme)).Cast<ColorScheme>();
+    ColorScheme colorScheme = ColorScheme.Pastel;
+
+    List<DataItem> CalculateQuarterlyRevenue(int year)
+    {
+        var quarterlyRevenue = new List<DataItem>();
+
+        for (var quarter = 1; quarter <= 4; quarter++)
+        {
+            var startDate = new DateTime(year, (quarter - 1) * 3 + 1, 1);
+            var endDate = startDate.AddMonths(3).AddDays(-1);
+
+            var revenue = dbContext.Invoice
+                .Where(i => i.AttendanceDate.HasValue && i.AttendanceDate.Value >= startDate && i.AttendanceDate.Value <= endDate && string.IsNullOrEmpty(i.OrderStatus))
+                .Sum(i => i.Total ?? 0);
+
+            quarterlyRevenue.Add(new DataItem
+                {
+                    Year = year,
+                    Quarter = $"Q{quarter}",
+                    Revenue = revenue
+                });
+        }
+
+        return quarterlyRevenue;
+    }
+
+
+    int GetQuarter(DateTime date)
+    {
+        return (date.Month - 1) / 3 + 1;
+    }
+
+    string FormatAsUSD(object value)
+    {
+        return ((double)value).ToString("C0", CultureInfo.CreateSpecificCulture("en-US"));
+    }
+
+    class DataItem
+    {
+        public int Year { get; set; }
+        public string Quarter { get; set; }
+        public double Revenue { get; set; }
+    }
+    List<ApplicationUser> applicationUsers { get; set; } = new List<ApplicationUser>();
+    List<Invoice> invoices { get; set; } = new List<Invoice>();
+    int numberOfUsers = 0;
+    int numberOfInvoices = 0;
+    double? total = 0;
+    int numberOfCustomers = 0;
+    int currentMonth = 0;
+    int currentYear = 0;
+    protected override async Task OnInitializedAsync()
+    {
+        applicationUsers = dbContext.ApplicationUser.ToList();
+        invoices = dbContext.Invoice.ToList();
+        numberOfUsers = applicationUsers.Count;
+        numberOfInvoices = invoices.Count;
+        total = invoices.Where(x => string.IsNullOrEmpty(x.OrderStatus)).Sum(x => x.TotalBeforeDiscount);
+        // Lấy ngày hiện tại
+        DateTime currentDate = DateTime.Now;
+
+        // Lấy tháng và năm từ ngày hiện tại
+         currentMonth = currentDate.Month;
+         currentYear = currentDate.Year;
+
+        numberOfCustomers = dbContext.Invoice
+                .Select(i => i.UserId) // UserId của hóa đơn
+                .Distinct() // Loại trùng lặp
+                .Count(); // Đếm số lượng user
+    }
+}

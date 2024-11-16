@@ -1,0 +1,292 @@
+﻿@page "/permission"
+
+@using CodeFirst.Data
+@using CodeFirst.Models
+@using CodeFirst.Models.Entities
+@using CodeFirst.Service
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.SignalR.Client
+@using Microsoft.EntityFrameworkCore
+@inject UserManager<ApplicationUser> UserManager
+@inject RoleManager<IdentityRole> RoleManager
+@inject ApplicationDbContext DbContext
+@inject NavigationManager NavigationManager
+@inject IJSRuntime jsRuntime
+@inject NavigationManager NavigationManager
+@inject RoleManager<IdentityRole> RoleManager
+@inject UserBlazorService _userBlazorService
+@inject ISnackbar SnackbarService
+@inject ISnackbar Snackbar
+<MudThemeProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+@code {
+    [Inject] protected PreloadService PreloadService { get; set; }
+
+    private List<MudBlazor.BreadcrumbItem> _items = new List<MudBlazor.BreadcrumbItem>
+    {
+        new MudBlazor.BreadcrumbItem("Trang chủ", href: "/", icon: Icons.Material.Filled.Home),
+        new MudBlazor.BreadcrumbItem("Quyền truy cập", href: "/permission", icon: Icons.Material.Filled.Security),
+    };
+}
+<MudBreadcrumbs Items="_items"></MudBreadcrumbs>
+<h3 style="margin-bottom:10px;margin-top:10px">Quản lý quyền truy cập</h3>
+<AuthorizeView Roles="administrator system">
+    <Authorized Context="authContext">
+
+<EditForm Model="@permission" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+            <div class="row" style=" margin:20px; border: 3px solid black; box-shadow: -0.3rem 0.4rem 0 rgba(29, 30, 28, 0.26);padding:5px">
+       
+        <div class="col-md-5" style="margin:10px">
+            <div class="form-group">
+                <label for="Roles">Danh sách vai trò:</label>
+                @foreach (var role in roles)
+                {
+                    var isChecked = selectedRoleIds.Contains(role.Id);
+                    <div class="form-check form-switch">
+                        <input type="checkbox" class="form-check-input" checked="@isChecked" id="@role.Id" @onchange="e => UpdateSelectedRoles(role.Id, e.Value)" />
+                        <label class="form-check-label" for="@role.Id">
+                            <span class="lable-name">@role.Name</span>
+                        </label>
+
+                        @if (isChecked)
+                        {
+                            <div class="permissions" style="margin:20px; border: 3px solid black; box-shadow: -0.3rem 0.4rem 0 rgba(29, 30, 28, 0.26);padding:5px">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="CanAdd_@role.Id" @bind="GetPermission(role.Id).CanAdd" />
+                                    <label class="form-check-label mini" for="CanAdd_@role.Id">
+                                        <span class="lable-name">Tạo mới</span>
+                                    </label>
+                                </div>
+
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="CanEdit_@role.Id" @bind="GetPermission(role.Id).CanEdit" />
+                                    <label class="form-check-label mini" for="CanEdit_@role.Id">
+                                        <span class="lable-name">Cập nhật</span>
+                                    </label>
+                                </div>
+
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="CanDelete_@role.Id" @bind="GetPermission(role.Id).CanDelete" />
+                                    <label class="form-check-label mini" for="CanDelete_@role.Id">
+                                        <span class="lable-name">Xóa</span>
+                                    </label>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+                <div class="col-md-5" style="margin:10px">
+            <div class="form-group">
+                <label for="Type">Chọn loại:</label>
+                <select class="form-control" @bind="permission.Type" @bind:event="oninput" @onchange="OnTypeChanged">
+                    <option value="branch">Chi nhánh</option>
+                    <option value="hall">Sảnh cưới</option>
+                    <option value="menu">Thực đơn</option>
+                    <option value="service">Dịch vụ</option>
+                </select>
+            </div>
+            <button type="submit" style="border-radius:0px;margin-top:20px;width:100%;box-shadow: -0.3rem 0.4rem 0 rgba(29, 30, 28, 0.26);background-color:white; color:black;border:3px solid black;font-weight:800" class="btn btn-primary">Lưu thay đổi</button>
+        </div>
+    </div>
+
+
+</EditForm>
+    </Authorized>
+    <NotAuthorized Context="notAuthContext">
+        <h3>You are not authorized to view this content.</h3>
+    </NotAuthorized>
+</AuthorizeView>
+@code {
+    private Permission permission = new Permission { Type = "branch" };
+    private List<IdentityRole> roles = new List<IdentityRole>();
+    private List<string> selectedRoleIds = new List<string>();
+    private Dictionary<string, Permission> rolePermissions = new Dictionary<string, Permission>();
+    private HubConnection hubConnection;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = await _userBlazorService.GetCurrentUser();
+        if(user == null)
+        {
+            NavigationManager.NavigateTo("/Identity/Account/Login?ReturnUrl=%2F");
+        }
+
+        roles = RoleManager.Roles.ToList();
+        await UpdateSelectedRolesForCurrentType();
+    }
+    
+    private async Task UpdateSelectedRolesForCurrentType()
+    {
+        selectedRoleIds = await GetSelectedRoleIdsFromDatabase(permission.Type);
+        foreach (var roleId in selectedRoleIds)
+        {
+            rolePermissions[roleId] = await GetPermissionForRole(permission.Type, roleId);
+        }
+        StateHasChanged();
+    }
+
+    private async Task<List<string>> GetSelectedRoleIdsFromDatabase(string type)
+    {
+        var permissions = await DbContext.Permission.Where(p => p.Type == type).ToListAsync();
+        return permissions.Select(p => p.RoleId).Distinct().ToList();
+    }
+
+    private async Task<Permission> GetPermissionForRole(string type, string roleId)
+    {
+        return await DbContext.Permission.FirstOrDefaultAsync(p => p.Type == type && p.RoleId == roleId)
+               ?? new Permission { Type = type, RoleId = roleId, CanAdd = false, CanEdit = false, CanDelete = false };
+    }
+
+
+
+    private async Task OnTypeChanged(ChangeEventArgs e)
+    {
+        permission.Type = e.Value.ToString();
+        await UpdateSelectedRolesForCurrentType();
+    }
+
+    private void UpdateSelectedRoles(string roleId, object isChecked)
+    {
+        DbContext.ChangeTracker.Clear();
+        if ((bool)isChecked)
+        {
+            if (!selectedRoleIds.Contains(roleId))
+            {
+                selectedRoleIds.Add(roleId);
+                rolePermissions[roleId] = new Permission { Type = permission.Type, RoleId = roleId };
+            }
+        }
+        else
+        {
+            if (selectedRoleIds.Contains(roleId))
+            {
+                selectedRoleIds.Remove(roleId);
+                rolePermissions.Remove(roleId);
+                // Xóa quyền của vai trò đó khỏi cơ sở dữ liệu
+                var permissionToRemove = DbContext.Permission.FirstOrDefault(p => p.Type == permission.Type && p.RoleId == roleId);
+                if (permissionToRemove != null)
+                {
+                    DbContext.Permission.Remove(permissionToRemove);
+                }
+            }
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        DbContext.ChangeTracker.Clear();
+        var permissionsToRemove = DbContext.Permission.Where(p => p.Type == permission.Type);
+        DbContext.Permission.RemoveRange(permissionsToRemove);
+
+        foreach (var roleId in selectedRoleIds)
+        {
+            var rolePermission = rolePermissions[roleId];
+            var existingPermission = await DbContext.Permission.FirstOrDefaultAsync(p => p.Type == permission.Type && p.RoleId == roleId);
+            if (existingPermission != null)
+            {
+                // Cập nhật các quyền "Can Add", "Can Edit", và "Can Delete"
+                existingPermission.CanAdd = rolePermission.CanAdd;
+                existingPermission.CanEdit = rolePermission.CanEdit;
+                existingPermission.CanDelete = rolePermission.CanDelete;
+                DbContext.Permission.Update(existingPermission);
+            }
+            else
+            {
+                DbContext.Permission.Add(rolePermission);
+            }
+        }
+        Snackbar.Add("Đã cập nhật!", Severity.Normal);
+
+        await DbContext.SaveChangesAsync();
+    }
+
+
+    private Permission GetPermission(string roleId)
+    {
+        return rolePermissions.ContainsKey(roleId) ? rolePermissions[roleId] : new Permission();
+    }
+}
+
+<style>
+    .form-check-input[type=checkbox] {
+        width: 0;
+        height: 0;
+        visibility: hidden;
+        border: 4px solid black;
+        margin-top: 5px;
+    }
+
+    .form-check-label {
+        margin-top: 5px;
+        border: 4px solid black;
+        cursor: pointer;
+        position: relative;
+        display: inline-block;
+        width: 40px;
+        height: 20px;
+        background-color: #ccc;
+        border-radius: 20px;
+        transition: background-color 0.3s ease;
+    }
+
+    .form-check-input[type=checkbox]:checked + .form-check-label {
+        background-color: #94de94ff;
+        border: 4px solid black;
+    }
+
+        .form-check-input[type=checkbox]:checked + .form-check-label.mini {
+            background-color: #f07e7eff; /* Màu nền khi checkbox được chọn */
+        }
+    .form-check-label::after {
+        border: 4px solid black;
+        content: '';
+        position: absolute;
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+        background-color: white;
+        top: -6px;
+        left: -4px;
+        transition: transform 0.3s ease;
+    }
+
+    .form-check-label:hover {
+        background-color: #ccc;
+    }
+    label:hover{
+        background-color:transparent;
+    }
+    .form-check-input[type=checkbox]:checked + .form-check-label::after {
+        transform: translateX(20px);
+    }
+
+    .permissions {
+        display: flex;
+        flex-direction: column;
+        margin-top: 10px;
+    }
+
+        .permissions label {
+            margin-right: 10px;
+        }
+
+        .permissions select {
+            margin-bottom: 5px;
+        }
+        .lable-name{
+        display: inline-block;
+        width: 400px;
+        margin-left: 50px;
+        vertical-align: top;
+        top:-5px;
+        bottom:5px;
+        margin-bottom:5px;
+        margin-top:-5px;
+        }
+</style>

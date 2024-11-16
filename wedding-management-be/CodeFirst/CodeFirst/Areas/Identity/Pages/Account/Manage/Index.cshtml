@@ -1,0 +1,93 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Profile";
+    ViewData["ActivePage"] = ManageNavPages.Index;
+}
+@using CodeFirst.Models;
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+@{
+    var user = await UserManager.GetUserAsync(User);
+}
+<style>
+    .flex-container {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    #profile-form {
+        flex: 1;
+        margin-right: 20px;
+    }
+
+    .image-container {
+        flex: 1;
+        text-align: center;
+    }
+
+    .rounded-image {
+        margin-top:40px;
+        border: 3px solid #000;
+        border-radius: 50%;
+        width: 90%;
+        max-width: 350px;
+    }
+
+    input:disabled {
+        background-color: #ccc !important;
+        color: #666;
+    }
+</style>
+<h3>@ViewData["Title"]</h3>
+<partial name="_StatusMessage" for="StatusMessage" />
+<div class="row">
+    <div class="col-md-12">
+        <div class="flex-container">
+            <form id="profile-form" method="post" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-floating">
+                    <input asp-for="Username" class="form-control" disabled />
+                    <label asp-for="Username" class="form-label"></label>
+                </div>
+                <div class="form-floating">
+                    <input asp-for="Input.FirstName" class="form-control" />
+                    <label asp-for="Input.FirstName" class="form-label"></label>
+                </div>
+                <div class="form-floating">
+                    <input asp-for="Input.LastName" class="form-control" />
+                    <label asp-for="Input.LastName" class="form-label"></label>
+                </div>
+                <div class="form-floating">
+                    <input asp-for="Input.PhoneNumber" class="form-control" />
+                    <label asp-for="Input.PhoneNumber" class="form-label"></label>
+                    <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+                </div>
+                <div class="form-floating">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <input asp-for="Input.Role" class="form-control" disabled />
+                    <label asp-for="Input.Role" class="form-label"></label>
+                    <span asp-validation-for="Input.Role" class="text-danger"></span>
+                </div>
+                <div class="form-floating">
+                    <input asp-for="Input.imageFile" class="form-control" autocomplete="off" aria-required="true" type="file" id="customFile" accept=".jpg, .jpeg, .png">
+                    <label for="customFile">Choose file</label>
+                    <span asp-validation-for="Input.imageFile" class="text-danger"></span>
+                    @*do up ảnh lên cloud nên đường link khác với file chọn trong máy*@
+                </div>
+                <button id="update-profile-button" type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
+            </form>
+            <div class="image-container">
+                @if (user != null && !string.IsNullOrEmpty(user.Avatar))
+                {
+                    <img src="@user.Avatar" alt="Avatar" class="rounded-image img-fluid" />
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

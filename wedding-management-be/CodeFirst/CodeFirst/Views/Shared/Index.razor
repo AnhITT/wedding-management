@@ -1,0 +1,119 @@
+﻿@page "/"
+@using CodeFirst.Service
+@inject UserBlazorService _userBlazorService
+@inject NavigationManager NavigationManager
+<PageTitle>Index</PageTitle>
+<style>
+    .big-script p{
+        font-size:2rem;   
+    }
+
+    .card-box {
+        border: 3px solid black;
+        margin-bottom: 7px;
+    }
+</style>
+
+<div class="main-container">
+    <div class="grid-container">
+        <!-- Card with big script -->
+        <div class="card card--2x card-box">
+            <div class="card__content big-script padding-large">
+                <p style="font-size: 2rem;"><a href="/">Restaurant of dreams</a></p>
+            </div>
+        </div>
+        <div class="card card--horizontal card-box">
+            <div class="card__content big-script">
+                <p><a href="/task">tasks to do</a></p>
+            </div>
+        </div>
+ 
+       
+        <!-- Card with horizontal layout -->
+        <div class="card card--horizontal card-box">
+            <div class="card__content big-script">
+                <p><a href="/branch-list">branches list</a></p>
+            </div>
+        </div>
+
+        <div class="card card--horizontal card-box">
+            <div class="card__content big-script">
+                <p>
+                    <a href="/user-list">manage user</a>
+                </p>
+            </div>
+        </div>
+        <!-- Card with horizontal layout and side-by-side content -->
+        <div class="card card--horizontal card-box">
+            <div class="card__side-by-side">
+                <div style="width:100%" class="card__content d-flex justify-content-center align-items-center">
+                    <h3 style="font-weight:300"><a href="/hall-list">Halls list</a></h3>
+                </div>
+            </div>
+        </div>
+       
+        <!-- Card with another image -->
+        <div class="card card-box">
+            <div class="card__image d-flex justify-content-center align-items-center">
+                <h2><a href="/menu-list">menu</a></h2>
+            </div>
+        </div>
+        <!-- Card with content -->
+        <div class="card card-box">
+            <div class="card__image d-flex justify-content-center align-items-center">
+                <h2><a href="/service-list">services</a></h2>
+            </div>
+        </div>
+  
+        <!-- Card with horizontal layout and frameless content -->
+        <div class="card card--horizontal card--frameless card-box">
+            <div class="card__content big-script">
+                <p><a href="/team-calendar">team calendar</a></p>
+            </div>
+        </div>
+        <!-- Card with another image -->
+        <div class="card card-box">
+            <div class="card__image d-flex justify-content-center align-items-center">
+                <h2><a href="/statistic">statistics</a></h2>
+            </div>
+        </div>
+        <!-- Card with another image -->
+        <div class="card card-box">
+            <div class="card__image d-flex justify-content-center align-items-center">
+                <h2><a href="/Admin/Invoice">invoices</a></h2>
+            </div>
+        </div>
+        <!-- Card with another image -->
+        <div class="card card-box">
+            <div class="card__image d-flex justify-content-center align-items-center">
+                <h2><a href="/Admin/Feedback">feedbacks</a></h2>
+            </div>
+        </div>
+
+        <!-- Card with content -->
+        <div class="card card-box">
+            <div class="card__image d-flex justify-content-center align-items-center">
+                <h2><a href="/Admin/Code">vouches</a></h2>
+            </div>
+        </div>
+        <!-- Card with another image -->
+        <div class="card card-box">
+            <div class="card__image d-flex justify-content-center align-items-center">
+                <h2><a href="/Admin/MenuItemComboMenu">combos</a></h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code{
+    protected override async Task OnInitializedAsync()
+    {
+        var getUserCurrBlazor = await _userBlazorService.GetCurrentUser();
+        if (getUserCurrBlazor == null)
+        {
+            NavigationManager.NavigateTo("/Identity/Account/Login?ReturnUrl=%2F");
+            return;
+        }
+    }
+}
+ 

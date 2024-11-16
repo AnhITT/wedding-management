@@ -1,0 +1,24 @@
+﻿﻿@using Microsoft.AspNetCore.Components.Routing
+@using CodeFirst.Views.Shared
+@inject IJSRuntime JSRuntime
+<CascadingAuthenticationState>
+<Router AppAssembly="@typeof(App).Assembly">
+    <Found Context="routeData">
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+    </Found>
+    <NotFound>
+        <PageTitle>Not found</PageTitle>
+        <LayoutView Layout="@typeof(MainLayout)">
+                <div><h1>Lỗi 404</h1></div><br />
+                <div><h2>Không tìm thấy trang </h2></div>
+        </LayoutView>
+    </NotFound>
+</Router>
+</CascadingAuthenticationState>
+@code {
+    private async Task GoToHome()
+    {
+        await JSRuntime.InvokeVoidAsync("window.location.href", "/");
+    }
+}

@@ -1,0 +1,280 @@
+﻿@page "/feedback-list"
+@using System.Globalization
+@inject NavigationManager Navigation
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IHubContext<MyBlazorHub> _hubContext
+
+@using CodeFirst.Data
+@using CodeFirst.Hubs
+@using CodeFirst.Models.Entities
+@using System.Linq
+@using Microsoft.AspNetCore.SignalR
+@using Microsoft.AspNetCore.SignalR.Client
+@using Microsoft.EntityFrameworkCore
+<MudThemeProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+<MudBreadcrumbs Items="_items"></MudBreadcrumbs>
+@code {
+    private List<MudBlazor.BreadcrumbItem> _items = new List<MudBlazor.BreadcrumbItem>
+    {
+        new MudBlazor.BreadcrumbItem("Trang chủ", href: "/", icon: Icons.Material.Filled.Home),
+        new MudBlazor.BreadcrumbItem("Phản hồi", href: "/feedback-list", icon: Icons.Material.Filled.Feedback),
+    };
+}
+<PageTitle>Feedback list</PageTitle>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css">
+
+<h1>Danh sách phản hồi</h1>
+
+<div class="feedback-container">
+    <div class="sorting-options">
+        <div class="row">
+            <div class="branch-filter mt-3 col-md-12 col-lg-4">
+                <label for="branchFilter">Lọc theo chi nhánh: </label>
+                <select @bind="selectedBranchId">
+                    <option value="all">Tất cả</option>
+                    @foreach (var branch in branches)
+                    {
+                        <option value="@branch.BranchId">@branch.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="sorting-options-left mt-3 col-md-12 col-lg-3">
+                <label>Sắp xếp theo: </label>
+                <select @bind="selectedSortOption">
+                    <option value="dateAsc">Ngày tăng dần</option>
+                    <option value="dateDesc">Ngày giảm dần</option>
+                    <option value="ratingAsc">Rating tăng dần</option>
+                    <option value="ratingDesc">Rating giảm dần</option>
+                </select>
+            </div>
+            <div class="sorting-options-right mt-3 col-md-12 col-lg-5">
+                <div class="search-box">
+                    <label style="margin-right:10px" for="searchKeyword">Tìm kiếm: </label>
+                    <input class="custom-input" style="margin-right:10px" type="text" @bind="searchKeyword" placeholder="Nhập từ khóa...">
+                    <button @onclick="SearchFeedbacks" class="btn btn-primary">Tìm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-container">
+        <div class="feedback-list">
+            @if (filteredFeedbacks.Count == 0)
+            {
+                <div class="feedback-item" style="margin-bottom:10px;border:2px solid #e8e9eb; border-radius:0px;box-shadow: -0.3rem 0.4rem 0 rgba(29, 30, 28, 0.26);border:1px solid black">
+                    <div style="margin-top:5px;word-break:break-word" class="feedback-content">
+                        Không tìm thấy phản hồi cho chi nhánh đã chọn.
+                    </div>
+                </div>
+            }
+            else
+            {
+                @foreach (var item in filteredFeedbacks)
+                {
+                    <div class="feedback-item" style="margin-bottom:10px; border:2px solid #e8e9eb; border-radius:0px; box-shadow:-0.3rem 0.4rem 0 rgba(29, 30, 28, 0.26); border:1px solid black; ">
+                        <div class="feedback-email" style="display: flex; align-items: center;">
+                            <img class="avatar" src="@item?.User.Avatar" alt="Avatar" style="width: 40px; height: 40px; margin-right: 10px;" />
+                            <span style="color:#999; margin-right: auto;">@item?.User.Email</span>
+                            <span class="feedback-date">@item.FeedbackDate?.ToString("dd/MM/yyyy")</span>
+                        </div>
+                        <div style="margin-top:5px; word-break:break-word;" class="feedback-content">
+                            @item.Content
+                        </div>
+                        <div class="feedback-rating" style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="star-rating">
+                                @for (int i = 0; i < Math.Floor((double)item.Rating); i++)
+                                {
+                                    <i class="fas fa-star"></i>
+                                }
+                                @if ((double)item.Rating % 1 > 0)
+                                {
+                                    <i class="fas fa-star-half-alt"></i>
+                                }
+                                @for (int i = 0; i < 5 - Math.Ceiling((double)item.Rating); i++)
+                                {
+                                    <i class="far fa-star"></i>
+                                }
+                            </div>
+                            <div class="branch-name" style="margin-left: 10px;">
+                                @item.Branch.Name
+                            </div>
+                        </div>
+                        <div class="branch-name" >
+                            <button @onclick="() => HiddenFeedback(item.FeedbackId)" style="color:white" >
+                                @if ((bool)item.isShowFeedback)
+                                {
+                                    <span  class="btn btn-primary">Ẩn phản hồi</span>
+                                }
+                                else
+                                {
+                                    <span style="color:white" class="btn btn-info">Hiển thị phản hồi</span>
+                                }
+                            </button>
+                        </div>
+                    </div>
+
+                }
+            }
+        </div>
+        <div class="branch-averages">
+            <ul>
+                @foreach (var branchRating in branchRatings)
+                {
+                    var (branchName, (totalRating, numberOfRatings)) = branchRating;
+                    var averageRating = numberOfRatings > 0 ? totalRating / numberOfRatings : 0.0;
+
+                    <li>
+                        @branchName:
+                        <span class="star-rating">
+                            @for (int i = 0; i < Math.Floor(averageRating); i++)
+                            {
+                                <i class="fas fa-star"></i>
+                            }
+                            @if (averageRating % 1 > 0)
+                            {
+                                <i class="fas fa-star-half-alt"></i>
+                            }
+                            @for (int i = 0; i < 5 - Math.Ceiling(averageRating); i++)
+                            {
+                                <i class="far fa-star"></i>
+                            }
+                        </span>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<Feedback> feedbacks = new();
+    private List<Branch> branches = new();
+    private string selectedSortOption = "dateAsc";
+    private string searchKeyword = "";
+    static  int change = 0;
+    private Dictionary<string, (double totalRating, int numberOfRatings)> branchRatings = new();
+    private List<Feedback> filteredFeedbacks => GetFilteredFeedbacks();
+    [Inject] private ApplicationDbContext _context { get; set; }
+    private string selectedBranchId = "all"; // Using "all" to represent all branches
+
+
+    private HubConnection hubConnection;
+
+    public async Task Init()
+    {
+        hubConnection = new HubConnectionBuilder()
+           // .WithUrl(NavigationManager.ToAbsoluteUri("http://localhost/myBlazorHub")) // docker
+           .WithUrl(NavigationManager.ToAbsoluteUri("/myBlazorHub"))
+           .Build();
+
+        hubConnection.On<List<Feedback>>("FeedbackList", list =>
+        {
+            InvokeAsync(() =>
+            {
+                feedbacks = list;
+                StateHasChanged();
+            });
+        });
+        try
+        {
+            await hubConnection.StartAsync();
+            await LoadDataAsync();
+        }
+        catch (Exception ex)
+        {
+        }
+        await base.OnInitializedAsync();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Init();
+        await LoadDataAsync();
+        CalculateBranchRatings();
+    }
+
+
+
+    private async Task HiddenFeedback(int feedbackId)
+    {
+        _context.ChangeTracker.Clear();
+
+        var feedback = await _context.Feedback.Where(x => x.FeedbackId == feedbackId).FirstOrDefaultAsync();
+        if (feedback != null)
+        {
+            feedback.isShowFeedback = !feedback.isShowFeedback; // Đảo ngược giá trị
+            _context.Update(feedback);
+            await _context.SaveChangesAsync();
+            change++;
+            await InvokeAsync(StateHasChanged);
+            await LoadDataAsync();
+
+        }
+    }
+
+    private async Task LoadDataAsync()
+    {
+        feedbacks = await _context.Feedback.Include(x => x.Branch).Include(x => x.User).ToListAsync();
+        branches = await _context.Branch.ToListAsync();
+        await _hubContext.Clients.All.SendAsync("FeedbackList", feedbacks);
+    }
+
+    private void CalculateBranchRatings()
+    {
+        branchRatings = new Dictionary<string, (double, int)>();
+
+        foreach (var item in feedbacks)
+        {
+            var branchName = item.Branch.Name;
+            var rating = item.Rating ?? 0.0;
+
+            if (!branchRatings.ContainsKey(branchName))
+            {
+                branchRatings[branchName] = (rating, 1);
+            }
+            else
+            {
+                var (totalRating, numberOfRatings) = branchRatings[branchName];
+                branchRatings[branchName] = (totalRating + rating, numberOfRatings + 1);
+            }
+        }
+    }
+
+    private List<Feedback> GetFilteredFeedbacks()
+    {
+        var result = feedbacks.AsQueryable();
+
+        if (selectedBranchId != "all")
+        {
+            int branchId = int.Parse(selectedBranchId);
+            result = result.Where(f => f.Branch.BranchId == branchId);
+        }
+
+        if (!string.IsNullOrEmpty(searchKeyword))
+        {
+            result = result.Where(f => f.Content.Contains(searchKeyword, StringComparison.OrdinalIgnoreCase));
+        }
+
+        result = selectedSortOption switch
+        {
+            "dateAsc" => result.OrderBy(f => f.FeedbackDate),
+            "dateDesc" => result.OrderByDescending(f => f.FeedbackDate),
+            "ratingAsc" => result.OrderBy(f => f.Rating),
+            "ratingDesc" => result.OrderByDescending(f => f.Rating),
+            _ => result
+        };
+
+        return result.ToList();
+    }
+
+    private void SearchFeedbacks()
+    {
+        StateHasChanged();
+    }
+
+    
+}

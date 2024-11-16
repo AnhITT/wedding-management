@@ -1,0 +1,25 @@
+﻿@* @page "/404"
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components
+@inject IJSRuntime JSRuntime
+
+<LayoutView Layout="MainLayout">
+    <Card>
+        <CardHeader>
+            <h2 class="card-title">Xin lỗi, không tìm thấy trang này.</h2>
+        </CardHeader>
+        <CardBody>
+            <p class="card-text">Rất tiếc, trang bạn đang tìm kiếm không tồn tại hoặc đã bị di chuyển. Hãy thử lại hoặc quay lại trang chủ.</p>
+        </CardBody>
+        <CardFooter>
+            <Button class="btn btn-primary" @onclick="GoToHome">Trở về trang chủ</Button>
+        </CardFooter>
+    </Card>
+</LayoutView>
+
+@code {
+    private async Task GoToHome()
+    {
+        await JSRuntime.InvokeVoidAsync("window.location.href", "/home");
+    }
+} *@
