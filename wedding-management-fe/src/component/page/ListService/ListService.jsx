@@ -1,9 +1,10 @@
 import './ListService.scss';
 import { BsCartCheck } from 'react-icons/bs';
 import React, { useEffect, useState } from 'react';
-import { Button, Card, Col, Form, Modal, Spinner, Row } from 'react-bootstrap';
+import { Button, Card, Col, Form, Modal, Row, Spinner } from 'react-bootstrap';
 import Apis, { endpoint } from '../../../config/Apis';
 import { Link } from 'react-router-dom';
+import { FaTag, FaMoneyBillWave, FaInfoCircle } from 'react-icons/fa';
 
 const ListService = () => {
     const [loading, setLoading] = useState(true);
@@ -17,17 +18,13 @@ const ListService = () => {
     useEffect(() => {
         const loadServices = async () => {
             try {
-                setLoading(true);
-                const serviceEndpoint = endpoint[`service`];
-                const categoryEndpoint = endpoint[`categoryService`];
-                let serviceRes = await Apis.get(serviceEndpoint);
-                let categoryRes = await Apis.get(categoryEndpoint);
-                setServices(serviceRes.data);
-                setCategories(categoryRes.data);
+                let e = endpoint[`service`];
+                let res = await Apis.get(e);
+                setServices(res.data);
                 setLoading(false);
             } catch (error) {
-                setLoading(false);
                 console.error(error);
+                setLoading(false);
             }
         };
         loadServices();
@@ -42,143 +39,113 @@ const ListService = () => {
         setSearchResult(searchResults);
     };
 
-    const handleCategoryChange = async (e) => {
-        const categoryId = e.target.value;
-        setSelectedCategory(categoryId);
-        if (categoryId) {
-            setLoading(true);
-            try {
-                let res = await Apis.get(`${endpoint[`service`]}/byCategoryService/${categoryId}`);
-                setServices(res.data);
-                setLoading(false);
-            } catch (error) {
-                setLoading(false);
-                console.error(error);
-            }
-        } else {
-            // neu chon tat ca thi nap lai toan bo service
-            const res = await Apis.get(endpoint[`service`]);
-            setServices(res.data);
-        }
-    };
-
-    function formatPrice(price) {
-        if (price === undefined || price === null) {
-            return "N/A";
-        }
+    const formatPrice = (price) => {
         return price.toLocaleString("vi-VN", {
             style: "currency",
-            currency: "VND"
+            currency: "VND",
         });
-    }
+    };
 
-    const openModal = () => setShowModal(true);
-    const closeModal = () => setShowModal(false);
+    const openModal = () => {
+        setShowModal(true);
+    };
+
+    const closeModal = () => {
+        setShowModal(false);
+    };
 
     return (
-        <>
-            <div className='tilte'>
-                <h1 className='text-gradient' style={{ fontWeight: 'bold', marginLeft:'55px'}}>DANH SÁCH DỊCH VỤ</h1>
-                {loading ? (
-                    <div className="overlay">
+        <div className="page-container">
+            <div className="header-section">
+                <h1>DANH SÁCH DỊCH VỤ</h1>
+                {loading && (
+                    <div className="loading-overlay">
                         <Spinner animation="border" />
                     </div>
-                ) : null}
-
-                <Form className="filter d-flex" onSubmit={handleSearch}>
-                    <Form.Control
-                        type="text"
-                        placeholder="Nhập dịch vụ bạn muốn tìm kiếm"
-                        name="kw"
-                        className="me-2"
-                        aria-label="Search"
-                    />
-                    <Button type='submit' >Tìm</Button>
-                </Form>
-                <Form.Select className='filter1 d-flex' style={{ width: '20%' }} aria-label="Chọn thể loại" onChange={handleCategoryChange}>
-                    <option value="">Tất cả</option>
-                    {categories.map(category => (
-                        <option key={category.categoryId} value={category.categoryId}>{category.name}</option>
-                    ))}
-                </Form.Select>
+                )}
+                <div className="search-section">
+                    <Form className="search-form" onSubmit={handleSearch}>
+                        <div className="search-input-wrapper">
+                            <Form.Control
+                                type="text"
+                                placeholder="Tìm kiếm dịch vụ..."
+                                name="kw"
+                                className="search-input"
+                            />
+                            <Button type="submit" className="search-button">
+                                Tìm Kiếm
+                            </Button>
+                        </div>
+                    </Form>
+                </div>
             </div>
 
-            <Modal show={showModal} onHide={closeModal} style={{textAlign:'center'}}>
+            <div className="services-grid">
+                <Row>
+                    {(searchResult.length > 0 ? searchResult : services).map(service => (
+                        <Col xs={12} md={4} lg={3} key={service.serviceId} className="service-item">
+                            <div className="service-card">
+                                <div className="image-wrapper">
+                                    <img src={service.image} alt={service.name} className="service-image" />
+                                    <div className="price-badge">
+                                        <FaMoneyBillWave className="icon" />
+                                        {formatPrice(service.price)}
+                                    </div>
+                                </div>
+                                <div className="card-content">
+                                    <h3 className="service-name">{service.name}</h3>
+                                    <div className="service-info">
+                                        <p className="category">
+                                            <FaTag className="icon" />
+                                            {service.categoryName}
+                                        </p>
+                                    </div>
+                                    <div className="button-group">
+                                        <Link to="/bill" className="book-button">
+                                            <BsCartCheck className="icon" />
+                                            Đặt Ngay
+                                        </Link>
+                                        <Button
+                                            className="detail-button"
+                                            onClick={() => {
+                                                setSelectedService(service);
+                                                openModal();
+                                            }}
+                                        >
+                                            <FaInfoCircle className="icon" />
+                                            Chi Tiết
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                        </Col>
+                    ))}
+                </Row>
+            </div>
+
+            <Modal show={showModal} onHide={closeModal} className="service-modal">
                 <Modal.Header closeButton>
-                    <Modal.Title >Chi tiết dịch vụ</Modal.Title>
+                    <Modal.Title>Chi tiết dịch vụ</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     {selectedService && (
-                        <div>
-                            <img src={selectedService.image} className="custom-img" alt={selectedService.name} />
-                            <h3>{selectedService.name}</h3>
-                            <p>Giá dịch vụ: {formatPrice(selectedService.price)}</p>
-                            <p>Mô tả: {selectedService.description}</p>
+                        <div className="modal-content-wrapper">
+                            <img src={selectedService.image} className="modal-image" alt={selectedService.name} />
+                            <h3 className="modal-title">{selectedService.name}</h3>
+                            <div className="modal-info">
+                                <p className="price">Giá: {formatPrice(selectedService.price)}</p>
+                                <p className="description">{selectedService.description}</p>
+                            </div>
                         </div>
                     )}
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={closeModal}>Đóng</Button>
+                    <Button variant="secondary" onClick={closeModal}>
+                        Đóng
+                    </Button>
                 </Modal.Footer>
             </Modal>
-
-            <Row className='listservice'>
-                {searchResult.length > 0 ? (
-                    searchResult.map(serviceItem => (
-                        <Col xs={12} md={3} className='mt-3' key={serviceItem.serviceId}>
-                            <Card className='card' style={{ width: '18rem' }}>
-                                <Card.Img variant="top" src={serviceItem.image} className="custom-img" alt={serviceItem.name} />
-                                <Card.Body>
-                                    <Card.Title >{serviceItem.name}</Card.Title>
-                                    <Card.Text>Giá dịch vụ: {formatPrice(serviceItem.price)}</Card.Text>
-                                    <Link to="/bill">
-                                        <Button variant="primary" ><BsCartCheck /> Đặt Đơn</Button>
-                                    </Link>
-                                    <Button
-                                        className='btndetail'
-                                        variant="primary"
-                                        onClick={() => {
-                                            setSelectedService(serviceItem);
-                                            openModal();
-                                        }}
-                                    >
-                                        Xem Chi Tiết
-                                    </Button>
-                                </Card.Body>
-                            </Card>
-                        </Col>
-                    ))
-                ) : (
-                    services.map(serviceItem => (
-                        <Col xs={12} md={3} className='mt-3' key={serviceItem.serviceId}>
-                            <Card className='card' style={{ width: '18rem' }}>
-                                <Card.Img variant="top" src={serviceItem.image} className="custom-img" alt={serviceItem.name} />
-                                <Card.Body>
-                                    <Card.Title>{serviceItem.name}</Card.Title>
-                                    <Card.Text>Giá dịch vụ: {formatPrice(serviceItem.price)}</Card.Text>
-                                    <Link to="/bill">
-                                    <Button className='btndetail' variant="primary" style={{ background: 'linear-gradient(90deg, #FE8E5C 0%, #F5576C 100%)', border: 'white', fontWeight: 'bold' }}>
-                                            <BsCartCheck style={{marginBottom:'5px'}} />Đặt Đơn
-                                        </Button>
-                                    </Link>
-                                    <Button
-                                        className='btndetail'
-                                        variant="primary"
-                                        onClick={() => {
-                                            setSelectedService(serviceItem);
-                                            openModal();
-                                        }}
-                                        style={{ background: 'linear-gradient(90deg, #FE8E5C 0%, #F5576C 100%)', border: 'white', fontWeight: 'bold' }}
-                                    >
-                                        Xem Chi Tiết
-                                    </Button>
-                                </Card.Body>
-                            </Card>
-                        </Col>
-                    ))
-                )}
-            </Row>
-        </>
+        </div>
     );
 };
 

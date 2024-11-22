@@ -20,7 +20,7 @@ const Header = () => {
             const decodedToken = jwt_decode(tokenFromCookie);
             const email = decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'];
             const firstName = decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'];
-            const avatar = decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/country'];
+            const lastName = decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/Surname'];
 
             login(tokenFromCookie, firstName, email, avatar);
         }
@@ -33,23 +33,31 @@ const Header = () => {
     };
     return (
         <Navbar expand="lg" className="bg-body-tertiary fixed-top">
-            <Container>
+            <Container className="nav__container">
                 <Link style={{marginRight:'6px'}} className="nav__logo" to="/">
                     Wedding
                 </Link>
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav">
-                    <Nav className="me-auto">
+                    <Nav className="nav__links mx-auto">
                         <Link className="nav-link text-black me-3 fw-bold mt-1" to="/">Trang chủ</Link>
                         <Link className="nav-link text-black me-3 fw-bold mt-1" to="/listhall">Sảnh cưới</Link>
                         <Link className="nav-link text-black me-3 fw-bold mt-1" to="/listbranch">Chi nhánh</Link>
                         <Link className="nav-link text-black me-3 fw-bold mt-1" to="/listmenu">Thực đơn</Link>
                         <Link className="nav-link text-black me-3 fw-bold mt-1" to="/listservice">Dịch vụ</Link>
+                    </Nav>
+                    <Nav className="nav__user-links">
                         {token ? (
                             <>
-                            <span style={{color:'#FE8E5C'}} className="nav-link text-black me-3 mt-1"><Link style={{textDecoration:'none', color:'#F5576C'}} className="fw-bold mt-1"  to="/profile" >{email}</Link></span>
-                            <Link style={{textDecoration:'none', color:'#F5576C'}} className=" mt-1"  to="/profile" ><img style={{ width: '40px', height: '40px', marginTop: '5px', borderRadius: '50%' }} src={avatar} alt="avatar" className="me-3 mt-1" /></Link>
-                                
+                                <Link to='/profile' className="nav-link text-black me-3 fw-bold mt-1" title="Thông tin cá nhân">
+                                    <BsFillPersonFill className='header' />
+                                </Link>
+                                <Link to='/history' className="nav-link text-black fw-bold mt-1" title="Lịch sử đặt tiệc">
+                                    <BsClipboardFill className='header' />
+                                </Link>
+                                <Link to='/bill' style={{marginLeft:'15px'}} className="nav-link text-black fw-bold mt-1" title="Đặt tiệc">
+                                    <MdRoomService className='header' />
+                                </Link>
                                 <button style={{width:'100px',marginLeft:'-6px'}} onClick={handleLogout} className="nav-link text-black me-3 fw-bold mt-1">Đăng Xuất</button>
                             </>
                         ) : (
@@ -57,15 +65,6 @@ const Header = () => {
                                 Đăng Nhập
                             </Link>
                         )}
-                        <Link to='/profile' className="nav-link text-black me-3 fw-bold mt-1" title="Thông tin cá nhân">
-                            <BsFillPersonFill className='header' />
-                        </Link>
-                        <Link to='/history' className="nav-link text-black fw-bold mt-1" title="Lịch sử đặt tiệc">
-                            <BsClipboardFill className='header' />
-                        </Link>
-                        <Link to='/bill' style={{marginLeft:'15px'}} className="nav-link text-black fw-bold mt-1" title="Đặt tiệc">
-                            <MdRoomService className='header' />
-                        </Link>
                     </Nav>
                 </Navbar.Collapse>
             </Container>

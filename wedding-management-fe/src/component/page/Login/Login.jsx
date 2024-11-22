@@ -92,33 +92,37 @@ const Login = () => {
             <div className="login-box">
                 <div className="login-content">
                     <div className="login-header">
-                        <h2>Đăng Nhập</h2>
-                        <p>Chào mừng bạn trở lại</p>
+                        <h2 className="title">Đăng Nhập</h2>
+                        <p className="subtitle">Chào mừng bạn trở lại</p>
                     </div>
                     <form onSubmit={handleLogin} className="login-form">
                         <div className="form-group">
-                            <div className="input-icon">
-                                <FaEnvelope className="icon" />
+                            <label className="form-label">Email</label>
+                            <div className="input-group">
+                                <FaEnvelope className="input-icon" />
                                 <input
                                     type="email"
                                     name="email"
-                                    placeholder="Email"
+                                    placeholder="Nhập email của bạn"
                                     value={formData.email}
                                     onChange={handleChange}
                                     required
+                                    className="form-control"
                                 />
                             </div>
                         </div>
                         <div className="form-group">
-                            <div className="input-icon">
-                                <FaLock className="icon" />
+                            <label className="form-label">Mật khẩu</label>
+                            <div className="input-group">
+                                <FaLock className="input-icon" />
                                 <input
                                     type="password"
                                     name="password"
-                                    placeholder="Mật khẩu"
+                                    placeholder="Nhập mật khẩu của bạn"
                                     value={formData.password}
                                     onChange={handleChange}
                                     required
+                                    className="form-control"
                                 />
                             </div>
                         </div>
@@ -137,24 +141,32 @@ const Login = () => {
                             disabled={isLoading}
                         >
                             {isLoading ? (
-                                <span className="spinner"></span>
+                                <div className="spinner-container">
+                                    <span className="spinner"></span>
+                                    <span>Đang xử lý...</span>
+                                </div>
                             ) : (
                                 "Đăng Nhập"
                             )}
                         </button>
+                        <div className="divider">
+                            <span>Hoặc</span>
+                        </div>
                         <div className="register-link">
                             <p>Chưa có tài khoản?</p>
                             <Link to="register" className="register-button">
                                 <FaUserPlus className="icon" />
-                                Đăng Ký Ngay
+                                <span>Đăng Ký Ngay</span>
                             </Link>
                         </div>
                     </form>
                 </div>
                 <div className="login-image">
+                    <div className="image-overlay"></div>
                     <img src={require("../../../assets/assets/login.png")} alt="Login" />
                 </div>
             </div>
+            <ToastContainer />
         </div>
     );
 };

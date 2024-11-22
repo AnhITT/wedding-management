@@ -49,7 +49,6 @@ namespace WebAPI.Repositories
             var userId = user.Id;
             var firstName = user.FirstName;
             var lastName = user.LastName;
-            var avatar = user.Avatar;
             var phone = user.PhoneNumber;
             // Thêm thông tin username và email vào danh sách claims
             var authClaims = new List<Claim> // jwt.io
@@ -59,7 +58,6 @@ namespace WebAPI.Repositories
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(ClaimTypes.Name, firstName),
                 new Claim(ClaimTypes.Surname, lastName),
-                new Claim(ClaimTypes.Country, avatar),
             };
 
 
@@ -100,40 +98,6 @@ namespace WebAPI.Repositories
                 PhoneNumber = model.PhoneNumber
             };
             user.EmailConfirmed = true;
-
-            // Khởi tạo Cloudinary
-            Account account = new Account(
-                "dl3hvap4a",
-                "834354428788744",
-                "lv7zI6VPru0YhHwUPQsru318SOE"
-            );
-            Cloudinary cloudinary = new Cloudinary(account);
-            string imageFormat = "";
-            if (model.Avatar.Contains("data:image/jpeg;base64,"))
-            {
-                imageFormat = "data:image/jpeg;base64,";
-            }
-            else if (model.Avatar.Contains("data:image/png;base64,"))
-            {
-                imageFormat = "data:image/png;base64,";
-            }
-            var base64Image = model.Avatar.Replace(imageFormat, "");
-
-            // Giải mã chuỗi base64 thành mảng byte
-            var imageBytes = Convert.FromBase64String(base64Image);
-
-            // Tạo MemoryStream từ mảng byte
-            var imageStream = new MemoryStream(imageBytes);
-
-            // Tải lên hình ảnh lên Cloudinary
-            var uploadParams = new ImageUploadParams()
-            {
-                File = new FileDescription("avatar", imageStream)
-            };
-            var uploadResult = cloudinary.Upload(uploadParams);
-
-            // Lấy URL của hình ảnh từ kết quả tải lên
-            user.Avatar = uploadResult.SecureUri.ToString();
 
             var result = await userManager.CreateAsync(user, model.Password);
 

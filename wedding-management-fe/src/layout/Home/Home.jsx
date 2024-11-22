@@ -14,7 +14,7 @@ const Home = () => {
                     <div className="home__left">
                         <div className="content-wrapper">
                             <span className="elegant-text">Nhà Hàng Tiệc Cưới</span>
-                            <h1 className="main-title">
+                            <h1>
                                 KHÔNG GIAN SANG TRỌNG<br/>
                                 CHO NGÀY HẠNH PHÚC
                             </h1>

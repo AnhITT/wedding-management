@@ -39,7 +39,6 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        background-color: #1e1e1e;
     }
 
     &__logo {
@@ -53,12 +52,8 @@
 
     &__links {
         display: flex;
-        gap: 0px 50px;
-
-        .header {
-            margin-top: 15px;
-            display: flex;
-        }
+        justify-content: center;
+        flex-grow: 1;
     }
 
     &__search {
@@ -85,14 +80,6 @@
     }
 }
 
-.navbar {
-    background-color: #1e1e1e !important;
-}
-
-.bg-body-tertiary {
-    background-color: #1e1e1e !important;
-}
-
 // Thêm animation cho gradient (tùy chọn)
 @keyframes gradientAnimation {
     0% {
@@ -112,4 +99,9 @@
     animation: gradientAnimation 3s ease infinite;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+}
+
+.nav__user-links {
+    display: flex;
+    align-items: center;
 }

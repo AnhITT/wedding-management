@@ -1,262 +1,256 @@
 import { useState } from "react";
 import "./Register.scss";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { FaUser, FaEnvelope, FaLock, FaPhone } from 'react-icons/fa';
 
 const Register = () => {
-  const nav = useNavigate();
+    const nav = useNavigate();
 
-  const initFormValue = {
-    firstName: "",
-    lastName: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    avatar: "",
-    phoneNumber: "",
-  };
-  const [formValue, setformValue] = useState(initFormValue);
-  //check error
-  const [formError, setformError] = useState({});
+    const initFormValue = {
+        firstName: "",
+        lastName: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+        phoneNumber: "",
+    };
 
-  const isEmptyValue = (value) => {
-    return !value || value.trim().length < 1;
-  };
+    const [formValue, setformValue] = useState(initFormValue);
+    const [formError, setformError] = useState({});
 
-  const isEmailVaild = (email) => {
-    return /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(email);
-  };
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setformValue({ ...formValue, [name]: value });
+    };
 
-  const validateForm = () => {
-    const error = {};
+    const validateForm = () => {
+        const error = {};
 
-    if (isEmptyValue(formValue.firstName)) {
-      error["firstName"] = "First Name is required.";
-    }
-
-    if (isEmptyValue(formValue.lastName)) {
-      error["lastName"] = "Last Name is required.";
-    }
-    if (!formValue.avatar) {
-      error["avatar"] = "Avatar is required.";
-    }
-    if (isEmptyValue(formValue.email)) {
-      error["email"] = "Email is required.";
-    } else if (!isEmailVaild(formValue.email)) {
-      error["email"] = "Email is invalid.";
-    }
-
-    if (isEmptyValue(formValue.password)) {
-      error["password"] = "Password is required.";
-    }
-
-    if (isEmptyValue(formValue.confirmPassword)) {
-      error["confirmPassword"] = "Confirm Password is required.";
-    } else if (formValue.confirmPassword !== formValue.password) {
-      error["confirmPassword"] = "Passwords do not match.";
-    }
-
-    // Enhanced validation for phone number
-    if (isEmptyValue(formValue.phoneNumber)) {
-      error["phoneNumber"] = "Phone Number is required.";
-    } else if (!/^(\+84|\d{10})$/.test(formValue.phoneNumber)) {
-      error["phoneNumber"] =
-        "Invalid phone number format. Please enter a valid Vietnamese phone number.";
-    }
-
-    setformError(error);
-    return Object.keys(error).length === 0;
-  };
-
-  //được sử dụng để cập nhật trạng thái của một thành phần (component)
-  //  trong ứng dụng React khi người dùng tương tác với nó, chẳng hạn như khi họ nhập dữ liệu vào một trường nhập liệu (input field).
-  const handleChange = (event) => {
-    const { value, name } = event.target;
-    setformValue({
-      ...formValue,
-      [name]: value,
-    });
-  };
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0]; // Lấy tệp đầu tiên trong danh sách tệp đã chọn
-
-    if (file) {
-      // Đọc tệp hình ảnh và chuyển đổi nó thành đường dẫn dạng URL
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const imageURL = event.target.result;
-        setformValue({ ...formValue, avatar: imageURL });
-      };
-      reader.readAsDataURL(file); // Đọc tệp dưới dạng URL
-
-      // Bạn có thể thêm logic xử lý tệp ở đây, ví dụ: tải lên máy chủ
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    try {
-      const response = await fetch(
-        "https://localhost:7296/api/account/SignUp",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formValue),
+        if (isEmptyValue(formValue.firstName)) {
+            error["firstName"] = "Vui lòng nhập họ";
         }
-      );
 
-      if (response.ok && validateForm()) {
-        toast.success("Đăng ký thành công!"); // Hiển thị thông báo thành công
-        console.log("form value", formValue);
-        nav("/login");
-      } else {
-        validateForm();
-        toast.error(
-          "Đăng ký thất bại. Vui lòng kiểm tra lại thông tin đăng ký."
-        );
-        console.log("form invalue");
-      }
-    } catch (error) {
-      console.error("Lỗi khi đăng ký:", error);
-    }
-  };
+        if (isEmptyValue(formValue.lastName)) {
+            error["lastName"] = "Vui lòng nhập tên";
+        }
 
-  console.log(formError);
-  return (
-    <div className="register-page">
-      <div className="register-form-container">
-        <h1 className="title">Đăng kí tài khoản</h1>
-        <form onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="first-name" className="form-label">
-              First Name
-            </label>
-            <input
-              id="first-name"
-              className="form-control"
-              type="text"
-              name="firstName"
-              value={formValue.firstName}
-              onChange={handleChange}
-            />
-            {formError.firstName && (
-              <div className="error">{formError.firstName}</div>
-            )}
-          </div>
+        if (isEmptyValue(formValue.email)) {
+            error["email"] = "Vui lòng nhập email";
+        } else if (!isEmailValid(formValue.email)) {
+            error["email"] = "Email không hợp lệ";
+        }
 
-          <div className="mb-2">
-            <label htmlFor="last-name" className="form-label">
-              Last Name
-            </label>
-            <input
-              id="last-name"
-              className="form-control"
-              type="text"
-              name="lastName"
-              value={formValue.lastName}
-              onChange={handleChange}
-            />
-            {formError.lastName && (
-              <div className="error">{formError.lastName}</div>
-            )}
-          </div>
+        if (isEmptyValue(formValue.password)) {
+            error["password"] = "Vui lòng nhập mật khẩu";
+        } else if (!isStrongPassword(formValue.password)) {
+            error["password"] = 
+                "Mật khẩu phải có ít nhất 6 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt";
+        }
 
-          <div className="mb-2">
-            <label htmlFor="email" className="form-label">
-              Email
-            </label>
-            <input
-              id="email"
-              className="form-control"
-              type="text"
-              name="email"
-              value={formValue.email}
-              onChange={handleChange}
-            />
-            {formError.email && <div className="error">{formError.email}</div>}
-          </div>
+        if (isEmptyValue(formValue.confirmPassword)) {
+            error["confirmPassword"] = "Vui lòng xác nhận mật khẩu";
+        } else if (formValue.confirmPassword !== formValue.password) {
+            error["confirmPassword"] = "Mật khẩu xác nhận không khớp";
+        }
 
-          <div className="mb-2">
-            <label htmlFor="password" className="form-label">
-              Password
-            </label>
-            <input
-              id="password"
-              className="form-control"
-              type="password"
-              name="password"
-              value={formValue.password}
-              onChange={handleChange}
-            />
-            {formError.password && (
-              <div className="error">{formError.password}</div>
-            )}
-          </div>
+        if (isEmptyValue(formValue.phoneNumber)) {
+            error["phoneNumber"] = "Vui lòng nhập số điện thoại";
+        } else if (!isPhoneValid(formValue.phoneNumber)) {
+            error["phoneNumber"] = "Số điện thoại không hợp lệ";
+        }
 
-          <div className="mb-2">
-            <label htmlFor="confirm-password" className="form-label">
-              Confirm Password
-            </label>
-            <input
-              id="confirm-password"
-              className="form-control"
-              type="password"
-              name="confirmPassword"
-              value={formValue.confirmPassword}
-              onChange={handleChange}
-            />
-            {formError.confirmPassword && (
-              <div className="error">{formError.confirmPassword}</div>
-            )}
-          </div>
-          <div className="mb-2">
-            <label htmlFor="phoneNumber" className="form-label">
-              Phone Number
-            </label>
-            <input
-              id="phoneNumber"
-              className="form-control"
-              type="text"
-              name="phoneNumber"
-              value={formValue.phoneNumber}
-              onChange={handleChange}
-            />
-            {formError.phoneNumber && (
-              <div className="error">{formError.phoneNumber}</div>
-            )}
-          </div>
+        setformError(error);
+        return Object.keys(error).length === 0;
+    };
 
-          <div className="mb-2">
-            <label htmlFor="avatar" className="form-label">
-              Avatar
-            </label>
-            <input
-              id="avatar"
-              className="form-control"
-              type="file"
-              name="avatar"
-              accept="image/*"
-              // value={formValue.password}
-              onChange={handleImageChange}
-            />
-            {formError.avatar && (
-              <div className="error">{formError.avatar}</div>
-            )}
-          </div>
-          <button
-            style={{ backgroundColor: "black" }}
-            className="w-100 btn btn-lg btn-primary mt-3 custom-button"
-            type="submit"
-          >
-            Đăng kí
-          </button>
-        </form>
-      </div>
-    </div>
-  );
+    const isEmptyValue = (value) => {
+        return !value || value.trim().length < 1;
+    };
+
+    const isEmailValid = (email) => {
+        return /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(email);
+    };
+
+    const isPhoneValid = (phone) => {
+        return /^[0-9]{10}$/.test(phone);
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        if (validateForm()) {
+            try {
+                const response = await fetch("https://localhost:7296/api/account/SignUp", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(formValue),
+                });
+
+                if (response.ok) {
+                    toast.success("Đăng ký thành công!");
+                    nav("/login");
+                } else if (response.status === 401) {
+                    toast.error(
+                        "Mật khẩu phải đáp ứng các yêu cầu sau:\n" +
+                        "- Ít nhất 6 ký tự\n" +
+                        "- Ít nhất 1 chữ hoa (A-Z)\n" +
+                        "- Ít nhất 1 chữ thường (a-z)\n" +
+                        "- Ít nhất 1 số (0-9)\n" +
+                        "- Ít nhất 1 ký tự đặc biệt (!@#$%^&*)",
+                        {
+                            position: "top-center",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            style: {
+                                whiteSpace: 'pre-line'
+                            }
+                        }
+                    );
+                } else {
+                    toast.error("Đăng ký thất bại!");
+                }
+            } catch (error) {
+                console.error("Lỗi:", error);
+                toast.error("Đã xảy ra lỗi khi đăng ký!");
+            }
+        }
+    };
+
+    const isStrongPassword = (password) => {
+        const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
+        return strongPasswordRegex.test(password);
+    };
+
+    return (
+        <div className="register-page">
+            <div className="register-form-container">
+                <h2 className="title">Đăng Ký Tài Khoản</h2>
+                <form onSubmit={handleSubmit}>
+                    <div className="form-group">
+                        <label className="form-label">Họ</label>
+                        <div className="input-group">
+                            <FaUser className="input-icon" />
+                            <input
+                                type="text"
+                                className="form-control"
+                                name="firstName"
+                                value={formValue.firstName}
+                                onChange={handleChange}
+                                placeholder="Nhập họ"
+                            />
+                        </div>
+                        {formError.firstName && (
+                            <div className="error">{formError.firstName}</div>
+                        )}
+                    </div>
+
+                    <div className="form-group">
+                        <label className="form-label">Tên</label>
+                        <div className="input-group">
+                            <FaUser className="input-icon" />
+                            <input
+                                type="text"
+                                className="form-control"
+                                name="lastName"
+                                value={formValue.lastName}
+                                onChange={handleChange}
+                                placeholder="Nhập tên"
+                            />
+                        </div>
+                        {formError.lastName && (
+                            <div className="error">{formError.lastName}</div>
+                        )}
+                    </div>
+
+                    <div className="form-group">
+                        <label className="form-label">Email</label>
+                        <div className="input-group">
+                            <FaEnvelope className="input-icon" />
+                            <input
+                                type="email"
+                                className="form-control"
+                                name="email"
+                                value={formValue.email}
+                                onChange={handleChange}
+                                placeholder="Nhập email"
+                            />
+                        </div>
+                        {formError.email && (
+                            <div className="error">{formError.email}</div>
+                        )}
+                    </div>
+
+                    <div className="form-group">
+                        <label className="form-label">Mật khẩu</label>
+                        <div className="input-group">
+                            <FaLock className="input-icon" />
+                            <input
+                                type="password"
+                                className="form-control"
+                                name="password"
+                                value={formValue.password}
+                                onChange={handleChange}
+                                placeholder="Nhập mật khẩu"
+                            />
+                        </div>
+                        {formError.password && (
+                            <div className="error">{formError.password}</div>
+                        )}
+                    </div>
+
+                    <div className="form-group">
+                        <label className="form-label">Xác nhận mật khẩu</label>
+                        <div className="input-group">
+                            <FaLock className="input-icon" />
+                            <input
+                                type="password"
+                                className="form-control"
+                                name="confirmPassword"
+                                value={formValue.confirmPassword}
+                                onChange={handleChange}
+                                placeholder="Xác nhận mật khẩu"
+                            />
+                        </div>
+                        {formError.confirmPassword && (
+                            <div className="error">{formError.confirmPassword}</div>
+                        )}
+                    </div>
+
+                    <div className="form-group">
+                        <label className="form-label">Số điện thoại</label>
+                        <div className="input-group">
+                            <FaPhone className="input-icon" />
+                            <input
+                                type="tel"
+                                className="form-control"
+                                name="phoneNumber"
+                                value={formValue.phoneNumber}
+                                onChange={handleChange}
+                                placeholder="Nhập số điện thoại"
+                            />
+                        </div>
+                        {formError.phoneNumber && (
+                            <div className="error">{formError.phoneNumber}</div>
+                        )}
+                    </div>
+
+                    <button type="submit" className="register-button">
+                        Đăng Ký
+                    </button>
+
+                    <div className="login-link">
+                        Đã có tài khoản? <Link to="/login">Đăng nhập ngay</Link>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
 };
+
 export default Register;

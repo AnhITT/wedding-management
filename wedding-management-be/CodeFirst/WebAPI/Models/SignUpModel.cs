@@ -17,8 +17,6 @@ namespace WebAPI.Models
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; }
         [Required]
-        public string Avatar { get; set; } = null!;
-        [Required]
         public string PhoneNumber { get; set; } = null!;
     }
 }

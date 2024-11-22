@@ -2,31 +2,39 @@
     margin-top: 150px;
 
     &_avatar {
-        width: 500px;
         display: flex;
-        border-radius: 50%;
-
-
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
     }
 
     &_detail {
-        margin-left: 500px;
+        margin-left: 20px;
     }
 
     .container {
         width: auto;
         padding: 50px;
-
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        background-color: #fff;
     }
 }
-.profile_avatar img {
+
+.profile-img {
     width: 150px;
     height: 150px;
     border-radius: 50%;
     border: 2px solid #ccc;
     object-fit: cover;
+    margin-bottom: 20px;
 }
-.modal-dialog{
+
+.modal-dialog {
     border-radius: 8px;
-margin-bottom:7px;
+    margin-bottom: 7px;
+}
+
+button {
+    margin-top: 20px;
 }

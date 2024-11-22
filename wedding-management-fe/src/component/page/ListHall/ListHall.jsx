@@ -1,3 +1,4 @@
+import "./ListHall.scss";
 import { BsCartCheck } from "react-icons/bs";
 import React, { useEffect, useState } from "react";
 import { Button, Card, Col, Form, Modal, Row, Spinner } from "react-bootstrap";
@@ -5,8 +6,9 @@ import Apis, { endpoint } from "../../../config/Apis";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import DatePicker from "react-datepicker";
+import { FaCalendarAlt, FaMapMarkerAlt, FaClock } from 'react-icons/fa';
 
-const ListMenu = () => {
+const ListHall = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -108,150 +110,80 @@ const ListMenu = () => {
   });
 
   return (
-    <>
-      <div className="tilte">
-        <h1
-          className="text-gradient"
-          style={{ fontWeight: "bold", marginLeft: "55px" }}
-        >
-          DANH SÁCH SẢNH CƯỚI
-        </h1>
-
+    <div className="page-container">
+      <div className="header-section">
+        <h1 clasName="main-heading">DANH SÁCH SẢNH CƯỚI</h1>
         {loading ? (
-          <div className="overlay">
+          <div className="loading-overlay">
             <Spinner animation="border" />
           </div>
         ) : null}
-
-        <Form className="filter d-flex" onSubmit={handleSearch}>
-          <Form.Control
-            type="text"
-            placeholder="Nhập sảnh cưới bạn muốn tìm kiếm"
-            name="kw"
-            className="me-2"
-            aria-label="Search"
-          />
-          <Button type="submit">Tìm</Button>
+        <Form className="search-form" onSubmit={handleSearch}>
+          <div className="search-input-wrapper">
+            <Form.Control
+              type="text"
+              placeholder="Tìm kiếm sảnh cưới..."
+              name="kw"
+              className="search-input"
+            />
+            <Button type="submit" className="search-button">
+              Tìm Kiếm
+            </Button>
+          </div>
         </Form>
       </div>
-      <Row className="listmenu">
-        {searchResult.length > 0
-          ? searchResult.map((hallItem) => (
-              <Col xs={12} md={3} className="mt-3" key={hallItem.hallId}>
-                <Card className="card" style={{ width: "18rem" }}>
-                  <Card.Img
-                    variant="top"
-                    src={hallItem.image}
-                    className="custom-img"
-                  />
-                  <Card.Body>
-                    <Card.Title>{hallItem.name}</Card.Title>
-                    <Card.Text>{hallItem.description}</Card.Text>
-                    <Card.Text>{hallItem.capacity}</Card.Text>
-                    <Card.Text>{formatPrice(hallItem.price)}</Card.Text>
-                    <Link to="/bill">
-                      <Button
-                        className="btndetail"
-                        variant="primary"
-                        style={{
-                          background:
-                            "linear-gradient(90deg, #FE8E5C 0%, #F5576C 100%)",
-                          border: "white",
-                          fontWeight: "bold",
-                        }}
-                      >
-                        <BsCartCheck style={{ marginBottom: "5px" }} />
-                        Đặt Đơn
-                      </Button>
-                    </Link>
-                    <Button
-                      className="btndetail"
-                      variant="primary"
-                      onClick={() => {
-                        setSelectedService(hallItem);
-                        openModal();
-                      }}
-                      style={{
-                        background:
-                          "linear-gradient(90deg, #FE8E5C 0%, #F5576C 100%)",
-                        border: "white",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Xem Chi Tiết
-                    </Button>
-                  </Card.Body>
-                </Card>
-              </Col>
-            ))
-          : hallData.map((hallItem) => (
-              <Col xs={12} md={3} className="mt-3" key={hallItem.hallId}>
-                <Card className="card" style={{ width: "18rem" }}>
-                  <Card.Img
-                    variant="top"
-                    src={hallItem.image}
-                    className="custom-img"
-                  />
-                  <Card.Body>
-                    <Card.Title>{hallItem.name}</Card.Title>
 
-                    <Card.Text>
-                      Số khách tham gia tối đa: {hallItem.capacity}
-                    </Card.Text>
-                    <Card.Text>
-                      Giá sảnh cưới: {formatPrice(hallItem.price)}
-                    </Card.Text>
-                    <Link to="/bill">
-                      <Button
-                        className="btndetail"
-                        variant="primary"
-                        style={{
-                          background:
-                            "linear-gradient(90deg, #FE8E5C 0%, #F5576C 100%)",
-                          border: "white",
-                          fontWeight: "bold",
-                        }}
-                      >
-                        <BsCartCheck style={{ marginBottom: "5px" }} />
-                        Đặt Đơn
-                      </Button>
+      <div className="halls-section">
+        <Row>
+          {(searchResult.length > 0 ? searchResult : hallData).map((hallItem) => (
+            <Col xs={12} md={4} lg={3} key={hallItem.hallId} className="hall-item">
+              <Card className="hall-card">
+                <div className="image-wrapper">
+                  <Card.Img variant="top" src={hallItem.image} className="hall-image" />
+                  <div className="price-badge">
+                    {formatPrice(hallItem.price)}
+                  </div>
+                </div>
+                <Card.Body>
+                  <Card.Title className="hall-title">{hallItem.name}</Card.Title>
+                  <div className="hall-capacity">
+                    <i className="fas fa-users"></i>
+                    <span>Sức chứa: {hallItem.capacity} khách</span>
+                  </div>
+                  <div className="button-group">
+                    <Link to="/bill" className="book-button">
+                      <BsCartCheck /> Đặt Ngay
                     </Link>
                     <Button
-                      className="btndetail"
-                      variant="primary"
+                      className="detail-button"
                       onClick={() => {
                         setSelectedService(hallItem);
                         openModal();
                       }}
-                      style={{
-                        background:
-                          "linear-gradient(90deg, #FE8E5C 0%, #F5576C 100%)",
-                        border: "white",
-                        fontWeight: "bold",
-                      }}
                     >
                       Xem Chi Tiết
                     </Button>
-                  </Card.Body>
-                </Card>
-              </Col>
-            ))}
-      </Row>
-      <Modal
-        show={showModal}
-        onHide={closeModal}
-        style={{ textAlign: "center" }}
-      >
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      </div>
+
+      <Modal show={showModal} onHide={closeModal} className="detail-modal">
         <Modal.Header closeButton>
           <Modal.Title>Chi tiết sảnh cưới</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {selectedService && (
-            <div>
-              <img src={selectedService.image} className="custom-img"></img>
-              <h3>{selectedService.name}</h3>
-              <p>Giá sảnh cưới: {formatPrice(selectedService.price)}</p>
-              <p>Mô tả: {selectedService.description}</p>
+            <div className="modal-content-wrapper">
+              <img src={selectedService.image} className="modal-image" alt={selectedService.name} />
+              <h3 className="modal-title">{selectedService.name}</h3>
+              <div className="modal-info">
+                <p className="price">Giá: {formatPrice(selectedService.price)}</p>
+                <p className="description">{selectedService.description}</p>
+              </div>
             </div>
           )}
         </Modal.Body>
@@ -262,65 +194,48 @@ const ListMenu = () => {
         </Modal.Footer>
       </Modal>
 
-      <div className="container mt-4">
-        <div className="title text-center mb-4">
-          <h1>Danh sách sảnh đã có người đặt</h1>
-        </div>
-        <div className="row mb-4">
-          <div className="col-md-12">
-            <label htmlFor="selectedDate" className="form-label">
-              Chọn ngày:
-            </label>
+      <div className="booked-halls-section">
+        <div className="section-header">
+          <h2 className="section-title">Danh Sách Sảnh Đã Có Người Đặt</h2>
+          <div className="date-picker-wrapper">
+            <FaCalendarAlt className="calendar-icon" />
             <DatePicker
               selected={selectedDate}
               onChange={handleDateChange}
               dateFormat="dd/MM/yyyy"
-              className="form-control"
+              className="date-input"
               placeholderText="Chọn ngày"
               isClearable
             />
           </div>
         </div>
-        <div className="row">
+
+        <div className="booked-halls-grid">
           {filteredHalls.map((hall) => (
-            <div key={hall.HallId} className="col-md-4 mb-4">
-              <div className="card shadow-sm">
-                <div
-                  className="card-header bg-primary text-white"
-                  style={{
-                    background:
-                      "linear-gradient(90deg, #FE8E5C 0%, #F5576C 100%)",
-                  }}
-                >
-                  <h5 className="mb-0" style={{ textAlign: "center" }}>
-                    {hall.hallName}
-                  </h5>
+            <div key={hall.HallId} className="booked-hall-card">
+              <div className="card-header">
+                <h3>{hall.hallName}</h3>
+              </div>
+              <div className="card-content">
+                <div className="info-item">
+                  <FaMapMarkerAlt />
+                  <span>{hall.branchName}</span>
                 </div>
-                <div className="card-body">
-                  <h6 className="card-subtitle mb-2 text-muted">
-                    Chi nhánh: {hall.branchName}
-                  </h6>
-                  <p className="card-text">
-                    Ngày đặt: {format(new Date(hall.bookingDate), "dd/MM/yyyy")}
-                  </p>
-                  <span
-                    className="card-subtitle mb-2"
-                    style={{
-                      padding: "5px",
-                      borderRadius: "4px",
-                      backgroundColor: "#7ebc9a",
-                      color: "white",
-                    }}
-                  >
-                    {hall.timeHall}
-                  </span>
+                <div className="info-item">
+                  <FaCalendarAlt />
+                  <span>{format(new Date(hall.bookingDate), "dd/MM/yyyy")}</span>
+                </div>
+                <div className="time-badge">
+                  <FaClock />
+                  <span>{hall.timeHall}</span>
                 </div>
               </div>
             </div>
           ))}
         </div>
       </div>
-    </>
+    </div>
   );
 };
-export default ListMenu;
+
+export default ListHall;

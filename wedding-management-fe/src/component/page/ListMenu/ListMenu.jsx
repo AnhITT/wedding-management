@@ -1,6 +1,6 @@
 import './ListMenu.scss';
 import { BsCartCheck } from 'react-icons/bs';
-import { MdDescription } from "react-icons/md";
+import { MdDescription, MdFoodBank } from "react-icons/md";
 import React, { useEffect, useState } from 'react';
 import { Button, Card, Col, Form, Modal, Spinner, Row } from 'react-bootstrap';
 import Apis, { endpoint } from '../../../config/Apis';
@@ -75,117 +75,113 @@ const ListMenu = () => {
     const closeModal = () => setShowModal(false);
 
     return (
-        <>
-               <div className='tilte '>
-                <h1 className='text-gradient' style={{ fontWeight: 'bold', marginLeft:'55px'}}>DANH SÁCH THỰC ĐƠN</h1>
-
-                {loading? (
-      <div className="overlay">
-        <Spinner animation="border" />
-      </div>
-    ) : null}
-
-                <Form className="filter d-flex" onSubmit={handleSearch}>
-                    <Form.Control
-                        type="text"
-                        placeholder="Nhập món ăn bạn muốn tìm kiếm"
-                        name="kw"
-                        className="me-2"
-                        aria-label="Search"
-                    />
-                    <Button type='submit'>Tìm</Button>
-                </Form>
-                <Form.Select className='filter1 d-flex' style={{width:'20%'}} aria-label="Chọn thể loại" onChange={handleCategoryChange}>
-                    <option value="">Lọc món ăn</option>
-                   
-                    {categories.map(category => (
-                        <option key={category.categoryId} value={category.categoryId}>{category.name}</option>
-                    ))}
-                </Form.Select>
+        <div className="page-container">
+            <div className="header-section">
+                <h1 >DANH SÁCH THỰC ĐƠN</h1>
+                {loading && (
+                    <div className="loading-overlay">
+                        <Spinner animation="border" />
+                    </div>
+                )}
+                
+                <div className="search-filters">
+                    <Form className="search-form" onSubmit={handleSearch}>
+                        <div className="search-input-wrapper">
+                            <Form.Control
+                                type="text"
+                                placeholder="Tìm kiếm món ăn..."
+                                name="kw"
+                                className="search-input"
+                            />
+                            <Button type="submit" className="search-button">
+                                Tìm Kiếm
+                            </Button>
+                        </div>
+                    </Form>
+                    
+                    <Form.Select 
+                        className="category-select" 
+                        onChange={handleCategoryChange}
+                    >
+                        <option value="">Tất cả món ăn</option>
+                        {categories.map(category => (
+                            <option key={category.categoryId} value={category.categoryId}>
+                                {category.name}
+                            </option>
+                        ))}
+                    </Form.Select>
+                </div>
             </div>
-            <Modal show={showModal} onHide={closeModal} style={{textAlign:'center'}}>
+
+            <div className="menu-grid">
+                <Row>
+                    {(searchResult.length > 0 ? searchResult : menus).map(menuItem => (
+                        <Col xs={12} md={3} className="menu-item" key={menuItem.menuId}>
+                            <div className="menu-card">
+                                <div className="image-wrapper">
+                                    <img src={menuItem.image} alt={menuItem.name} className="menu-image" />
+                                    <div className="price-badge">
+                                        {formatPrice(menuItem.price)}
+                                    </div>
+                                </div>
+                                <div className="card-content">
+                                    <h3 className="menu-name">{menuItem.name}</h3>
+                                    <div className="menu-info">
+                                        <p className="category">
+                                            <MdFoodBank className="icon" />
+                                            {menuItem.categoryName}
+                                        </p>
+                                    </div>
+                                    <div className="button-group">
+                                        <Button
+                                            className="detail-button"
+                                            onClick={() => {
+                                                setSelectedService(menuItem);
+                                                openModal();
+                                            }}
+                                        >
+                                            <MdDescription className="icon" />
+                                            Chi Tiết
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                        </Col>
+                    ))}
+                </Row>
+            </div>
+
+            <Modal 
+                show={showModal} 
+                onHide={closeModal} 
+                className="menu-detail-modal"
+            >
                 <Modal.Header closeButton>
-                    <Modal.Title>Chi tiết thực đơn</Modal.Title>
+                    <Modal.Title>Chi tiết món ăn</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     {selectedService && (
-                        <div>
-                            <img src={selectedService.image} className="custom-img" alt={selectedService.name} />
-                            <h3>{selectedService.name}</h3>
-                            <p>Giá thực đơn: {formatPrice(selectedService.price)}</p>
-                            <p>Mô tả: {selectedService.description}</p>
+                        <div className="modal-content-wrapper">
+                            <img 
+                                src={selectedService.image} 
+                                className="modal-image" 
+                                alt={selectedService.name} 
+                            />
+                            <h3 className="modal-title">{selectedService.name}</h3>
+                            <div className="modal-info">
+                                <p className="price">Giá: {formatPrice(selectedService.price)}</p>
+                                <p className="description">{selectedService.description}</p>
+                            </div>
                         </div>
                     )}
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={closeModal}>Đóng</Button>
+                    <Button variant="secondary" onClick={closeModal}>
+                        Đóng
+                    </Button>
                 </Modal.Footer>
             </Modal>
-
-            <Row className='listmenu'>
-                {searchResult.length > 0 ? (
-                    searchResult.map(menuItem => (
-                        <Col xs={12} md={3} className='mt-3' key={menuItem.menuId}>
-                            <Card className='card' style={{ width: '18rem' }}>
-                                <Card.Img variant="top" src={menuItem.image} className="custom-img" alt={menuItem.name} />
-                                <Card.Body >
-                                    <Card.Title>{menuItem.name}</Card.Title>
-                                    <hr></hr>
-                                    <h4 className='detail'>
-                                    <Card.Text style={{ fontWeight: 'bold',fontSize:'19px', marginTop:'15px' }}>{formatPrice(menuItem.price)}</Card.Text>
-                                    {/* <Link to="/bill">
-                                        <Button variant="primary"><BsCartCheck /> Đặt Đơn</Button>
-                                    </Link> */}
-                                    <Button style={{padding: '10px 15px',fontWeight: 'bold', textAlign: 'center',border:'black' }}
-                                        className='btndetail'
-                                        variant="primary"
-                                        onClick={() => {
-                                            setSelectedService(menuItem);
-                                            openModal();
-                                        }}
-                                    >
-                                       
-                                        Chi Tiết
-                                         <MdDescription style={{ marginTop: '-5px',marginLeft:'6px' }} />
-                                    </Button>
-                                    </h4>
-                                </Card.Body>
-                            </Card>
-                        </Col>
-                    ))
-                ) : (
-                    menus.map(menuItem => (
-                        <Col xs={12} md={3} className='mt-3' key={menuItem.menuId}>
-                            <Card className='card' style={{ width: '18rem' }}>
-                                <Card.Img variant="top" src={menuItem.image} className="custom-img" alt={menuItem.name} />
-                                <Card.Body>
-                                    <Card.Title style={{ fontWeight: 'bold', textAlign: 'center' }}>{menuItem.name}</Card.Title>
-                                    <hr></hr>
-                                    <h4 className='detail'>
-                                    <Card.Text style={{ fontWeight: 'bold',fontSize:'19px', marginTop:'15px' }}>{formatPrice(menuItem.price)}</Card.Text>
-                                    {/* <Link to="/bill">
-                                        <Button variant="primary"><BsCartCheck /> Đặt Đơn</Button>
-                                    </Link> */}
-                                    <Button style={{padding: '10px 15px',fontWeight: 'bold', textAlign: 'center',border:'black' }}
-                                        className='btndetail'
-                                        variant="primary"
-                                        onClick={() => {
-                                            setSelectedService(menuItem);
-                                            openModal();
-                                        }}
-                                    >
-                                       
-                                        Chi Tiết
-                                         <MdDescription style={{ marginTop: '-5px',marginLeft:'6px' }} />
-                                    </Button>
-                                    </h4>
-                                </Card.Body>
-                            </Card>
-                        </Col>
-                    ))
-                )}
-            </Row>
-        </>
+        </div>
     );
 };
 

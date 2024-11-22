@@ -43,50 +43,6 @@ namespace WebAPI.Controllers
             user.LastName = profileData.LastName;
             user.Email = profileData.Email;
             user.PhoneNumber = profileData.PhoneNumber;
-
-            // Khởi tạo Cloudinary
-            Account account = new Account(
-                "dl3hvap4a",
-                "834354428788744",
-                "lv7zI6VPru0YhHwUPQsru318SOE"
-            );
-            if (profileData.Avatar.Contains("https"))
-            {
-                user.Avatar = profileData.Avatar;
-            }
-            else
-            {
-                Cloudinary cloudinary = new Cloudinary(account);
-                string imageFormat = "";
-                if (profileData.Avatar.Contains("data:image/jpeg;base64,"))
-                {
-                    imageFormat = "data:image/jpeg;base64,";
-                }
-                else if (profileData.Avatar.Contains("data:image/png;base64,"))
-                {
-                    imageFormat = "data:image/png;base64,";
-                }
-                var base64Image = profileData.Avatar.Replace(imageFormat, "");
-
-                // Giải mã chuỗi base64 thành mảng byte
-                var imageBytes = Convert.FromBase64String(base64Image);
-
-                // Tạo MemoryStream từ mảng byte
-                var imageStream = new MemoryStream(imageBytes);
-
-                // Tải lên hình ảnh lên Cloudinary
-                var uploadParams = new ImageUploadParams()
-                {
-                    File = new FileDescription("avatar", imageStream)
-                };
-                var uploadResult = cloudinary.Upload(uploadParams);
-
-                // Lấy URL của hình ảnh từ kết quả tải lên
-                user.Avatar = uploadResult.SecureUri.ToString();
-            }
-           
-
-
             // Save the changes to the database
             _context.ApplicationUser.Update(user);
             await _context.SaveChangesAsync();

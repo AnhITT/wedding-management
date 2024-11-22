@@ -1283,12 +1283,11 @@ const Bill = () => {
                   ))}
                 </Accordion.Body>
               </Accordion.Item>
-
               {/* =================Sảnh Cưới=========== */}
               <Accordion.Item eventKey="1">
                 <Accordion.Header>Sảnh Cưới</Accordion.Header>
                 <Accordion.Body className="body">
-                  {selectedItemHall.map((hall, index) => (
+                  {halls.map((hall, index) => (
                     <Card key={index} style={{ width: "18rem" }}>
                       <Card.Img
                         className="image-fixed-height"

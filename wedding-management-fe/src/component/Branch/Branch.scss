@@ -80,14 +80,6 @@
                 display: block;
             }
 
-            h1 {
-                font-size: 48px;
-                font-weight: 800;
-                color: #000;
-                line-height: 1.2;
-                margin-bottom: 30px;
-            }
-
             .description {
                 .main-desc {
                     font-size: 18px;
@@ -205,7 +197,7 @@
 
                     .feature-item {
                         justify-content: center;
-                        
+
                         &:hover {
                             transform: translateY(-5px);
                         }
