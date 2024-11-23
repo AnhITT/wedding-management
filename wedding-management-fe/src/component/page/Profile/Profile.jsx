@@ -184,6 +184,9 @@ const Profile = () => {
 
   return (
     <div className="profile">
+      <div className="title">
+        <h1>Thông tin cá nhân</h1>
+      </div>
       {loading ? (
         <div className="overlay">
           <Spinner animation="border" />
@@ -209,10 +212,7 @@ const Profile = () => {
                   <label htmlFor="phone-number" className="form-label"><b>Số điện thoại</b></label>
                   <p>{phoneNumber || "Chưa nhập số điện thoại"}</p>
                 </div>
-                <div>
-                  <label htmlFor="wallet" className="form-label"><b>Ví điện tử</b></label>
-                  <p>Coin: <b style={{ color: "red" }}>{wallet?.coin ? formatPrice(wallet.coin) : "Chưa có ví"}</b></p>
-                </div>
+                
                 <Button variant="dark" onClick={openModal}>Cập nhật thông tin</Button>
               </Col>
             </Row>

@@ -3,12 +3,14 @@ import { BsCartCheck } from "react-icons/bs";
 import React, { useEffect, useState } from "react";
 import { Button, Card, Col, Form, Modal, Row, Spinner } from "react-bootstrap";
 import Apis, { endpoint } from "../../../config/Apis";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import DatePicker from "react-datepicker";
-import { FaCalendarAlt, FaMapMarkerAlt, FaClock } from 'react-icons/fa';
+import { FaCalendarAlt, FaMapMarkerAlt, FaClock, FaInfoCircle } from 'react-icons/fa';
+import { FaSearch } from 'react-icons/fa'; 
 
 const ListHall = () => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -112,12 +114,12 @@ const ListHall = () => {
   return (
     <div className="page-container">
       <div className="header-section">
-        <h1 clasName="main-heading">DANH SÁCH SẢNH CƯỚI</h1>
-        {loading ? (
+        <h1>DANH SÁCH SẢNH CƯỚI</h1>
+        {loading && (
           <div className="loading-overlay">
             <Spinner animation="border" />
           </div>
-        ) : null}
+        )}
         <Form className="search-form" onSubmit={handleSearch}>
           <div className="search-input-wrapper">
             <Form.Control
@@ -151,9 +153,12 @@ const ListHall = () => {
                     <span>Sức chứa: {hallItem.capacity} khách</span>
                   </div>
                   <div className="button-group">
-                    <Link to="/bill" className="book-button">
+                    <Button
+                      className="book-button"
+                      onClick={() => navigate("/bill")}
+                    >
                       <BsCartCheck /> Đặt Ngay
-                    </Link>
+                    </Button>
                     <Button
                       className="detail-button"
                       onClick={() => {
@@ -161,7 +166,7 @@ const ListHall = () => {
                         openModal();
                       }}
                     >
-                      Xem Chi Tiết
+                      <FaInfoCircle className="icon" /> Xem Chi Tiết
                     </Button>
                   </div>
                 </Card.Body>

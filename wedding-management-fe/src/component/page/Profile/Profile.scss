@@ -1,23 +1,162 @@
 .profile {
-    margin-top: 150px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 
-    &_avatar {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 20px;
-    }
+    .title {
+        text-align: center;
+        h1 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #333;
+            position: relative;
+            display: inline-block;
+            padding-bottom: 15px;
 
-    &_detail {
-        margin-left: 20px;
+            &:after {
+                content: "";
+                position: absolute;
+                bottom: 0;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 100px;
+                height: 3px;
+                background: linear-gradient(90deg, #fe8e5c 0%, #f5576c 100%);
+            }
+        }
     }
 
     .container {
-        width: auto;
-        padding: 50px;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        max-width: 600px;
+        width: 90%;
+        margin: 0 auto;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         background-color: #fff;
+
+        .profile_detail {
+            width: 100%;
+
+            div {
+                background: #f8f9fa;
+                padding: 15px 20px;
+                border-radius: 10px;
+                margin-bottom: 15px;
+                transition: all 0.3s ease;
+
+                &:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+                }
+
+                label {
+                    display: block;
+                    color: #666;
+                    margin-bottom: 8px;
+                    font-size: 14px;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                }
+
+                p {
+                    font-size: 16px;
+                    color: #333;
+                    margin: 0;
+                    padding: 10px 15px;
+                    background: white;
+                    border-radius: 6px;
+                    border: 1px solid #eee;
+                    text-align: center;
+
+                    b[style*="color: red"] {
+                        background: #fee5e5;
+                        padding: 5px 10px;
+                        border-radius: 4px;
+                        font-weight: 600;
+                    }
+                }
+            }
+
+            .btn {
+                width: 100%;
+                padding: 12px;
+                border-radius: 8px;
+                font-weight: 600;
+                margin-top: 20px;
+                background: linear-gradient(90deg, #fe8e5c 0%, #f5576c 100%);
+                border: none;
+                color: white;
+                transition: all 0.3s ease;
+
+                &:hover {
+                    transform: translateY(-2px);
+                }
+            }
+        }
+    }
+}
+
+// Modal styling
+.modal {
+    .modal-content {
+        border-radius: 15px;
+        border: none;
+        overflow: hidden;
+        max-width: 500px;
+        margin: 0 auto;
+
+        .modal-header {
+            background: linear-gradient(90deg, #fe8e5c 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            padding: 20px;
+        }
+
+        .modal-body {
+            padding: 30px;
+
+            .form-group {
+                margin-bottom: 20px;
+
+                .form-label {
+                    font-weight: 600;
+                    color: #333;
+                    margin-bottom: 8px;
+                }
+
+                .form-control {
+                    padding: 12px;
+                    border-radius: 8px;
+                    border: 1px solid #ddd;
+
+                    &:focus {
+                        border-color: #fe8e5c;
+                        box-shadow: 0 0 0 2px rgba(254, 142, 92, 0.1);
+                    }
+                }
+            }
+        }
+
+        .modal-footer {
+            padding: 20px;
+            border-top: none;
+
+            .btn {
+                padding: 10px 25px;
+                border-radius: 8px;
+                font-weight: 600;
+
+                &.btn-primary {
+                    background: linear-gradient(
+                        90deg,
+                        #fe8e5c 0%,
+                        #f5576c 100%
+                    );
+                    border: none;
+                }
+            }
+        }
     }
 }
 
@@ -37,4 +176,14 @@
 
 button {
     margin-top: 20px;
+}
+
+// Responsive
+@media (max-width: 768px) {
+    .profile {
+        .container {
+            width: 95%;
+            padding: 20px;
+        }
+    }
 }

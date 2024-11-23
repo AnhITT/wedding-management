@@ -22,7 +22,26 @@ body .page-container {
 
     .header-section {
         text-align: center;
-        margin-bottom: 60px;
+
+        h1 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #333;
+            position: relative;
+            display: inline-block;
+            padding-bottom: 15px;
+
+            &:after {
+                content: "";
+                position: absolute;
+                bottom: 0;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 100px;
+                height: 3px;
+                background: linear-gradient(90deg, #fe8e5c 0%, #f5576c 100%);
+            }
+        }
 
         .search-form {
             max-width: 600px;
@@ -122,7 +141,17 @@ body .page-container {
                     border-radius: 8px;
                     text-align: center;
                     text-decoration: none;
+                    font-size: 16px;
+                    height: 50px;
                     transition: all 0.3s ease;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+
+                    border: 1px solid transparent;
+                    &:hover {
+                        border-color: #fe8e5c;
+                    }
                 }
 
                 .book-button {
@@ -132,15 +161,21 @@ body .page-container {
                         #f5576c 100%
                     );
                     color: white;
+
+                    &:hover {
+                        background: linear-gradient(
+                            90deg,
+                            #f5576c 0%,
+                            #fe8e5c 100%
+                        );
+                    }
                 }
 
                 .detail-button {
                     background: white;
-                    border: 1px solid #ddd;
                     color: #333;
 
                     &:hover {
-                        border-color: #fe8e5c;
                         color: #fe8e5c;
                     }
                 }
@@ -256,7 +291,6 @@ body .page-container {
 .btn {
     &.search-button {
         background: linear-gradient(90deg, #fe8e5c 0%, #f5576c 100%) !important;
-        border: none !important;
-        // ...
+        margin-top: 0;
     }
 }

@@ -258,7 +258,7 @@ const History = () => {
             setIsProcessingPaymentWallet(false);
             closeModalPaymentCoin();
             fetchInvoicesByUser();
-            localStorage.removeItem("invoiceId"); // Xóa dữ liệu đơn hàng trong localStorage
+            localStorage.removeItem("invoiceId"); // Xóa d liệu đơn hàng trong localStorage
             toast.success("Thanh toán bằng ví thành công", {
               position: "top-right",
               autoClose: 5000,
@@ -302,8 +302,8 @@ const History = () => {
   };
 
   return (
-    <>
-      <div style={{ marginTop: "120px", marginLeft: "60px" }} className="title">
+    <div className="history-container">
+      <div className="title">
         <h1>Lịch sử đặt nhà hàng</h1>
       </div>
       {loading ? (
@@ -311,128 +311,73 @@ const History = () => {
           <Spinner animation="border" />
         </div>
       ) : invoices.length > 0 ? (
-        <div
-          style={{
-            marginTop: "50px",
-            display: "flex",
-            flexWrap: "wrap",
-            justifyContent: "center",
-          }}
-        >
+        <div className="invoice-list">
           {invoices.map((invoice) => (
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                justifyContent: "center",
-              }}
-              className="invoice-card"
-              key={invoice.invoiceID}
-              onClick={() => openModal(invoice)}
-            >
-              <Card
-                style={{
-                  backgroundColor:
-                    invoice.orderStatus === "Đã hủy đơn hàng"
-                      ? "#dbdbdb"
-                      : "transparent",
-                  width: "90%",
-                  borderRadius: "8px",
-                  border: "3px solid black",
-                }}
-              >
-                <Card.Body>
-                  <div
-                    style={{ display: "flex", justifyContent: "space-between" }}
-                  >
-                    <h5>Mã hóa đơn: {invoice.invoiceID}</h5>
-                    <h8 style={{ color: "red", fontWeight: "bolder" }}>
-                      {invoice.orderStatus}
-                    </h8>
+            <div className="invoice-item" key={invoice.invoiceID} onClick={() => openModal(invoice)}>
+              <div className="invoice-header">
+                <div className="invoice-id">Mã hóa đơn: {invoice.invoiceID}</div>
+                <div className={`status ${invoice.orderStatus === "Đã hủy đơn hàng" ? "cancelled" : ""}`}>
+                  {invoice.orderStatus}
+                </div>
+              </div>
+              
+              <div className="invoice-content">
+                <div className="info-row">
+                  <span className="label">Họ và tên:</span>
+                  <span className="value">{invoice.fullName}</span>
+                </div>
+                <div className="info-row">
+                  <span className="label">Số điện thoại:</span>
+                  <span className="value">{invoice.phoneNumber}</span>
+                </div>
+                <div className="info-row">
+                  <span className="label">Chi nhánh:</span>
+                  <span className="value">{invoice.branch.name}</span>
+                </div>
+                <div className="info-row">
+                  <span className="label">Sảnh cưới:</span>
+                  <span className="value">{invoice.hall.name}</span>
+                </div>
+                <div className="info-row">
+                  <span className="label">Thời gian đã đặt:</span>
+                  <span className="value">{format(new Date(invoice.invoiceDate), "dd/MM/yyyy")}</span>
+                </div>
+                <div className="info-row">
+                  <span className="label">Ngày tham dự:</span>
+                  <span className="value">{format(new Date(invoice.attendanceDate), "dd/MM/yyyy")}</span>
+                </div>
+                <div className="info-row">
+                  <span className="label">Ca:</span>
+                  <span className="value">{invoice.timeHall}</span>
+                </div>
+                <div className="info-row">
+                  <span className="label">Tổng tiền:</span>
+                  <span className="value price">{formatPrice(invoice.total)}</span>
+                </div>
+                <div className="info-row">
+                  <span className="label">Đã đặt cọc:</span>
+                  <span className="value price">{formatPrice(invoice.depositPayment)}</span>
+                </div>
+              </div>
+
+              <div className="payment-status">
+                {invoice.paymentStatus === false ? (
+                  <div className="status-badge deposit">
+                    {invoice?.paymentWallet ? "Đã đặt cọc bằng ví" : "Đã đặt cọc bằng VNPAY"}
                   </div>
-                  <p>Họ và tên: {invoice.fullName}</p>
-                  <p>Số điện thoại: {invoice.phoneNumber}</p>
-                  <p>Chi nhánh: {invoice.branch.name}</p>
-                  <p>Sảnh cưới: {invoice.hall.name}</p>
-                  <p>
-                    Thời gian đã đặt:{" "}
-                    {format(new Date(invoice.invoiceDate), "dd/MM/yyyy")}
-                  </p>
-                  <p>
-                    Ngày tham dự:{" "}
-                    {format(new Date(invoice.attendanceDate), "dd/MM/yyyy")}
-                  </p>
-                  <p>{invoice.timeHall}</p>
-                  <p>
-                    Tổng tiền cần thanh toán:{" "}
-                    <span className="price">{formatPrice(invoice.total)}</span>
-                  </p>
-                  <p>
-                    Tổng tiền đã đặt cọc:{" "}
-                    <span className="price">
-                      {invoice.depositPayment
-                        ? formatPrice(invoice.depositPayment)
-                        : "Chưa đặt cọc"}
-                    </span>
-                  </p>
-                  <p>
-                    {invoice.paymentStatus === false && (
-                      <span
-                        style={{
-                          color: "white",
-                          backgroundColor: "black",
-                          padding: "10px",
-                          borderRadius: "6px",
-                        }}
-                      >
-                        {invoice.paymentWallet
-                          ? "Đã đặt cọc bằng ví"
-                          : "Đã đặt cọc bằng vnpay"}{" "}
-                      </span>
-                    )}
-                    {invoice.paymentStatus === true && (
-                      <span
-                        style={{
-                          color: "white",
-                          backgroundColor: "green",
-                          padding: "10px",
-                          borderRadius: "6px",
-                        }}
-                      >
-                        {" "}
-                        <i
-                          style={{ marginRight: "5px", fontWeight: "900" }}
-                          className="checkmark"
-                        >
-                          ✓
-                        </i>{" "}
-                        {invoice.paymentCompleteWallet === true
-                          ? "Đã hoàn tất thanh toán bằng ví"
-                          : "Đã hoàn tất thanh toán bằng VNPAY"}
-                      </span>
-                    )}
-                  </p>
-                </Card.Body>
-              </Card>
+                ) : (
+                  <div className="status-badge completed">
+                    <i className="checkmark">✓</i>
+                    {invoice?.paymentCompleteWallet ? "Đã hoàn tất thanh toán bằng ví" : "Đã hoàn tất thanh toán bằng VNPAY"}
+                  </div>
+                )}
+              </div>
             </div>
           ))}
         </div>
       ) : (
-        <div
-          className="container emp-profile"
-          style={{ marginTop: "40px", border: "3px solid black" }}
-        >
-          <p
-            style={{
-              textAlign: "center",
-              verticalAlign: "center",
-              padding: "20px",
-              marginTop: "10px",
-              fontWeight: "bolder",
-            }}
-          >
-            Người dùng chưa đăng nhập hoặc không có hóa đơn nào
-          </p>
+        <div className="empty-state">
+          <p>Không có hóa đơn nào</p>
         </div>
       )}
 
@@ -445,63 +390,39 @@ const History = () => {
           {selectedInvoice && (
             <div>
               <h5>Mã hóa đơn: {selectedInvoice.invoiceID}</h5>
-              <p>Họ và tên: {selectedInvoice.fullName}</p>
-              <p>Số điện thoại: {selectedInvoice.phoneNumber}</p>
-              <p>Ghi chú: {selectedInvoice.note}</p>
+              
+              <div className="invoice-details">
+                <div className="detail-item">
+                  <div className="label">Họ và tên</div>
+                  <div className="value">{selectedInvoice.fullName}</div>
+                </div>
+                <div className="detail-item">
+                  <div className="label">Số điện thoại</div>
+                  <div className="value">{selectedInvoice.phoneNumber}</div>
+                </div>
+                <div className="detail-item">
+                  <div className="label">Chi nhánh</div>
+                  <div className="value">{selectedInvoice.branch.name}</div>
+                </div>
+                <div className="detail-item">
+                  <div className="label">Sảnh cưới</div>
+                  <div className="value">{selectedInvoice.hall.name}</div>
+                </div>
+                <div className="detail-item">
+                  <div className="label">Thời gian đã đặt</div>
+                  <div className="value">
+                    {format(new Date(selectedInvoice.invoiceDate), "dd/MM/yyyy")}
+                  </div>
+                </div>
+                <div className="detail-item">
+                  <div className="label">Ngày tham dự</div>
+                  <div className="value">
+                    {format(new Date(selectedInvoice.attendanceDate), "dd/MM/yyyy")}
+                  </div>
+                </div>
+              </div>
 
-              <p>Chi nhánh: {selectedInvoice.branch.name}</p>
-              <p>
-                Thòi gian đã đặt:{" "}
-                {format(new Date(selectedInvoice.invoiceDate), "dd/MM/yyyy")}
-              </p>
-              <p>
-                Ngày tham dự:{" "}
-                {format(new Date(selectedInvoice.attendanceDate), "dd/MM/yyyy")}
-              </p>
-              <p>Sảnh cưới: {selectedInvoice.hall.name}</p>
-              <p>{selectedInvoice.timeHall}</p>
-
-              <Table striped bordered hover>
-                <thead>
-                  <tr>
-                    <th style={{ width: "150px" }}>Hình</th>
-                    <th style={{ width: "300px" }}>Tên</th>
-                    <th>Giá</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr key={selectedInvoice.hall.id}>
-                    <td
-                      style={{
-                        width: "150px",
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                      }}
-                    >
-                      <img
-                        style={{
-                          borderRadius: "7px",
-                          maxWidth: "120px",
-                          maxHeight: "120px",
-                          objectFit: "cover",
-                        }}
-                        src={selectedInvoice.hall.image}
-                      />
-                    </td>
-
-                    <td>{selectedInvoice.hall.name}</td>
-                    <td>
-                      <span className="price">
-                        {formatPrice(selectedInvoice.hall.price)}
-                      </span>
-                    </td>
-                  </tr>
-                </tbody>
-              </Table>
-
-              <p>Danh sách thực đơn:</p>
-
+              <div className="section-title">Danh sách thực đơn</div>
               <Table striped bordered hover>
                 <thead>
                   <tr>
@@ -513,14 +434,12 @@ const History = () => {
                 <tbody>
                   {selectedInvoice.orderMenus.map((orderMenu) => (
                     <tr key={orderMenu.orderMenuId}>
-                      <td
-                        style={{
-                          width: "150px",
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                        }}
-                      >
+                      <td style={{
+                        width: "150px",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}>
                         <img
                           style={{
                             borderRadius: "7px",
@@ -529,6 +448,7 @@ const History = () => {
                             objectFit: "cover",
                           }}
                           src={orderMenu.menuEntity.image}
+                          alt={orderMenu.menuEntity.name}
                         />
                       </td>
                       <td>{orderMenu.menuEntity.name}</td>
@@ -542,28 +462,24 @@ const History = () => {
                 </tbody>
               </Table>
 
-              <p>Danh sách dịch vụ:</p>
-
+              <div className="section-title">Danh sách dịch vụ</div>
               <Table striped bordered hover>
                 <thead>
                   <tr>
                     <th style={{ width: "150px" }}>Hình</th>
                     <th style={{ width: "300px" }}>Tên</th>
-
                     <th>Giá</th>
                   </tr>
                 </thead>
                 <tbody>
                   {selectedInvoice.orderServices.map((orderService) => (
                     <tr key={orderService.orderServiceId}>
-                      <td
-                        style={{
-                          width: "150px",
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                        }}
-                      >
+                      <td style={{
+                        width: "150px",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}>
                         <img
                           style={{
                             borderRadius: "7px",
@@ -572,6 +488,7 @@ const History = () => {
                             objectFit: "cover",
                           }}
                           src={orderService.serviceEntity.image}
+                          alt={orderService.serviceEntity.name}
                         />
                       </td>
                       <td>{orderService.serviceEntity.name}</td>
@@ -584,77 +501,35 @@ const History = () => {
                   ))}
                 </tbody>
               </Table>
-              <p>
-                Tổng tiền thanh toán:{" "}
-                <span className="price">
-                  {formatPrice(selectedInvoice.total)}
-                </span>
-              </p>
+
+              <div className="total-section">
+                <div className="total-row">
+                  <span className="label">Tổng tiền thanh toán:</span>
+                  <span className="value">{formatPrice(selectedInvoice.total)}</span>
+                </div>
+              </div>
             </div>
           )}
         </Modal.Body>
-        <Modal.Footer
-          style={{ display: "flex", justifyContent: "space-between" }}
-        >
-          <div>
-            <Button variant="secondary" onClick={closeModal}>
-              Đóng
-            </Button>
-            <Button
-              style={{ marginLeft: "5px" }}
-              variant="danger"
-              onClick={() => {
-                if (selectedInvoice.orderStatus === "Đã hủy đơn hàng") {
-                  alert("Đơn hàng đã bị hủy trước đó");
-                } else if (
-                  window.confirm(
-                    "Xác nhận hủy đơn hàng?\n\nSố tiền đối với đơn hàng đã thanh toán sẽ được hoàn về dạng coin trong phần thông tin cá nhân"
-                  )
-                ) {
-                  cancelInvoice(selectedInvoice.invoiceID);
-                  toast.success(`Đã hoàn tiền về dạng coin`, {
-                    position: "top-right",
-                    autoClose: 3000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                  });
-                }
-              }}
-            >
+        <Modal.Footer>
+          <div className="left-buttons">
+            <Button variant="danger" onClick={() => {
+              if (selectedInvoice?.orderStatus === "Đã hủy đơn hàng") {
+                alert("Đơn hàng đã bị hủy trước đó");
+              } else if (window.confirm("Xác nhận hủy đơn hàng?")) {
+                cancelInvoice(selectedInvoice?.invoiceID);
+              }
+            }}>
               Hủy đơn
             </Button>
           </div>
-          <div>
-            <Button
-              className="btn btn-success"
-              style={{ marginRight: "5px" }}
-              variant="secondary"
-              onClick={() => {
-                if (selectedInvoice.paymentStatus === true) {
-                  alert("Đơn hàng đã thanh toán rồi");
-                } else {
-                  repaymentInvoice(selectedInvoice.invoiceID);
-                }
-              }}
+          <div className="right-buttons">
+            <Button 
+              className="btn btn-success" 
+              onClick={() => repaymentInvoice(selectedInvoice?.invoiceID)}
+              disabled={selectedInvoice?.paymentStatus === true}
             >
-              Thanh toán đầy đủ với <b>VNPAY</b>
-            </Button>
-
-            <Button
-              className="btn btn-dark"
-              style={{ marginRight: "5px" }}
-              variant="secondary"
-              onClick={() => {
-                if (selectedInvoice.paymentStatus === true) {
-                  alert("Đơn hàng đã thanh toán rồi");
-                } else {
-                  repaymentInvoiceCoin(selectedInvoice.invoiceID);
-                }
-              }}
-            >
-              Thanh toán đầy đủ với <b> coin</b>
+              Thanh toán với VNPAY
             </Button>
           </div>
         </Modal.Footer>
@@ -719,7 +594,7 @@ const History = () => {
           </Button>
         </Modal.Footer>
       </Modal>
-    </>
+    </div>
   );
 };
 

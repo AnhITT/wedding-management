@@ -3,39 +3,12 @@
     background-color: #f8f9fa;
     min-height: 100vh;
 
-    .header-section {
-        text-align: center;
-        margin-bottom: 60px;
-
-        .main-title {
-            font-size: 48px;
-            font-weight: 800;
-            background: linear-gradient(90deg, #FE8E5C 0%, #F5576C 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 30px;
-            position: relative;
-            display: inline-block;
-
-            &::after {
-                content: '';
-                position: absolute;
-                bottom: -10px;
-                left: 50%;
-                transform: translateX(-50%);
-                width: 100px;
-                height: 3px;
-                background: linear-gradient(90deg, #FE8E5C 0%, #F5576C 100%);
-            }
-        }
-    }
-
-    .branches-grid {
+        .branches-grid {
         .branch-card {
             background: white;
             border-radius: 15px;
             overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
             margin-bottom: 30px;
             transition: transform 0.3s ease;
 
@@ -61,7 +34,11 @@
                     left: 0;
                     right: 0;
                     bottom: 0;
-                    background: linear-gradient(0deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 100%);
+                    background: linear-gradient(
+                        0deg,
+                        rgba(0, 0, 0, 0.3) 0%,
+                        rgba(0, 0, 0, 0) 100%
+                    );
                 }
 
                 &:hover .branch-image {
@@ -90,7 +67,7 @@
                         margin-bottom: 10px;
 
                         .icon {
-                            color: #FE8E5C;
+                            color: #fe8e5c;
                         }
                     }
 
@@ -115,7 +92,11 @@
                         transition: all 0.3s ease;
 
                         &.feedback-button {
-                            background: linear-gradient(90deg, #FE8E5C 0%, #F5576C 100%);
+                            background: linear-gradient(
+                                90deg,
+                                #fe8e5c 0%,
+                                #f5576c 100%
+                            );
                             border: none;
                             color: white;
 
@@ -130,8 +111,8 @@
                             color: #333;
 
                             &:hover {
-                                border-color: #FE8E5C;
-                                color: #FE8E5C;
+                                border-color: #fe8e5c;
+                                color: #fe8e5c;
                             }
                         }
                     }
@@ -147,7 +128,7 @@
         }
 
         .modal-header {
-            background: linear-gradient(90deg, #FE8E5C 0%, #F5576C 100%);
+            background: linear-gradient(90deg, #fe8e5c 0%, #f5576c 100%);
             color: white;
         }
 
@@ -208,7 +189,7 @@
                 resize: vertical;
 
                 &:focus {
-                    border-color: #FE8E5C;
+                    border-color: #fe8e5c;
                     outline: none;
                 }
             }
@@ -232,7 +213,11 @@
                 }
 
                 .submit-button {
-                    background: linear-gradient(90deg, #FE8E5C 0%, #F5576C 100%);
+                    background: linear-gradient(
+                        90deg,
+                        #fe8e5c 0%,
+                        #f5576c 100%
+                    );
                     border: none;
                     padding: 10px 30px;
                     border-radius: 8px;
@@ -247,6 +232,3 @@
         }
     }
 }
-  
- 
-  

@@ -176,22 +176,17 @@
                 .button-group {
                     .detail-button {
                         width: 100%;
-                        padding: 12px;
-                        background: linear-gradient(90deg, #FE8E5C 0%, #F5576C 100%);
-                        border: none;
+                        padding: 10px;
                         border-radius: 8px;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        gap: 8px;
+                        height: 50px;
+                        background: linear-gradient(90deg, #fe8e5c 0%, #f5576c 100%);
+                        border: none;
+                        color: white;
+                        font-size: 16px;
                         transition: all 0.3s ease;
 
                         &:hover {
-                            transform: translateY(-2px);
-                        }
-
-                        .icon {
-                            font-size: 18px;
+                            transform: translateY(-4px);
                         }
                     }
                 }

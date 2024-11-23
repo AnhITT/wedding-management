@@ -3,10 +3,11 @@ import { BsCartCheck } from 'react-icons/bs';
 import React, { useEffect, useState } from 'react';
 import { Button, Card, Col, Form, Modal, Row, Spinner } from 'react-bootstrap';
 import Apis, { endpoint } from '../../../config/Apis';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { FaTag, FaMoneyBillWave, FaInfoCircle } from 'react-icons/fa';
 
 const ListService = () => {
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [services, setServices] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -94,17 +95,15 @@ const ListService = () => {
                                 </div>
                                 <div className="card-content">
                                     <h3 className="service-name">{service.name}</h3>
-                                    <div className="service-info">
-                                        <p className="category">
-                                            <FaTag className="icon" />
-                                            {service.categoryName}
-                                        </p>
-                                    </div>
+                                   
                                     <div className="button-group">
-                                        <Link to="/bill" className="book-button">
+                                        <Button
+                                            className="book-button"
+                                            onClick={() => navigate("/bill")}
+                                        >
                                             <BsCartCheck className="icon" />
                                             Đặt Ngay
-                                        </Link>
+                                        </Button>
                                         <Button
                                             className="detail-button"
                                             onClick={() => {
@@ -112,8 +111,7 @@ const ListService = () => {
                                                 openModal();
                                             }}
                                         >
-                                            <FaInfoCircle className="icon" />
-                                            Chi Tiết
+                                            <FaInfoCircle className="icon" /> Chi Tiết
                                         </Button>
                                     </div>
                                 </div>

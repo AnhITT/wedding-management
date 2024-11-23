@@ -87,7 +87,7 @@ const ListBranch = () => {
     return (
         <div className="page-container">
             <div className="header-section">
-                <h1 >DANH SÁCH CHI NHÁNH</h1>
+                <h1>DANH SÁCH CHI NHÁNH</h1>
                 {loading && (
                     <div className="loading-overlay">
                         <Spinner animation="border" />
