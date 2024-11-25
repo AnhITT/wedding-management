@@ -101,8 +101,7 @@ const ListService = () => {
                                             className="book-button"
                                             onClick={() => navigate("/bill")}
                                         >
-                                            <BsCartCheck className="icon" />
-                                            Đặt Ngay
+                                            <BsCartCheck className="icon" style={{ marginRight: '5px' }} /> Đặt Ngay
                                         </Button>
                                         <Button
                                             className="detail-button"
@@ -111,7 +110,7 @@ const ListService = () => {
                                                 openModal();
                                             }}
                                         >
-                                            <FaInfoCircle className="icon" /> Chi Tiết
+                                            <FaInfoCircle className="icon" style={{ marginRight: '5px' }} /> Chi Tiết
                                         </Button>
                                     </div>
                                 </div>

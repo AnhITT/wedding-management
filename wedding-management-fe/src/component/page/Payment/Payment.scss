@@ -1,32 +1,163 @@
-body {
-    text-align: center;
-    padding: 40px 0;
-    background: #EBF0F5;
-  }
-    h1 {
-      color: #88B04B;
-      font-family: "Nunito Sans", "Helvetica Neue", sans-serif;
-      font-weight: 900;
-      font-size: 40px;
-      margin-bottom: 10px;
-    }
-    p {
-      color: #404F5E;
-      font-family: "Nunito Sans", "Helvetica Neue", sans-serif;
-      font-size:20px;
-      margin: 0;
-    }
-  i {
-    color: #9ABC66;
-    font-size: 100px;
-    line-height: 200px;
-    margin-left:-15px;
-  }
-  .card {
+.payment-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 20px;
+
+  .payment-card {
     background: white;
-    padding: 60px;
-    border-radius: 4px;
-    box-shadow: 0 2px 3px #C8D0D8;
-    display: inline-block;
-    margin: 0 auto;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .loading-state {
+      .spinner-border {
+        width: 4rem;
+        height: 4rem;
+        color: #4834d4;
+        margin-bottom: 20px;
+      }
+
+      h3 {
+        color: #2d3436;
+        margin-bottom: 10px;
+        font-weight: 600;
+      }
+
+      p {
+        color: #636e72;
+        margin: 0;
+      }
+    }
+
+    .status-icon {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 50px;
+
+      &.success {
+        background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        color: white;
+      }
+
+      &.error {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
+        color: white;
+      }
+    }
+
+    .error-state {
+      h2 {
+        color: #ff6b6b;
+        margin-bottom: 15px;
+        font-weight: 700;
+      }
+
+      p {
+        color: #636e72;
+        margin-bottom: 25px;
+      }
+
+      .retry-button {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+      }
+    }
+
+    .success-state {
+      h2 {
+        color: #43e97b;
+        margin-bottom: 15px;
+        font-weight: 700;
+      }
+
+      p {
+        color: #636e72;
+        margin-bottom: 25px;
+      }
+
+      .success-actions {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+
+        button {
+          padding: 12px 25px;
+          border-radius: 25px;
+          font-weight: 600;
+          transition: all 0.3s ease;
+          border: none;
+
+          &:hover {
+            transform: translateY(-2px);
+          }
+        }
+
+        .home-button {
+          background: linear-gradient(135deg, #4834d4 0%, #686de0 100%);
+          color: white;
+
+          &:hover {
+            box-shadow: 0 5px 15px rgba(72, 52, 212, 0.4);
+          }
+        }
+
+        .new-order-button {
+          background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+          color: white;
+
+          &:hover {
+            box-shadow: 0 5px 15px rgba(67, 233, 123, 0.4);
+          }
+        }
+      }
+    }
   }
+}
+
+@media (max-width: 576px) {
+  .payment-container {
+    padding: 15px;
+
+    .payment-card {
+      padding: 30px 20px;
+
+      .success-state {
+        .success-actions {
+          flex-direction: column;
+          gap: 10px;
+
+          button {
+            width: 100%;
+          }
+        }
+      }
+    }
+  }
+}

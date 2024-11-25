@@ -25,11 +25,11 @@ const Footer = () => {
                             </li>
                             <li>
                                 <FaEnvelope className="icon" />
-                                <span>Email: contact@nhahangtieccuoi.com</span>
+                                <span>Email: contact@wedding.com</span>
                             </li>
                             <li>
                                 <FaMapMarkerAlt className="icon" />
-                                <span>Địa chỉ: 123 Đường ABC, Quận XYZ, TP.HCM</span>
+                                <span>Địa chỉ: TP.HCM</span>
                             </li>
                         </ul>
                     </div>
@@ -62,7 +62,7 @@ const Footer = () => {
 
                 <div className="footer-bottom">
                     <div className="copyright">
-                        © 2024 Nhà Hàng Tiệc Cưới VIP. Tất cả quyền được bảo lưu.
+                        © 2024 Nhà Hàng Tiệc Cưới VIP.
                     </div>
                     <div className="footer-bottom-links">
                         <a href="#">Điều khoản sử dụng</a>

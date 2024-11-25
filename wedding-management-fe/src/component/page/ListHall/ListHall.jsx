@@ -157,7 +157,7 @@ const ListHall = () => {
                       className="book-button"
                       onClick={() => navigate("/bill")}
                     >
-                      <BsCartCheck /> Đặt Ngay
+                      <BsCartCheck className="icon" style={{ marginRight: '5px' }} /> Đặt Ngay
                     </Button>
                     <Button
                       className="detail-button"
@@ -166,7 +166,7 @@ const ListHall = () => {
                         openModal();
                       }}
                     >
-                      <FaInfoCircle className="icon" /> Xem Chi Tiết
+                      <FaInfoCircle className="icon" style={{ marginRight: '5px' }} /> Xem Chi Tiết
                     </Button>
                   </div>
                 </Card.Body>

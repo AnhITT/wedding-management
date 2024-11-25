@@ -14,6 +14,7 @@ import { faCheckCircle } from "@fortawesome/free-solid-svg-icons";
 import moment from "moment-timezone";
 import Slider from "rc-slider";
 import "rc-slider/assets/index.css";
+import { FaLightbulb } from 'react-icons/fa';
 const Bill = () => {
   const [cookies] = useCookies(["token_user"]);
   const [branchs, setBranchs] = useState([]);
@@ -65,52 +66,55 @@ const Bill = () => {
   };
 
   useEffect(() => {
-    var getLocalOpenBill = localStorage.getItem("openBill");
-    console.log("getLocalOpenBill", getLocalOpenBill);
-    const contentElement = document.querySelector(".content");
-    if (getLocalOpenBill) {
-      contentElement.classList.add("active");
-    }
-  }, []);
-
-  useEffect(() => {
     const slideTrigger = document.getElementById("slide-trigger");
     const contentElement = document.querySelector(".content");
+    
+    if (slideTrigger && contentElement) { // Kiểm tra xem elements có tồn tại không
+      const handleSlideTriggerClick = function () {
+        const isActive = contentElement.classList.toggle("active");
+        if (isActive) {
+          localStorage.setItem("openBill", "true");
+        } else {
+          localStorage.removeItem("openBill");
+        }
+      };
+
+      slideTrigger.addEventListener("click", handleSlideTriggerClick);
+
+      // Cleanup function
+      return () => {
+        slideTrigger.removeEventListener("click", handleSlideTriggerClick);
+      };
+    }
+  }, []); // Chỉ chạy một lần khi component mount
+
+  useEffect(() => {
+    const contentElement = document.querySelector(".content");
     const closeIcon = document.querySelector(".close-icon");
-
-    const handleSlideTriggerClick = function () {
-      const isActive = contentElement.classList.toggle("active");
-
-      if (isActive) {
-        localStorage.setItem("openBill", "true");
-      } else {
+    
+    if (contentElement && closeIcon) { // Kiểm tra xem elements có tồn tại không
+      const handleCloseIconClick = function () {
+        contentElement.classList.remove("active");
         localStorage.removeItem("openBill");
-      }
+      };
 
-      console.log("toggle ne");
-    };
-    const handleCloseIconClick = function () {
-      contentElement.classList.remove("active");
-      localStorage.removeItem("openBill");
-    };
+      closeIcon.addEventListener("click", handleCloseIconClick);
 
-    // const handleWindowClick = function (event) {
-    //   if (!event.target.closest('.content') && event.target !== slideTrigger) {
-    //     contentElement.classList.remove('active');
-    //   }
-    // };
+      // Cleanup function
+      return () => {
+        closeIcon.removeEventListener("click", handleCloseIconClick);
+      };
+    }
+  }, []); // Chỉ chạy một lần khi component mount
 
-    slideTrigger.addEventListener("click", handleSlideTriggerClick);
-    closeIcon.addEventListener("click", handleCloseIconClick);
-    // window.addEventListener('click', handleWindowClick);
-
-    // Cleanup function to remove the event listeners when the component unmounts
-    return () => {
-      slideTrigger.removeEventListener("click", handleSlideTriggerClick);
-      closeIcon.removeEventListener("click", handleCloseIconClick);
-      //   window.removeEventListener('click', handleWindowClick);
-    };
-  }, []);
+  useEffect(() => {
+    const contentElement = document.querySelector(".content");
+    const openBill = localStorage.getItem("openBill");
+    
+    if (contentElement && openBill) {
+      contentElement.classList.add("active");
+    }
+  }, []); // Chỉ chạy một lần khi component mount
 
   useEffect(() => {
     const storedFullName = localStorage.getItem("fullName");
@@ -482,7 +486,7 @@ const Bill = () => {
             promoCodeId
           );
         } else {
-          // Xử lý khi có lỗi khi sử dụng mã giảm giá
+          // Xử lý khi có lỗi khi s    dụng mã gi  m giá
           console.error(
             "Lỗi khi sử dụng mã giảm giá cho mã có ID:",
             promoCodeId
@@ -565,7 +569,7 @@ const Bill = () => {
   // Xử lý thay đổi checkbox của dịch vụ
   const handleServiceCheckboxChange = (serviceId) => {
     if (selectedServices.includes(serviceId)) {
-      // Nếu đã chọn, loại bỏ dịch vụ khỏi danh sách
+      // Nu đã chọn, loại bỏ dịch vụ khỏi danh sách
       const updatedServices = selectedServices.filter((id) => id !== serviceId);
       setSelectedServices(updatedServices);
       localStorage.setItem("selectedServices", JSON.stringify(updatedServices));
@@ -1237,6 +1241,8 @@ const Bill = () => {
     sendOrderData();
   };
 
+  const [showOrderModal, setShowOrderModal] = useState(false);
+
   return (
     <div className="bill">
       <div
@@ -1255,7 +1261,7 @@ const Bill = () => {
                 <Accordion.Header>Chi Nhánh</Accordion.Header>
                 <Accordion.Body className="body">
                   {branchs.map((branch, index) => (
-                    <Card key={index} style={{ width: "18rem" }}>
+                    <Card className="menu-card" key={index} style={{ width: "18rem" }}>
                       <Card.Img
                         className="image-fixed-height"
                         variant="top"
@@ -1288,7 +1294,7 @@ const Bill = () => {
                 <Accordion.Header>Sảnh Cưới</Accordion.Header>
                 <Accordion.Body className="body">
                   {halls.map((hall, index) => (
-                    <Card key={index} style={{ width: "18rem" }}>
+                    <Card className="menu-card" key={index} style={{ width: "18rem" }}>
                       <Card.Img
                         className="image-fixed-height"
                         variant="top"
@@ -1320,9 +1326,7 @@ const Bill = () => {
                   ))}
                 </Accordion.Body>
               </Accordion.Item>
-              <h2 style={{ textAlign: "center", marginTop: "15px" }}>
-                Thực đơn
-              </h2>
+              <h1 className="title section-title">Thực đơn</h1>
 
               {Object.entries(categorizedMenus).map(
                 ([categoryName, categoryMenus]) => (
@@ -1330,7 +1334,7 @@ const Bill = () => {
                     <Accordion.Header>{categoryName}</Accordion.Header>
                     <Accordion.Body className="body">
                       {categoryMenus.map((menu) => (
-                        <Card key={menu.menuId} style={{ width: "18rem" }}>
+                        <Card className="menu-card" key={menu.menuId} style={{ width: "18rem" }}>
                           <Card.Img
                             className="image-fixed-height"
                             variant="top"
@@ -1362,9 +1366,7 @@ const Bill = () => {
                 )
               )}
 
-              <h2 style={{ textAlign: "center", marginTop: "15px" }}>
-                Dịch vụ
-              </h2>
+              <h1 className="title section-title">Dịch vụ</h1>
 
               {Object.entries(categorizedServices).map(
                 ([categoryName, categoryServices]) => (
@@ -1372,10 +1374,7 @@ const Bill = () => {
                     <Accordion.Header>{categoryName}</Accordion.Header>
                     <Accordion.Body className="body">
                       {categoryServices.map((service) => (
-                        <Card
-                          key={service.serviceId}
-                          style={{ width: "18rem" }}
-                        >
+                        <Card className="menu-card" key={service.serviceId} style={{ width: "18rem" }}>
                           <Card.Img
                             className="image-fixed-height"
                             variant="top"
@@ -1417,7 +1416,7 @@ const Bill = () => {
               <div style={{ marginTop: "20px" }} className="mb-2">
                 <label>Họ và tên:</label>
                 <input
-                  className="form-control"
+                  className="form-control custom-input"
                   type="text"
                   value={fullName}
                   onChange={handleFullNameChange}
@@ -1428,7 +1427,7 @@ const Bill = () => {
               <div className="mb-2">
                 <label>Số điện thoại:</label>
                 <input
-                  className="form-control"
+                  className="form-control custom-input"
                   type="tel"
                   value={phoneNumber}
                   onChange={handlePhoneNumberChange}
@@ -1439,7 +1438,7 @@ const Bill = () => {
               <div className="mb-2">
                 <label>Ghi chú cho nhà hàng:</label>
                 <textarea
-                  className="form-control"
+                  className="form-control custom-input"
                   value={note}
                   onChange={handleNoteChange}
                   placeholder="Ghi chú nếu có"
@@ -1499,60 +1498,6 @@ const Bill = () => {
               </div>
             </Accordion>
             <div>
-              <h3
-                style={{ fontSize: "2rem", marginTop: "20px" }}
-                className="title"
-              >
-                Danh sách mã giảm giá
-              </h3>
-
-              <div
-                style={{
-                  margin: "0 auto",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-                className="promo-code-list row"
-              >
-                {promoCodes.map((promoCode) => (
-                  <div
-                    className="promo-code-card col-md-6"
-                    key={promoCode.codeId}
-                  >
-                    <label
-                      htmlFor={promoCode.codeId}
-                      className="promo-code-label"
-                    >
-                      <input
-                        type="checkbox"
-                        id={promoCode.codeId}
-                        checked={selectedCodes.includes(promoCode.codeId)}
-                        onChange={() => handleCodeSelection(promoCode.codeId)}
-                        className="form-check-input"
-                      />
-                      <div className="promo-code-info">
-                        <div className="promo-code-string">
-                          {promoCode.codeString}
-                        </div>
-                        <div className="promo-code-discount">
-                          Giảm {promoCode.discount}%
-                        </div>
-                      </div>
-                      <div className="promo-code-quantity">
-                        Số lượng: {promoCode.quantity}
-                      </div>
-                      <div className="promo-code-expiration">
-                        Hết hạn:{" "}
-                        {format(
-                          new Date(promoCode.expirationDate),
-                          "dd/MM/yyyy hh:mm"
-                        )}
-                      </div>
-                    </label>
-                  </div>
-                ))}
-              </div>
             </div>
 
             <button
@@ -1642,150 +1587,115 @@ const Bill = () => {
           </Modal.Footer>
         </Modal>
         <Button
-          id="slide-trigger"
-          className="btn btn-success"
-          style={{ position: "fixed", bottom: "90px", right: "0" }}
+          onClick={() => setShowOrderModal(true)}
+          className="view-order-button"
+          style={{ position: "fixed", bottom: "90px", right: "0", zIndex: 1000 }}
         >
+          <i className="fas fa-shopping-cart" style={{ marginRight: '8px' }}></i>
           Xem đơn hàng
         </Button>
 
-        <div
-          class="content"
-          style={{
-            zIndex: "1000000000000",
-            marginTop: "60px",
-            position: "fixed",
-            backgroundColor: "white",
-            overflow: "auto",
-            maxHeight: "100%",
-            borderRadius: "4px",
-            border: "5px solid black",
-          }}
+        <Modal 
+          show={showOrderModal}
+          onHide={() => setShowOrderModal(false)}
+          dialogClassName="order-modal"
+          size="lg"
         >
-          <svg
-            class="close-icon"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
-          <div>
-            <div
-              className="selected-items-content"
-              style={{ overflowY: "auto" }}
-            >
-              {selectedBranch && (
-                <div>
-                  <h3 style={{ fontWeight: "bold" }}>Chi nhánh đã chọn:</h3>
-                  <div className="center-content">
-                    <img
-                      src={selectedBranch.image}
-                      alt={selectedBranch.name}
-                      style={{ width: "100%", height: "250px" }}
-                    />
-                    <h3>
-                      <b>{selectedBranch.name}</b>
-                    </h3>
-                  </div>
-                  <hr />
-                </div>
-              )}
-
-              {selectedHalls.length > 0 && (
-                <div>
-                  <h3 style={{ fontWeight: "bold" }}>Sảnh cưới đã chọn:</h3>
-                  <div className="center-content">
-                    {selectedHalls.map((hall, index) => (
-                      <div key={index}>
-                        <img
-                          src={hall.image}
-                          alt={hall.name}
-                          style={{ width: "100%", height: "250px" }}
-                        />
-                        <h3>
-                          <b>{hall.name}</b>
-                        </h3>
-                        <h3>
-                          <b>{formatPrice(hall.price)}</b>
-                        </h3>
-                      </div>
-                    ))}
-                  </div>
-                  <hr />
-                </div>
-              )}
-
-              <h3 style={{ fontWeight: "bold" }}>Danh sách món ăn đã chọn:</h3>
-              {selectedMenus.length > 0 ? (
-                <div className="selected-menus">
-                  {selectedMenus.map((menuId, index) => {
-                    const selectedMenu = menus.find(
-                      (menu) => menu.menuId === menuId
-                    );
-                    return (
-                      <div key={index} className="selected-menu">
-                        <div className="menu-image">
-                          <img
-                            src={selectedMenu.image}
-                            alt={selectedMenu.name}
-                          />
-                        </div>
-                        <div className="menu-details">
-                          <h4>{selectedMenu.name}</h4>
-                          <p>Giá: {formatPrice(selectedMenu.price)}</p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                "Chưa chọn món ăn"
-              )}
-              <hr></hr>
-              <h3 style={{ fontWeight: "bold" }}>Dịch vụ đã chọn:</h3>
-              {selectedServices.length > 0 ? (
-                <div className="selected-menus">
-                  {selectedServices.map((serviceId) => {
-                    const selectedService = services.find(
-                      (service) => service.serviceId === serviceId
-                    );
-                    return (
-                      <div key={serviceId} className="selected-menu">
-                        <div className="menu-image">
-                          <img
-                            src={selectedService.image}
-                            alt={selectedService.name}
-                          />
-                        </div>
-                        <div className="menu-details">
-                          <h4>{selectedService.name}</h4>
-                          <p>Giá: {formatPrice(selectedService.price)}</p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                "Chưa chọn dịch vụ"
-              )}
-            </div>
-            <div style={{ marginTop: "20px" }} className="total-row">
-              <h3 style={{ textAlign: "center" }}>
-                Tổng tiền cần thanh toán{" "}
-                <h3 style={{ textAlign: "center", color: "red" }}>
-                  {formatPrice(calculateTotalPrice())}
+          <Modal.Header closeButton>
+            <Modal.Title className="order-title">
+              <i className="fas fa-shopping-cart" style={{ marginRight: '10px' }}></i>
+              Chi tiết đơn hàng
+            </Modal.Title>
+          </Modal.Header>
+          
+          <Modal.Body className="order-content">
+            {selectedBranch && (
+              <div className="order-section">
+                <h3 className="section-title">
+                  <i className="fas fa-building" style={{ marginRight: '8px' }}></i>
+                  Chi nhánh đã chọn
                 </h3>
+                <div className="branch-card">
+                  <img src={selectedBranch.image} alt={selectedBranch.name} />
+                  <h4>{selectedBranch.name}</h4>
+                </div>
+              </div>
+            )}
+
+            {selectedHalls.length > 0 && (
+              <div className="order-section">
+                <h3 className="section-title">
+                  <i className="fas fa-home" style={{ marginRight: '8px' }}></i>
+                  Sảnh cưới đã chọn
+                </h3>
+                {selectedHalls.map((hall, index) => (
+                  <div className="hall-card" key={index}>
+                    <img src={hall.image} alt={hall.name} />
+                    <div className="hall-info">
+                      <h4>{hall.name}</h4>
+                      <p className="price">{formatPrice(hall.price)}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="order-section">
+              <h3 className="section-title">
+                <i className="fas fa-utensils" style={{ marginRight: '8px' }}></i>
+                Danh sách món ăn đã chọn
               </h3>
-              <span className="total-amount"></span>
+              {selectedMenus.length > 0 ? (
+                <div className="menu-list">
+                  {selectedMenus.map((menuId, index) => {
+                    const selectedMenu = menus.find(menu => menu.menuId === menuId);
+                    return (
+                      <div className="menu-item" key={index}>
+                        <img src={selectedMenu.image} alt={selectedMenu.name} />
+                        <div className="menu-info">
+                          <h4>{selectedMenu.name}</h4>
+                          <p className="price">{formatPrice(selectedMenu.price)}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="empty-message">Chưa chọn món ăn</p>
+              )}
             </div>
-          </div>
-        </div>
+
+            <div className="order-section">
+              <h3 className="section-title">
+                <i className="fas fa-concierge-bell" style={{ marginRight: '8px' }}></i>
+                Dịch vụ đã chọn
+              </h3>
+              {selectedServices.length > 0 ? (
+                <div className="service-list">
+                  {selectedServices.map((serviceId) => {
+                    const selectedService = services.find(service => service.serviceId === serviceId);
+                    return (
+                      <div className="service-item" key={serviceId}>
+                        <img src={selectedService.image} alt={selectedService.name} />
+                        <div className="service-info">
+                          <h4>{selectedService.name}</h4>
+                          <p className="price">{formatPrice(selectedService.price)}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="empty-message">Chưa chọn dịch vụ</p>
+              )}
+            </div>
+
+            <div className="order-total">
+              <h3>Tổng tiền</h3>
+              <p className="total-amount">{formatPrice(calculateTotalPrice())}</p>
+            </div>
+          </Modal.Body>
+        </Modal>
 
         <Modal
           scrollable
@@ -1793,98 +1703,69 @@ const Bill = () => {
           centered
           show={showModalConfirmOrder}
           onHide={closeModalConfirmOrder}
+          className="confirm-order-modal"
         >
           <Modal.Header closeButton>
-            <Modal.Title>Xác nhận đặt hàng</Modal.Title>
+            <Modal.Title>
+              <i className="fas fa-clipboard-check" style={{ marginRight: '10px', color: '#27ae60' }}></i>
+              Xác nhận đặt nhà hàng
+            </Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <div>
+            <div className="confirm-order-content">
+              <div className="order-check-section">
                 <Button
                   onClick={handleFormSubmit}
-                  style={{
-                    border: "1px solid transparent",
-                    backgroundColor: isCheckOrder ? "#5cb85c" : "blue",
-                    color: isCheckOrder ? "white" : "white",
-                  }}
+                  className={`check-order-button ${isCheckOrder ? 'checked' : ''}`}
                 >
                   {isCheckOrder ? (
                     <>
-                      <FontAwesomeIcon icon={faCheckCircle} className="me-2" />
+                      <FontAwesomeIcon icon={faCheckCircle} className="check-icon" />
                       <span>Kiểm tra thành công</span>
                     </>
                   ) : (
-                    "Kiểm tra đơn hàng"
+                    <>
+                      <i className="fas fa-search" style={{ marginRight: '8px' }}></i>
+                      Kiểm tra đơn hàng
+                    </>
                   )}
                 </Button>
               </div>
-              <div
-                style={{
-                  width: "40%",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  gap: "10px",
-                }}
-              >
-                <div
-                  style={{
-                    width: "100%",
-                    border: "1px solid gray",
-                    backgroundColor: "#f4f4f4",
-                    padding: "10px",
-                    borderRadius: "7px",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    gap: "10px",
-                  }}
-                >
-                  <h4 style={{ textAlign: "center" }}>Đặt cọc 50%</h4>
+
+              <div className="payment-section">
+                <div className="payment-header">
+                  <i className="fas fa-money-bill-wave"></i>
+                  <h4>Thanh toán đặt cọc 50%</h4>
+                </div>
+                
+                <div className="payment-methods">
                   <Button
-                    className="btn btn-success"
+                    className="payment-button online-payment"
                     onClick={demoPayment}
                     disabled={isProcessing}
                   >
                     {isProcessing ? (
                       <>
-                        <div
-                          className="spinner-border spinner-border-sm"
-                          role="status"
-                        >
+                        <div className="spinner-border spinner-border-sm" role="status">
                           <span className="visually-hidden">Loading...</span>
                         </div>
-                        <span className="ms-2">Thanh toán...</span>
+                        <span>Đang xử lý...</span>
                       </>
                     ) : (
-                      "Thanh toán online"
+                      <>
+                        <i className="fas fa-credit-card"></i>
+                        Thanh toán online
+                      </>
                     )}
-                  </Button>
-                  <Button
-                    className="btn btn-dark"
-                    onClick={openModalPaymentCoin}
-                  >
-                    {" "}
-                    <FontAwesomeIcon icon={faWallet} className="me-2" />
-                    Thanh toán bằng wallet coin
                   </Button>
                 </div>
               </div>
             </div>
           </Modal.Body>
           <Modal.Footer>
-            <button
-              onClick={closeModalConfirmOrder}
-              className="btn btn-secondary"
-            >
-              Đóng
-            </button>
+            <Button variant="secondary" onClick={closeModalConfirmOrder}>
+              <i className="fas fa-times"></i> Đóng
+            </Button>
           </Modal.Footer>
         </Modal>
 
@@ -1949,7 +1830,7 @@ const Bill = () => {
 
         <Button
           onClick={openModalSuggest}
-          className="btn btn-dark"
+          className="btn btn-dark suggest-button"
           style={{
             padding: "10px",
             position: "fixed",
@@ -1957,7 +1838,7 @@ const Bill = () => {
             right: "0",
           }}
         >
-          Gợi ý nhà hàng
+          <FaLightbulb style={{ marginRight: '8px' }} /> Gợi ý nhà hàng
         </Button>
 
         <Modal
@@ -1966,270 +1847,176 @@ const Bill = () => {
           centered
           show={showModalSuggest}
           onHide={closeModalSuggest}
+          className="suggest-modal"
         >
           <Modal.Header closeButton>
-            <Modal.Title>Gợi ý nhà hàng</Modal.Title>
+            <Modal.Title>
+              <i className="fas fa-lightbulb" style={{ color: '#FFC107', marginRight: '10px' }}></i>
+              Gợi ý nhà hàng phù hợp
+            </Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <div>
-              <label htmlFor="addressSelect">Chọn địa điểm:</label>
-              <select
-                id="addressSelect"
-                value={selectedAddress}
-                onChange={handleAddressChange}
-                className="form-control"
-              >
-                <option value="" disabled>
-                  -- Chọn địa điểm --
-                </option>
-                {uniqueAddresses.map((address, index) => (
-                  <option key={index} value={address}>
-                    {address}
-                  </option>
-                ))}
-              </select>
+            <div className="suggest-container">
+              {/* Phần chọn địa điểm */}
+              <div className="location-section">
+                <label htmlFor="addressSelect" className="form-label">
+                  <i className="fas fa-map-marker-alt" style={{ marginRight: '8px' }}></i>
+                  Chọn địa điểm:
+                </label>
+                <select
+                  id="addressSelect"
+                  value={selectedAddress}
+                  onChange={handleAddressChange}
+                  className="form-select custom-select"
+                >
+                  <option value="" disabled>-- Chọn địa điểm --</option>
+                  {uniqueAddresses.map((address, index) => (
+                    <option key={index} value={address}>{address}</option>
+                  ))}
+                </select>
+              </div>
 
               {selectedAddress && (
                 <>
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      flexWrap: "wrap",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
+                  {/* Phần hiển thị chi nhánh */}
+                  <div className="branches-grid">
                     {filteredBranches.map((branch, index) => (
-                      <div
-                        style={{
-                          padding: "10px",
-                          border: "3px solid black",
-                          width: "45%",
-                          margin: "10px",
-                          position: "relative",
-                        }}
-                        key={index}
-                      >
-                        <h4 style={{ textAlign: "center" }}>{branch.name}</h4>
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            marginBottom: "10px",
-                          }}
-                        >
-                          <img
-                            src={branch.image}
-                            style={{
-                              border: "2px solid black",
-                              borderRadius: "4px",
-                              width: "200px",
-                              height: "auto",
-                            }}
-                            alt="chi nhanh"
-                          />
+                      <div className="branch-card" key={index}>
+                        <div className="branch-image">
+                          <img src={branch.image} alt={branch.name} />
+                          <div className="branch-checkbox">
+                            <input
+                              type="checkbox"
+                              checked={branch.branchId === selectedBranchIdSuggest}
+                              onChange={() => handleCheckboxChange(branch.branchId)}
+                              id={`branch-${branch.branchId}`}
+                            />
+                            <label htmlFor={`branch-${branch.branchId}`}></label>
+                          </div>
                         </div>
-                        <p>Địa chỉ: {branch.address}</p>
-                        <div
-                          className="form-check"
-                          style={{
-                            position: "absolute",
-                            top: "10px",
-                            left: "10px",
-                          }}
-                        >
-                          <input
-                            style={{
-                              color: "black",
-                              border: "2px solid black",
-                            }}
-                            className="form-check-input custom-checkbox"
-                            type="checkbox"
-                            checked={
-                              branch.branchId === selectedBranchIdSuggest
-                            }
-                            onChange={() =>
-                              handleCheckboxChange(branch.branchId)
-                            }
-                            value=""
-                            id={`flexCheckBranchSuggest-${index}`}
-                          />
+                        <div className="branch-content">
+                          <h4>{branch.name}</h4>
+                          <p><i className="fas fa-map-marker-alt"></i> {branch.address}</p>
+                          <p><i className="fas fa-phone"></i> {branch.phone}</p>
                         </div>
                       </div>
                     ))}
                   </div>
-                  <div>
-                    {selectedBranchIdSuggest && (
-                      <div style={{ marginTop: "20px" }}>
-                        <h5>Danh sách sảnh cưới:</h5>
-                        <div style={{ display: "flex", flexFlow: "row" }}>
-                          {weddingHalls.length > 0 ? (
-                            weddingHalls.map((hall, index) => (
-                              <div
-                                key={index}
-                                style={{
-                                  width: "50%",
-                                  padding: "10px",
-                                  border: "1px solid gray",
-                                  marginBottom: "10px",
-                                  margin: "20px",
-                                  position: "relative",
-                                }}
-                              >
-                                <h6 style={{ textAlign: "center" }}>
-                                  {hall.name}
-                                </h6>
-                                <div
-                                  style={{
-                                    display: "flex",
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                    marginBottom: "10px",
-                                  }}
-                                >
-                                  <img
-                                    src={hall.image}
-                                    style={{
-                                      border: "2px solid black",
-                                      borderRadius: "4px",
-                                      width: "200px",
-                                      height: "150px",
-                                    }}
-                                    alt="chi nhanh"
-                                  />
-                                </div>
-                                <p>Giá: {formatPrice(hall.price)}</p>
-                                <p>Số lượng bàn: {hall.capacity}</p>
-                                <div
-                                  className="form-check"
-                                  style={{
-                                    position: "absolute",
-                                    top: "10px",
-                                    left: "10px",
-                                  }}
-                                >
-                                  <input
-                                    style={{
-                                      color: "black",
-                                      border: "2px solid black",
-                                    }}
-                                    className="form-check-input custom-checkbox"
-                                    type="checkbox"
-                                    checked={
-                                      hall.hallId === selectedHallIdSuggest
-                                    }
-                                    onChange={() =>
-                                      handleHallSuggestCheckboxChange(
-                                        hall.hallId
-                                      )
-                                    }
-                                    value=""
-                                    id={`flexCheckHallSuggest-${index}`}
-                                  />
-                                </div>
-                              </div>
-                            ))
-                          ) : (
-                            <p>Không có sảnh nào cho chi nhánh này.</p>
-                          )}
+
+                  {/* Phần tìm kiếm nâng cao */}
+                  {selectedBranchIdSuggest && (
+                    <div className="advanced-search">
+                      <h5 className="search-title">
+                        <i className="fas fa-search" style={{ marginRight: '8px' }}></i>
+                        Tìm kiếm theo yêu cầu
+                      </h5>
+                      
+                      <div className="search-filters">
+                        <div className="tables-input">
+                          <label>Số lượng bàn:</label>
+                          <input
+                            type="number"
+                            className="form-control"
+                            onChange={handleNumberOfTablesChange}
+                            placeholder="Nhập số lượng bàn"
+                          />
+                        </div>
+
+                        <div className="cost-slider">
+                          <label>Chi phí dự kiến:</label>
+                          <div className="slider-container">
+                            <Slider
+                              min={0}
+                              max={100000000}
+                              step={100000}
+                              value={cost}
+                              onChange={handleSliderChange}
+                              railStyle={{ backgroundColor: '#e9ecef' }}
+                              trackStyle={{ backgroundColor: '#fe8e5c' }}
+                              handleStyle={{
+                                borderColor: '#fe8e5c',
+                                backgroundColor: 'white'
+                              }}
+                            />
+                            <div className="cost-display">
+                              {formatPrice(cost)}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="search-actions">
+                          <Button 
+                            className="filter-button"
+                            onClick={submitSuggest}
+                          >
+                            <i className="fas fa-filter"></i> Lọc kết quả
+                          </Button>
+                          <Button 
+                            className="reset-button"
+                            onClick={handleReset}
+                          >
+                            <i className="fas fa-undo"></i> Xóa lọc
+                          </Button>
                         </div>
                       </div>
-                    )}
-                    <hr></hr>
-                    <h5>Nhập tìm kiếm về số lượng bàn và chi phí</h5>
+                    </div>
+                  )}
 
-                    <div
-                      style={{
-                        display: "flex",
-                        flexFlow: "row",
-                        justifyContent: "center",
-                        gap: "20px",
-                        marginBottom: "10px",
-                        marginTop: "20px",
-                      }}
+                  {/* Phần hiển thị sảnh cưới */}
+                  {selectedBranchIdSuggest && (
+                    <div className="halls-section">
+                      <h5 className="halls-title">Danh sách sảnh cưới phù hợp</h5>
+                      <div className="halls-grid">
+                        {weddingHalls.length > 0 ? (
+                          weddingHalls.map((hall, index) => (
+                            <div className="hall-card" key={index}>
+                              <div className="hall-image">
+                                <img src={hall.image} alt={hall.name} />
+                                <div className="hall-checkbox">
+                                  <input
+                                    type="checkbox"
+                                    checked={hall.hallId === selectedHallIdSuggest}
+                                    onChange={() => handleHallSuggestCheckboxChange(hall.hallId)}
+                                    id={`hall-${hall.hallId}`}
+                                  />
+                                  <label htmlFor={`hall-${hall.hallId}`}></label>
+                                </div>
+                              </div>
+                              <div className="hall-content">
+                                <h6>{hall.name}</h6>
+                                <p className="hall-price">
+                                  <i className="fas fa-tag"></i> {formatPrice(hall.price)}
+                                </p>
+                                <p className="hall-capacity">
+                                  <i className="fas fa-users"></i> {hall.capacity} bàn
+                                </p>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="no-halls">
+                            <i className="fas fa-exclamation-circle"></i>
+                            <p>Không có sảnh nào phù hợp với tiêu chí tìm kiếm.</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Nút chấp nhận gợi ý */}
+                  <div className="accept-suggestion">
+                    <Button 
+                      className="accept-button"
+                      onClick={acceptSuggest}
                     >
-                      <div
-                        style={{ width: "20%", border: "2px solid black" }}
-                        class="form-floating mb-3"
-                      >
-                        <input
-                          type="number"
-                          class="form-control"
-                          id="floatingInput"
-                          placeholder="Số lượng bàn"
-                          onChange={handleNumberOfTablesChange}
-                        ></input>
-                        <label for="floatingInput">Số lượng bàn</label>
-                      </div>
-
-                      <div
-                        style={{
-                          width: "50%",
-                          display: "flex",
-                          alignItems: "center",
-                          paddingLeft: "10px",
-                          position: "relative",
-                        }}
-                      >
-                        <label
-                          htmlFor="costSlider"
-                          style={{
-                            position: "absolute",
-                            top: "-6px",
-                            left: "10px",
-                          }}
-                        >
-                          Chọn chi phí:
-                        </label>
-                        <Slider
-                          id="costSlider"
-                          min={0}
-                          max={100000000}
-                          step={100000}
-                          value={cost}
-                          onChange={handleSliderChange}
-                          style={{ flexGrow: 1, marginRight: "10px" }}
-                        />
-                        <input
-                          style={{ width: "60%", border: "2px solid black" }}
-                          className="form-control"
-                          placeholder="Chi phí"
-                          value={formatPrice(cost)}
-                          readOnly
-                        />
-                        <button
-                          style={{ margin: "20px", width: "10%" }}
-                          className="btn btn-primary"
-                          onClick={submitSuggest}
-                        >
-                          Lọc
-                        </button>
-                        <button
-                          style={{ width: "190px" }}
-                          className="btn btn-danger"
-                          onClick={handleReset}
-                        >
-                          Xóa lọc
-                        </button>
-                      </div>
-                    </div>
-                    <div style={{ display: "flex", justifyContent: "center" }}>
-                      <button
-                        style={{ width: "50%" }}
-                        className="btn btn-dark"
-                        onClick={acceptSuggest}
-                      >
-                        Chấp nhận gợi ý từ nhà hàng
-                      </button>
-                    </div>
+                      <i className="fas fa-check-circle"></i>
+                      Chấp nhận gợi ý từ nhà hàng
+                    </Button>
                   </div>
                 </>
               )}
             </div>
           </Modal.Body>
-          <Modal.Footer></Modal.Footer>
         </Modal>
       </div>
     </div>
