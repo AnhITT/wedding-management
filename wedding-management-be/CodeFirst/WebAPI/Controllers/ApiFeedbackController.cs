@@ -64,5 +64,51 @@ namespace WebAPI.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateFeedback(int id, [FromBody] Feedback feedback)
+        {
+            if (id != feedback.FeedbackId)
+            {
+                return BadRequest("ID không khớp");
+            }
+
+            _context.Entry(feedback).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!FeedbackExists(id))
+                {
+                    return NotFound();
+                }
+                throw;
+            }
+
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteFeedback(int id)
+        {
+            var feedback = await _context.Feedback.FindAsync(id);
+            if (feedback == null)
+            {
+                return NotFound();
+            }
+
+            // Thay vì xóa, cập nhật trạng thái hiển thị
+            feedback.isShowFeedback = false;
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        private bool FeedbackExists(int id)
+        {
+            return _context.Feedback.Any(e => e.FeedbackId == id);
+        }
     }
 }

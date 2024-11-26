@@ -92,27 +92,81 @@ namespace WebAPI.Controllers
 
         // GET api/<ApiHallController>/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public async Task<IActionResult> GetHallById(int id)
         {
-            return "value";
+            var hall = await _context.Hall
+                .Include(h => h.Branch)
+                .FirstOrDefaultAsync(h => h.HallId == id);
+
+            if (hall == null)
+            {
+                return NotFound("Không tìm thấy sảnh");
+            }
+
+            return Ok(hall);
         }
 
         // POST api/<ApiHallController>
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task<IActionResult> CreateHall([FromBody] Hall hall)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            _context.Hall.Add(hall);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetHallById), new { id = hall.HallId }, hall);
         }
 
         // PUT api/<ApiHallController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public async Task<IActionResult> UpdateHall(int id, [FromBody] Hall hall)
         {
+            if (id != hall.HallId)
+            {
+                return BadRequest("ID không khớp");
+            }
+
+            _context.Entry(hall).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!HallExists(id))
+                {
+                    return NotFound();
+                }
+                throw;
+            }
+
+            return NoContent();
         }
 
         // DELETE api/<ApiHallController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<IActionResult> DeleteHall(int id)
         {
+            var hall = await _context.Hall.FindAsync(id);
+            if (hall == null)
+            {
+                return NotFound();
+            }
+
+            _context.Hall.Remove(hall);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        private bool HallExists(int id)
+        {
+            return _context.Hall.Any(e => e.HallId == id);
         }
     }
 }

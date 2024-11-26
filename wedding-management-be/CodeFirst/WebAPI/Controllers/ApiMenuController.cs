@@ -100,14 +100,130 @@ namespace WebAPI.Controllers
 
         // PUT api/<MenuController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public async Task<IActionResult> UpdateMenu(int id, [FromBody] MenuEntity menu)
         {
+            if (id != menu.MenuId)
+            {
+                return BadRequest("ID không khớp");
+            }
+
+            _context.Entry(menu).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!MenuExists(id))
+                {
+                    return NotFound();
+                }
+                throw;
+            }
+
+            return NoContent();
         }
 
         // DELETE api/<MenuController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<IActionResult> DeleteMenu(int id)
         {
+            var menu = await _context.MenuEntity.FindAsync(id);
+            if (menu == null)
+            {
+                return NotFound();
+            }
+
+            _context.MenuEntity.Remove(menu);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        private bool MenuExists(int id)
+        {
+            return _context.MenuEntity.Any(e => e.MenuId == id);
+        }
+
+        [HttpGet("category/{id}")]
+        public async Task<ActionResult<MenuCategory>> GetCategory(int id)
+        {
+            var category = await _context.MenuCategory.FindAsync(id);
+            if (category == null)
+            {
+                return NotFound("Không tìm thấy danh mục");
+            }
+            return Ok(new {
+                categoryId = category.CategoryId,
+                name = category.Name,
+                description = category.Description
+            });
+        }
+
+        [HttpPost("category")]
+        public async Task<ActionResult<MenuCategory>> CreateCategory([FromBody] MenuCategory category)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            _context.MenuCategory.Add(category);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetCategory), new { id = category.CategoryId }, category);
+        }
+
+        [HttpPut("category/{id}")]
+        public async Task<IActionResult> UpdateCategory(int id, [FromBody] MenuCategory category)
+        {
+            if (id != category.CategoryId)
+            {
+                return BadRequest("ID không khớp");
+            }
+
+            _context.Entry(category).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                return Ok(new { message = "Cập nhật thành công" });
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!CategoryExists(id))
+                {
+                    return NotFound();
+                }
+                throw;
+            }
+        }
+
+        [HttpDelete("category/{id}")]
+        public async Task<IActionResult> DeleteCategory(int id)
+        {
+            var category = await _context.MenuCategory.FindAsync(id);
+            if (category == null)
+            {
+                return NotFound("Không tìm thấy danh mục");
+            }
+
+            try
+            {
+                _context.MenuCategory.Remove(category);
+                await _context.SaveChangesAsync();
+                return Ok(new { message = "Xóa thành công" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi khi xóa danh mục", error = ex.Message });
+            }
+        }
+
+        private bool CategoryExists(int id)
+        {
+            return _context.MenuCategory.Any(e => e.CategoryId == id);
         }
     }
 }

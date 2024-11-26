@@ -10,6 +10,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebAPI.Models;
 using WebAPI.Repositories;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using Microsoft.Extensions.Configuration;
 
 namespace WebAPI.Controllers
 {
@@ -20,13 +24,174 @@ namespace WebAPI.Controllers
         private readonly IAccountRepository accountRepo;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ApplicationDbContext _context;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly IConfiguration _configuration;
 
-        public AccountsController(IAccountRepository repo, UserManager<ApplicationUser> userManager, ApplicationDbContext context)
+        public AccountsController(IAccountRepository repo, UserManager<ApplicationUser> userManager, ApplicationDbContext context, SignInManager<ApplicationUser> signInManager, IConfiguration configuration)
         {
             accountRepo = repo;
             _userManager = userManager;
             _context = context;
+            _signInManager = signInManager;
+            _configuration = configuration;
         }
+
+        // GET: api/account
+        [HttpGet]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            try 
+            {
+                var users = await _context.ApplicationUser.ToListAsync();
+                var userDtos = new List<object>();
+
+                foreach (var user in users)
+                {
+                    var roles = await _userManager.GetRolesAsync(user);
+                    userDtos.Add(new
+                    {
+                        user.Id,
+                        user.FirstName,
+                        user.LastName,
+                        user.Email,
+                        user.PhoneNumber,
+                        user.Avatar,
+                        user.UserName,
+                        Roles = roles
+                    });
+                }
+
+                return Ok(userDtos);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        // GET: api/account/{id}
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetUserById(string id)
+        {
+            var user = await _context.ApplicationUser
+                .Select(u => new
+                {
+                    u.Id,
+                    u.FirstName,
+                    u.LastName,
+                    u.Email,
+                    u.PhoneNumber,
+                    u.Avatar,
+                    u.UserName
+                })
+                .FirstOrDefaultAsync(u => u.Id == id);
+
+            if (user == null)
+            {
+                return NotFound("Không tìm thấy người dùng");
+            }
+
+            return Ok(user);
+        }
+
+        // POST: api/account/create
+        [HttpPost("create")]
+        public async Task<IActionResult> CreateUser([FromBody] CreateUserModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var user = new ApplicationUser
+            {
+                UserName = model.Email,
+                Email = model.Email,
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                PhoneNumber = model.PhoneNumber
+            };
+
+            var result = await _userManager.CreateAsync(user, model.Password);
+
+            if (result.Succeeded)
+            {
+                return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, user);
+            }
+
+            return BadRequest(result.Errors);
+        }
+
+        // PUT: api/account/{id}
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateUser(string id, [FromBody] UpdateUserModel model)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+
+            if (user == null)
+            {
+                return NotFound("Không tìm thấy người dùng");
+            }
+
+            user.FirstName = model.FirstName ?? user.FirstName;
+            user.LastName = model.LastName ?? user.LastName;
+            user.PhoneNumber = model.PhoneNumber ?? user.PhoneNumber;
+            user.Email = model.Email ?? user.Email;
+            user.UserName = model.Email ?? user.UserName;
+
+            var result = await _userManager.UpdateAsync(user);
+
+            if (result.Succeeded)
+            {
+                return NoContent();
+            }
+
+            return BadRequest(result.Errors);
+        }
+
+        // DELETE: api/account/{id}
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteUser(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+
+            if (user == null)
+            {
+                return NotFound("Không tìm thấy người dùng");
+            }
+
+            var result = await _userManager.DeleteAsync(user);
+
+            if (result.Succeeded)
+            {
+                return NoContent();
+            }
+
+            return BadRequest(result.Errors);
+        }
+
+        // POST: api/account/change-password
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordModel model)
+        {
+            var user = await _userManager.FindByIdAsync(model.UserId);
+
+            if (user == null)
+            {
+                return NotFound("Không tìm thấy người dùng");
+            }
+
+            var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+
+            if (result.Succeeded)
+            {
+                return Ok("Đổi mật khẩu thành công");
+            }
+
+            return BadRequest(result.Errors);
+        }
+
+        // Giữ lại các phương thức hiện có
         [HttpPost("Update")]
         public async Task<IActionResult> UpdateProfile([FromBody] UserProfile profileData)
         {
@@ -114,7 +279,7 @@ namespace WebAPI.Controllers
 
             if (user == null)
             {
-                return null; // Trả về null nếu không tìm thấy thông tin người dùng
+                return null; // Trả về null nếu không tìm thấy thông tin ngư���i dùng
             }
 
             // Chuyển đổi thông tin người dùng thành đối tượng UserInfo
@@ -137,5 +302,95 @@ namespace WebAPI.Controllers
             return Ok(userInfo); // Trả về thông tin người dùng nếu tìm thấy
         }
 
+        [HttpPost("SignInAdmin")]
+        public async Task<IActionResult> SignInAdmin([FromBody] SignInModel signInModel)
+        {
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(signInModel.Email);
+                if (user == null)
+                {
+                    return BadRequest(new { message = "Email hoặc mật khẩu không đúng" });
+                }
+
+                var result = await _signInManager.CheckPasswordSignInAsync(user, signInModel.Password, false);
+                if (!result.Succeeded)
+                {
+                    return BadRequest(new { message = "Email hoặc mật khẩu không đúng" });
+                }
+
+                var roles = await _userManager.GetRolesAsync(user);
+                var allowedRoles = new[] { "employee", "administrator system", "admin" };
+                
+                if (!roles.Any(role => allowedRoles.Contains(role)))
+                {
+                    return BadRequest(new { message = "Tài khoản không có quyền truy cập" });
+                }
+
+                var authClaims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Email, user.Email),
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                };
+
+                foreach (var role in roles)
+                {
+                    authClaims.Add(new Claim(ClaimTypes.Role, role));
+                }
+
+                var token = GenerateToken(authClaims);
+
+                return Ok(new
+                {
+                    token = new JwtSecurityTokenHandler().WriteToken(token),
+                    roles = roles,
+                    expiration = token.ValidTo
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi server: " + ex.Message });
+            }
+        }
+
+        private JwtSecurityToken GenerateToken(List<Claim> authClaims)
+        {
+            var authSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
+
+            var token = new JwtSecurityToken(
+                issuer: _configuration["JWT:ValidIssuer"],
+                audience: _configuration["JWT:ValidAudience"],
+                expires: DateTime.Now.AddMinutes(30),
+                claims: authClaims,
+                signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
+            );
+
+            return token;
+        }
+    }
+
+    // Models mới cho các request
+    public class CreateUserModel
+    {
+        public string Email { get; set; }
+        public string Password { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string PhoneNumber { get; set; }
+    }
+
+    public class UpdateUserModel
+    {
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Email { get; set; }
+        public string PhoneNumber { get; set; }
+    }
+
+    public class ChangePasswordModel
+    {
+        public string UserId { get; set; }
+        public string CurrentPassword { get; set; }
+        public string NewPassword { get; set; }
     }
 }

@@ -14,71 +14,94 @@ namespace WebAPI.Controllers
     [ApiController]
     public class ApiBranchController : ControllerBase
     {
-        private readonly IAccountRepository accountRepo;
-        private readonly UserManager<ApplicationUser> _userManager;
         private readonly ApplicationDbContext _context;
 
-        public ApiBranchController(IAccountRepository repo, UserManager<ApplicationUser> userManager, ApplicationDbContext context)
+        public ApiBranchController(ApplicationDbContext context)
         {
-            accountRepo = repo;
-            _userManager = userManager;
             _context = context;
         }
-        // GET: api/<ApiBranchController>
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Branch>>> GetUnlockedBranchesWithHalls()
+        public async Task<IActionResult> GetAllBranches()
         {
-            var branches = await _context.Branch
-                .Where(b => b.IsLocked == false) // Lọc các chi nhánh có IsLocked == false
-                .Include(b => b.Halls)
-                .ToListAsync();
-
-            var branchDtos = branches.Select(branch => new Branch
-            {
-                BranchId = branch.BranchId,
-                Name = branch.Name,
-                Description = branch.Description,
-                Image = branch.Image,
-                Phone = branch.Phone,
-                Address = branch.Address,
-                Halls = branch.Halls.Select(hall => new Hall
-                {
-                    HallId = hall.HallId,
-                    Name = hall.Name,
-                    Description = hall.Description,
-                    Image = hall.Image,
-                    BranchId = hall.BranchId,
-                }).ToList()
-            }).ToList();
-
-            return branchDtos;
+            var branches = await _context.Branch.ToListAsync();
+            return Ok(branches);
         }
 
-
-        // GET api/<ApiBranchController>/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public async Task<IActionResult> GetBranchById(int id)
         {
-            return "value";
+            var branch = await _context.Branch.FindAsync(id);
+            if (branch == null)
+            {
+                return NotFound("Không tìm thấy chi nhánh");
+            }
+            return Ok(branch);
         }
 
-        // POST api/<ApiBranchController>
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task<IActionResult> CreateBranch([FromBody] Branch branch)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            _context.Branch.Add(branch);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetBranchById), new { id = branch.BranchId }, branch);
         }
 
-        // PUT api/<ApiBranchController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public async Task<IActionResult> UpdateBranch(int id, [FromBody] Branch branch)
         {
+            if (id != branch.BranchId)
+            {
+                return BadRequest("ID không khớp");
+            }
+
+            _context.Entry(branch).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                return Ok(new { message = "Cập nhật thành công" });
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!BranchExists(id))
+                {
+                    return NotFound();
+                }
+                throw;
+            }
         }
 
-        // DELETE api/<ApiBranchController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<IActionResult> DeleteBranch(int id)
         {
+            var branch = await _context.Branch.FindAsync(id);
+            if (branch == null)
+            {
+                return NotFound("Không tìm thấy chi nhánh");
+            }
+
+            try
+            {
+                _context.Branch.Remove(branch);
+                await _context.SaveChangesAsync();
+                return Ok(new { message = "Xóa thành công" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi khi xóa chi nhánh", error = ex.Message });
+            }
+        }
+
+        private bool BranchExists(int id)
+        {
+            return _context.Branch.Any(e => e.BranchId == id);
         }
     }
 }
