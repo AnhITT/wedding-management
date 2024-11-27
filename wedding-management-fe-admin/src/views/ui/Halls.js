@@ -4,7 +4,6 @@ import { Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
 import ReactPaginate from "react-paginate";
 import { hallApi } from "../../api/hall";
 import { branchApi } from "../../api/branch";
-import "../../assets/scss/paging.css";
 
 const Halls = () => {
     const [halls, setHalls] = useState([]);
@@ -26,7 +25,7 @@ const Halls = () => {
         image: "",
         branchId: "",
         capacity: 0,
-        price: 0
+        price: 0,
     });
 
     const [editHall, setEditHall] = useState({
@@ -36,7 +35,7 @@ const Halls = () => {
         image: "",
         branchId: "",
         capacity: 0,
-        price: 0
+        price: 0,
     });
     const [editHallModal, setEditHallModal] = useState(false);
 
@@ -114,7 +113,7 @@ const Halls = () => {
                 image: "",
                 branchId: "",
                 capacity: 0,
-                price: 0
+                price: 0,
             });
         } catch (error) {
             setError([error.response?.data?.message || "Lỗi khi thêm sảnh"]);
@@ -133,7 +132,7 @@ const Halls = () => {
                 image: hall.image,
                 branchId: hall.branchId,
                 capacity: hall.capacity,
-                price: hall.price
+                price: hall.price,
             });
             setEditHallModal(true);
         } catch (error) {
@@ -150,7 +149,9 @@ const Halls = () => {
             setEditHallModal(false);
             fetchHalls();
         } catch (error) {
-            setError([error.response?.data?.message || "Lỗi khi cập nhật sảnh"]);
+            setError([
+                error.response?.data?.message || "Lỗi khi cập nhật sảnh",
+            ]);
         } finally {
             setLoading(false);
         }
@@ -214,22 +215,33 @@ const Halls = () => {
                                     {displayItems.map((hall) => (
                                         <tr key={hall.hallId}>
                                             <td>
-                                                <img 
-                                                    src={hall.image} 
+                                                <img
+                                                    src={hall.image}
                                                     alt={hall.name}
-                                                    style={{ width: '100px', height: '60px', objectFit: 'cover' }}
+                                                    style={{
+                                                        width: "100px",
+                                                        height: "60px",
+                                                        objectFit: "cover",
+                                                    }}
                                                 />
                                             </td>
                                             <td>{hall.name}</td>
                                             <td>{hall.branchName}</td>
                                             <td>{hall.capacity} bàn</td>
-                                            <td>{hall.price.toLocaleString()} VND</td>
+                                            <td>
+                                                {hall.price.toLocaleString()}{" "}
+                                                VND
+                                            </td>
                                             <td>
                                                 <Button
                                                     color="info"
                                                     size="sm"
                                                     className="me-2"
-                                                    onClick={() => handleEditHall(hall.hallId)}
+                                                    onClick={() =>
+                                                        handleEditHall(
+                                                            hall.hallId
+                                                        )
+                                                    }
                                                 >
                                                     Sửa
                                                 </Button>
@@ -237,8 +249,12 @@ const Halls = () => {
                                                     color="danger"
                                                     size="sm"
                                                     onClick={() => {
-                                                        setHallIdToDelete(hall.hallId);
-                                                        setConfirmationModal(true);
+                                                        setHallIdToDelete(
+                                                            hall.hallId
+                                                        );
+                                                        setConfirmationModal(
+                                                            true
+                                                        );
                                                     }}
                                                 >
                                                     Xóa
@@ -258,7 +274,9 @@ const Halls = () => {
                             marginPagesDisplayed={2}
                             pageRangeDisplayed={5}
                             onPageChange={handlePageClick}
-                            containerClassName={"pagination justify-content-center"}
+                            containerClassName={
+                                "pagination justify-content-center"
+                            }
                             pageClassName={"page-item"}
                             pageLinkClassName={"page-link"}
                             previousClassName={"page-item"}
@@ -273,7 +291,10 @@ const Halls = () => {
                 </Card>
 
                 {/* Add Hall Modal */}
-                <Modal isOpen={addHallModal} toggle={() => setAddHallModal(false)}>
+                <Modal
+                    isOpen={addHallModal}
+                    toggle={() => setAddHallModal(false)}
+                >
                     <ModalHeader toggle={() => setAddHallModal(false)}>
                         Thêm sảnh mới
                     </ModalHeader>
@@ -284,7 +305,12 @@ const Halls = () => {
                                 type="text"
                                 className="form-control"
                                 value={newHall.name}
-                                onChange={(e) => setNewHall({ ...newHall, name: e.target.value })}
+                                onChange={(e) =>
+                                    setNewHall({
+                                        ...newHall,
+                                        name: e.target.value,
+                                    })
+                                }
                             />
                         </div>
                         <div className="mb-3">
@@ -292,7 +318,12 @@ const Halls = () => {
                             <textarea
                                 className="form-control"
                                 value={newHall.description}
-                                onChange={(e) => setNewHall({ ...newHall, description: e.target.value })}
+                                onChange={(e) =>
+                                    setNewHall({
+                                        ...newHall,
+                                        description: e.target.value,
+                                    })
+                                }
                             />
                         </div>
                         <div className="mb-3">
@@ -301,7 +332,12 @@ const Halls = () => {
                                 type="text"
                                 className="form-control"
                                 value={newHall.image}
-                                onChange={(e) => setNewHall({ ...newHall, image: e.target.value })}
+                                onChange={(e) =>
+                                    setNewHall({
+                                        ...newHall,
+                                        image: e.target.value,
+                                    })
+                                }
                             />
                         </div>
                         <div className="mb-3">
@@ -309,23 +345,38 @@ const Halls = () => {
                             <select
                                 className="form-control"
                                 value={newHall.branchId}
-                                onChange={(e) => setNewHall({ ...newHall, branchId: parseInt(e.target.value) })}
+                                onChange={(e) =>
+                                    setNewHall({
+                                        ...newHall,
+                                        branchId: parseInt(e.target.value),
+                                    })
+                                }
                             >
                                 <option value="">Chọn chi nhánh</option>
                                 {branches.map((branch) => (
-                                    <option key={branch.branchId} value={branch.branchId}>
+                                    <option
+                                        key={branch.branchId}
+                                        value={branch.branchId}
+                                    >
                                         {branch.name}
                                     </option>
                                 ))}
                             </select>
                         </div>
                         <div className="mb-3">
-                            <label className="form-label">Sức chứa (số bàn)</label>
+                            <label className="form-label">
+                                Sức chứa (số bàn)
+                            </label>
                             <input
                                 type="number"
                                 className="form-control"
                                 value={newHall.capacity}
-                                onChange={(e) => setNewHall({ ...newHall, capacity: parseInt(e.target.value) })}
+                                onChange={(e) =>
+                                    setNewHall({
+                                        ...newHall,
+                                        capacity: parseInt(e.target.value),
+                                    })
+                                }
                             />
                         </div>
                         <div className="mb-3">
@@ -334,25 +385,42 @@ const Halls = () => {
                                 type="number"
                                 className="form-control"
                                 value={newHall.price}
-                                onChange={(e) => setNewHall({ ...newHall, price: parseFloat(e.target.value) })}
+                                onChange={(e) =>
+                                    setNewHall({
+                                        ...newHall,
+                                        price: parseFloat(e.target.value),
+                                    })
+                                }
                             />
                         </div>
                         {error.map((err, index) => (
-                            <div key={index} className="text-danger">{err}</div>
+                            <div key={index} className="text-danger">
+                                {err}
+                            </div>
                         ))}
                     </ModalBody>
                     <ModalFooter>
-                        <Button color="primary" onClick={handleAddHall} disabled={loading}>
+                        <Button
+                            color="primary"
+                            onClick={handleAddHall}
+                            disabled={loading}
+                        >
                             {loading ? "Đang xử lý..." : "Thêm"}
                         </Button>
-                        <Button color="secondary" onClick={() => setAddHallModal(false)}>
+                        <Button
+                            color="secondary"
+                            onClick={() => setAddHallModal(false)}
+                        >
                             Hủy
                         </Button>
                     </ModalFooter>
                 </Modal>
 
                 {/* Edit Hall Modal */}
-                <Modal isOpen={editHallModal} toggle={() => setEditHallModal(false)}>
+                <Modal
+                    isOpen={editHallModal}
+                    toggle={() => setEditHallModal(false)}
+                >
                     <ModalHeader toggle={() => setEditHallModal(false)}>
                         Chỉnh sửa sảnh
                     </ModalHeader>
@@ -363,7 +431,12 @@ const Halls = () => {
                                 type="text"
                                 className="form-control"
                                 value={editHall.name}
-                                onChange={(e) => setEditHall({ ...editHall, name: e.target.value })}
+                                onChange={(e) =>
+                                    setEditHall({
+                                        ...editHall,
+                                        name: e.target.value,
+                                    })
+                                }
                             />
                         </div>
                         <div className="mb-3">
@@ -371,7 +444,12 @@ const Halls = () => {
                             <textarea
                                 className="form-control"
                                 value={editHall.description}
-                                onChange={(e) => setEditHall({ ...editHall, description: e.target.value })}
+                                onChange={(e) =>
+                                    setEditHall({
+                                        ...editHall,
+                                        description: e.target.value,
+                                    })
+                                }
                             />
                         </div>
                         <div className="mb-3">
@@ -380,7 +458,12 @@ const Halls = () => {
                                 type="text"
                                 className="form-control"
                                 value={editHall.image}
-                                onChange={(e) => setEditHall({ ...editHall, image: e.target.value })}
+                                onChange={(e) =>
+                                    setEditHall({
+                                        ...editHall,
+                                        image: e.target.value,
+                                    })
+                                }
                             />
                         </div>
                         <div className="mb-3">
@@ -388,23 +471,38 @@ const Halls = () => {
                             <select
                                 className="form-control"
                                 value={editHall.branchId}
-                                onChange={(e) => setEditHall({ ...editHall, branchId: parseInt(e.target.value) })}
+                                onChange={(e) =>
+                                    setEditHall({
+                                        ...editHall,
+                                        branchId: parseInt(e.target.value),
+                                    })
+                                }
                             >
                                 <option value="">Chọn chi nhánh</option>
                                 {branches.map((branch) => (
-                                    <option key={branch.branchId} value={branch.branchId}>
+                                    <option
+                                        key={branch.branchId}
+                                        value={branch.branchId}
+                                    >
                                         {branch.name}
                                     </option>
                                 ))}
                             </select>
                         </div>
                         <div className="mb-3">
-                            <label className="form-label">Sức chứa (số bàn)</label>
+                            <label className="form-label">
+                                Sức chứa (số bàn)
+                            </label>
                             <input
                                 type="number"
                                 className="form-control"
                                 value={editHall.capacity}
-                                onChange={(e) => setEditHall({ ...editHall, capacity: parseInt(e.target.value) })}
+                                onChange={(e) =>
+                                    setEditHall({
+                                        ...editHall,
+                                        capacity: parseInt(e.target.value),
+                                    })
+                                }
                             />
                         </div>
                         <div className="mb-3">
@@ -413,43 +511,68 @@ const Halls = () => {
                                 type="number"
                                 className="form-control"
                                 value={editHall.price}
-                                onChange={(e) => setEditHall({ ...editHall, price: parseFloat(e.target.value) })}
+                                onChange={(e) =>
+                                    setEditHall({
+                                        ...editHall,
+                                        price: parseFloat(e.target.value),
+                                    })
+                                }
                             />
                         </div>
                         {error.map((err, index) => (
-                            <div key={index} className="text-danger">{err}</div>
+                            <div key={index} className="text-danger">
+                                {err}
+                            </div>
                         ))}
                     </ModalBody>
                     <ModalFooter>
-                        <Button color="primary" onClick={handleUpdateHall} disabled={loading}>
+                        <Button
+                            color="primary"
+                            onClick={handleUpdateHall}
+                            disabled={loading}
+                        >
                             {loading ? "Đang xử lý..." : "Cập nhật"}
                         </Button>
-                        <Button color="secondary" onClick={() => setEditHallModal(false)}>
+                        <Button
+                            color="secondary"
+                            onClick={() => setEditHallModal(false)}
+                        >
                             Hủy
                         </Button>
                     </ModalFooter>
                 </Modal>
 
                 {/* Confirmation Modal */}
-                <Modal isOpen={confirmationModal} toggle={() => setConfirmationModal(false)}>
+                <Modal
+                    isOpen={confirmationModal}
+                    toggle={() => setConfirmationModal(false)}
+                >
                     <ModalHeader toggle={() => setConfirmationModal(false)}>
                         Xác nhận xóa
                     </ModalHeader>
-                    <ModalBody>
-                        Bạn có chắc chắn muốn xóa sảnh này?
-                    </ModalBody>
+                    <ModalBody>Bạn có chắc chắn muốn xóa sảnh này?</ModalBody>
                     <ModalFooter>
-                        <Button color="danger" onClick={handleDeleteHall} disabled={loading}>
+                        <Button
+                            color="danger"
+                            onClick={handleDeleteHall}
+                            disabled={loading}
+                        >
                             {loading ? "Đang xử lý..." : "Xóa"}
                         </Button>
-                        <Button color="secondary" onClick={() => setConfirmationModal(false)}>
+                        <Button
+                            color="secondary"
+                            onClick={() => setConfirmationModal(false)}
+                        >
                             Hủy
                         </Button>
                     </ModalFooter>
                 </Modal>
 
                 {/* Success Modal */}
-                <Modal isOpen={successModal} toggle={() => setSuccessModal(false)}>
+                <Modal
+                    isOpen={successModal}
+                    toggle={() => setSuccessModal(false)}
+                >
                     <ModalBody>
                         <div className="text-center text-success">
                             <i className="bi bi-check-circle-fill fs-1"></i>
@@ -457,7 +580,10 @@ const Halls = () => {
                         </div>
                     </ModalBody>
                     <ModalFooter>
-                        <Button color="primary" onClick={() => setSuccessModal(false)}>
+                        <Button
+                            color="primary"
+                            onClick={() => setSuccessModal(false)}
+                        >
                             Đóng
                         </Button>
                     </ModalFooter>

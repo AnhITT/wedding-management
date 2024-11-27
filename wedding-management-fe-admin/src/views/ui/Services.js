@@ -4,7 +4,6 @@ import { Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
 import ReactPaginate from "react-paginate";
 import { serviceApi } from "../../api/service";
 import { serviceCategoryApi } from "../../api/serviceCategory";
-import "../../assets/scss/paging.css";
 
 const Services = () => {
     const [services, setServices] = useState([]);
@@ -25,7 +24,7 @@ const Services = () => {
         description: "",
         price: 0,
         categoryId: "",
-        image: ""
+        image: "",
     });
 
     const [editService, setEditService] = useState({
@@ -34,7 +33,7 @@ const Services = () => {
         description: "",
         price: 0,
         categoryId: "",
-        image: ""
+        image: "",
     });
     const [editServiceModal, setEditServiceModal] = useState(false);
 
@@ -110,7 +109,7 @@ const Services = () => {
                 description: "",
                 price: 0,
                 categoryId: "",
-                image: ""
+                image: "",
             });
         } catch (error) {
             setError([error.response?.data?.message || "Lỗi khi thêm dịch vụ"]);
@@ -128,7 +127,7 @@ const Services = () => {
                 description: service.description,
                 price: service.price,
                 categoryId: service.categoryId,
-                image: service.image
+                image: service.image,
             });
             setEditServiceModal(true);
         } catch (error) {
@@ -145,7 +144,9 @@ const Services = () => {
             setEditServiceModal(false);
             fetchServices();
         } catch (error) {
-            setError([error.response?.data?.message || "Lỗi khi cập nhật dịch vụ"]);
+            setError([
+                error.response?.data?.message || "Lỗi khi cập nhật dịch vụ",
+            ]);
         } finally {
             setLoading(false);
         }
@@ -208,21 +209,32 @@ const Services = () => {
                                     {displayItems.map((service) => (
                                         <tr key={service.serviceId}>
                                             <td>
-                                                <img 
-                                                    src={service.image} 
+                                                <img
+                                                    src={service.image}
                                                     alt={service.name}
-                                                    style={{ width: '100px', height: '60px', objectFit: 'cover' }}
+                                                    style={{
+                                                        width: "100px",
+                                                        height: "60px",
+                                                        objectFit: "cover",
+                                                    }}
                                                 />
                                             </td>
                                             <td>{service.name}</td>
                                             <td>{service.categoryName}</td>
-                                            <td>{service.price.toLocaleString()} VND</td>
+                                            <td>
+                                                {service.price.toLocaleString()}{" "}
+                                                VND
+                                            </td>
                                             <td>
                                                 <Button
                                                     color="info"
                                                     size="sm"
                                                     className="me-2"
-                                                    onClick={() => handleEditService(service.serviceId)}
+                                                    onClick={() =>
+                                                        handleEditService(
+                                                            service.serviceId
+                                                        )
+                                                    }
                                                 >
                                                     Sửa
                                                 </Button>
@@ -230,8 +242,12 @@ const Services = () => {
                                                     color="danger"
                                                     size="sm"
                                                     onClick={() => {
-                                                        setServiceIdToDelete(service.serviceId);
-                                                        setConfirmationModal(true);
+                                                        setServiceIdToDelete(
+                                                            service.serviceId
+                                                        );
+                                                        setConfirmationModal(
+                                                            true
+                                                        );
                                                     }}
                                                 >
                                                     Xóa
@@ -251,7 +267,9 @@ const Services = () => {
                             marginPagesDisplayed={2}
                             pageRangeDisplayed={5}
                             onPageChange={handlePageClick}
-                            containerClassName={"pagination justify-content-center"}
+                            containerClassName={
+                                "pagination justify-content-center"
+                            }
                             pageClassName={"page-item"}
                             pageLinkClassName={"page-link"}
                             previousClassName={"page-item"}
@@ -266,7 +284,10 @@ const Services = () => {
                 </Card>
 
                 {/* Add Service Modal */}
-                <Modal isOpen={addServiceModal} toggle={() => setAddServiceModal(false)}>
+                <Modal
+                    isOpen={addServiceModal}
+                    toggle={() => setAddServiceModal(false)}
+                >
                     <ModalHeader toggle={() => setAddServiceModal(false)}>
                         Thêm dịch vụ mới
                     </ModalHeader>
@@ -277,7 +298,12 @@ const Services = () => {
                                 type="text"
                                 className="form-control"
                                 value={newService.name}
-                                onChange={(e) => setNewService({ ...newService, name: e.target.value })}
+                                onChange={(e) =>
+                                    setNewService({
+                                        ...newService,
+                                        name: e.target.value,
+                                    })
+                                }
                             />
                         </div>
                         <div className="mb-3">
@@ -285,7 +311,12 @@ const Services = () => {
                             <textarea
                                 className="form-control"
                                 value={newService.description}
-                                onChange={(e) => setNewService({ ...newService, description: e.target.value })}
+                                onChange={(e) =>
+                                    setNewService({
+                                        ...newService,
+                                        description: e.target.value,
+                                    })
+                                }
                             />
                         </div>
                         <div className="mb-3">
@@ -294,7 +325,12 @@ const Services = () => {
                                 type="text"
                                 className="form-control"
                                 value={newService.image}
-                                onChange={(e) => setNewService({ ...newService, image: e.target.value })}
+                                onChange={(e) =>
+                                    setNewService({
+                                        ...newService,
+                                        image: e.target.value,
+                                    })
+                                }
                             />
                         </div>
                         <div className="mb-3">
@@ -302,11 +338,19 @@ const Services = () => {
                             <select
                                 className="form-control"
                                 value={newService.categoryId}
-                                onChange={(e) => setNewService({ ...newService, categoryId: parseInt(e.target.value) })}
+                                onChange={(e) =>
+                                    setNewService({
+                                        ...newService,
+                                        categoryId: parseInt(e.target.value),
+                                    })
+                                }
                             >
                                 <option value="">Chọn danh mục</option>
                                 {categories.map((category) => (
-                                    <option key={category.categoryId} value={category.categoryId}>
+                                    <option
+                                        key={category.categoryId}
+                                        value={category.categoryId}
+                                    >
                                         {category.name}
                                     </option>
                                 ))}
@@ -318,25 +362,42 @@ const Services = () => {
                                 type="number"
                                 className="form-control"
                                 value={newService.price}
-                                onChange={(e) => setNewService({ ...newService, price: parseFloat(e.target.value) })}
+                                onChange={(e) =>
+                                    setNewService({
+                                        ...newService,
+                                        price: parseFloat(e.target.value),
+                                    })
+                                }
                             />
                         </div>
                         {error.map((err, index) => (
-                            <div key={index} className="text-danger">{err}</div>
+                            <div key={index} className="text-danger">
+                                {err}
+                            </div>
                         ))}
                     </ModalBody>
                     <ModalFooter>
-                        <Button color="primary" onClick={handleAddService} disabled={loading}>
+                        <Button
+                            color="primary"
+                            onClick={handleAddService}
+                            disabled={loading}
+                        >
                             {loading ? "Đang xử lý..." : "Thêm"}
                         </Button>
-                        <Button color="secondary" onClick={() => setAddServiceModal(false)}>
+                        <Button
+                            color="secondary"
+                            onClick={() => setAddServiceModal(false)}
+                        >
                             Hủy
                         </Button>
                     </ModalFooter>
                 </Modal>
 
                 {/* Edit Service Modal */}
-                <Modal isOpen={editServiceModal} toggle={() => setEditServiceModal(false)}>
+                <Modal
+                    isOpen={editServiceModal}
+                    toggle={() => setEditServiceModal(false)}
+                >
                     <ModalHeader toggle={() => setEditServiceModal(false)}>
                         Chỉnh sửa dịch vụ
                     </ModalHeader>
@@ -347,7 +408,12 @@ const Services = () => {
                                 type="text"
                                 className="form-control"
                                 value={editService.name}
-                                onChange={(e) => setEditService({ ...editService, name: e.target.value })}
+                                onChange={(e) =>
+                                    setEditService({
+                                        ...editService,
+                                        name: e.target.value,
+                                    })
+                                }
                             />
                         </div>
                         <div className="mb-3">
@@ -355,7 +421,12 @@ const Services = () => {
                             <textarea
                                 className="form-control"
                                 value={editService.description}
-                                onChange={(e) => setEditService({ ...editService, description: e.target.value })}
+                                onChange={(e) =>
+                                    setEditService({
+                                        ...editService,
+                                        description: e.target.value,
+                                    })
+                                }
                             />
                         </div>
                         <div className="mb-3">
@@ -364,7 +435,12 @@ const Services = () => {
                                 type="text"
                                 className="form-control"
                                 value={editService.image}
-                                onChange={(e) => setEditService({ ...editService, image: e.target.value })}
+                                onChange={(e) =>
+                                    setEditService({
+                                        ...editService,
+                                        image: e.target.value,
+                                    })
+                                }
                             />
                         </div>
                         <div className="mb-3">
@@ -372,11 +448,19 @@ const Services = () => {
                             <select
                                 className="form-control"
                                 value={editService.categoryId}
-                                onChange={(e) => setEditService({ ...editService, categoryId: parseInt(e.target.value) })}
+                                onChange={(e) =>
+                                    setEditService({
+                                        ...editService,
+                                        categoryId: parseInt(e.target.value),
+                                    })
+                                }
                             >
                                 <option value="">Chọn danh mục</option>
                                 {categories.map((category) => (
-                                    <option key={category.categoryId} value={category.categoryId}>
+                                    <option
+                                        key={category.categoryId}
+                                        value={category.categoryId}
+                                    >
                                         {category.name}
                                     </option>
                                 ))}
@@ -388,22 +472,37 @@ const Services = () => {
                                 type="number"
                                 className="form-control"
                                 value={editService.price}
-                                onChange={(e) => setEditService({ ...editService, price: parseFloat(e.target.value) })}
+                                onChange={(e) =>
+                                    setEditService({
+                                        ...editService,
+                                        price: parseFloat(e.target.value),
+                                    })
+                                }
                             />
                         </div>
                     </ModalBody>
                     <ModalFooter>
-                        <Button color="primary" onClick={handleUpdateService} disabled={loading}>
+                        <Button
+                            color="primary"
+                            onClick={handleUpdateService}
+                            disabled={loading}
+                        >
                             {loading ? "Đang xử lý..." : "Cập nhật"}
                         </Button>
-                        <Button color="secondary" onClick={() => setEditServiceModal(false)}>
+                        <Button
+                            color="secondary"
+                            onClick={() => setEditServiceModal(false)}
+                        >
                             Hủy
                         </Button>
                     </ModalFooter>
                 </Modal>
 
                 {/* Confirmation Modal */}
-                <Modal isOpen={confirmationModal} toggle={() => setConfirmationModal(false)}>
+                <Modal
+                    isOpen={confirmationModal}
+                    toggle={() => setConfirmationModal(false)}
+                >
                     <ModalHeader toggle={() => setConfirmationModal(false)}>
                         Xác nhận xóa
                     </ModalHeader>
@@ -411,17 +510,27 @@ const Services = () => {
                         Bạn có chắc chắn muốn xóa dịch vụ này?
                     </ModalBody>
                     <ModalFooter>
-                        <Button color="danger" onClick={handleDeleteService} disabled={loading}>
+                        <Button
+                            color="danger"
+                            onClick={handleDeleteService}
+                            disabled={loading}
+                        >
                             {loading ? "Đang xử lý..." : "Xóa"}
                         </Button>
-                        <Button color="secondary" onClick={() => setConfirmationModal(false)}>
+                        <Button
+                            color="secondary"
+                            onClick={() => setConfirmationModal(false)}
+                        >
                             Hủy
                         </Button>
                     </ModalFooter>
                 </Modal>
 
                 {/* Success Modal */}
-                <Modal isOpen={successModal} toggle={() => setSuccessModal(false)}>
+                <Modal
+                    isOpen={successModal}
+                    toggle={() => setSuccessModal(false)}
+                >
                     <ModalBody>
                         <div className="text-center text-success">
                             <i className="bi bi-check-circle-fill fs-1"></i>
@@ -429,7 +538,10 @@ const Services = () => {
                         </div>
                     </ModalBody>
                     <ModalFooter>
-                        <Button color="primary" onClick={() => setSuccessModal(false)}>
+                        <Button
+                            color="primary"
+                            onClick={() => setSuccessModal(false)}
+                        >
                             Đóng
                         </Button>
                     </ModalFooter>
@@ -439,4 +551,4 @@ const Services = () => {
     );
 };
 
-export default Services; 
+export default Services;

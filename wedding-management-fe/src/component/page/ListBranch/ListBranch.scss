@@ -125,32 +125,59 @@
         .modal-content {
             border-radius: 15px;
             overflow: hidden;
+            background-color: #ffffff;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         }
 
         .modal-header {
             background: linear-gradient(90deg, #fe8e5c 0%, #f5576c 100%);
             color: white;
+            border-bottom: none;
+            padding: 20px;
+        }
+
+        .modal-body {
+            padding: 20px;
+            background-color: #f8f9fa;
         }
 
         .feedback-list {
-            max-height: 400px;
+            max-height: 300px;
             overflow-y: auto;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
 
             .feedback-item {
-                background: #f8f9fa;
+                background: #ffffff;
                 border-radius: 10px;
-                padding: 20px;
-                margin-bottom: 15px;
+                padding: 15px;
+                margin-bottom: 10px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 
                 .feedback-header {
                     display: flex;
                     justify-content: space-between;
+                    align-items: center;
                     margin-bottom: 10px;
 
-                    .user-email {
-                        font-weight: 600;
-                        color: #333;
+                    .user-info {
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+
+                        .user-name {
+                            font-weight: 600;
+                            color: #333;
+                        }
+
+                        .text-warning {
+                            display: flex;
+                            align-items: center;
+                            
+                            .bi {
+                                color: #ffd700;
+                                margin-right: 5px;
+                            }
+                        }
                     }
 
                     .feedback-date {
@@ -160,15 +187,12 @@
                 }
 
                 .feedback-content {
+                    display: flex;
+                    align-items: center;
                     color: #444;
 
-                    .star {
-                        color: #ffd700;
-                        margin-right: 5px;
-
-                        &.empty {
-                            color: #ddd;
-                        }
+                    .content-text {
+                        flex: 1;
                     }
                 }
             }
@@ -180,13 +204,12 @@
                 margin-bottom: 15px;
             }
 
-            .feedback-textarea {
+            .feedback-input {
                 width: 100%;
-                padding: 15px;
+                padding: 10px;
                 border: 1px solid #ddd;
                 border-radius: 8px;
                 margin-bottom: 20px;
-                resize: vertical;
 
                 &:focus {
                     border-color: #fe8e5c;
@@ -199,27 +222,10 @@
                 align-items: center;
                 justify-content: space-between;
 
-                .star {
-                    font-size: 24px;
-                    cursor: pointer;
-
-                    &.empty {
-                        color: #ddd;
-                    }
-
-                    &.full {
-                        color: #ffd700;
-                    }
-                }
-
                 .submit-button {
-                    background: linear-gradient(
-                        90deg,
-                        #fe8e5c 0%,
-                        #f5576c 100%
-                    );
+                    background: linear-gradient(90deg, #fe8e5c 0%, #f5576c 100%);
                     border: none;
-                    padding: 10px 30px;
+                    padding: 10px 20px;
                     border-radius: 8px;
                     color: white;
                     font-weight: 600;

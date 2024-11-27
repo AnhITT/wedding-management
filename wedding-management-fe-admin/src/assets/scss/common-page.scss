@@ -1,0 +1,332 @@
+.page-container {
+    padding: 1.5rem;
+    background-color: #f8fafc;
+    min-height: 100vh;
+}
+
+.page-header {
+    padding: 1rem 0;
+}
+
+.page-title {
+    color: #1a202c;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 1.75rem;
+    display: flex;
+    align-items: center;
+
+    i {
+        color: #4a5568;
+        margin-right: 0.75rem;
+    }
+}
+
+.text-muted {
+    color: #718096 !important;
+}
+
+.main-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+    background-color: white;
+}
+
+/* Search Box Styles */
+.search-box {
+    position: relative;
+    width: 300px;
+
+    .search-icon {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #a0aec0;
+    }
+
+    .search-input {
+        padding-left: 35px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        transition: all 0.3s ease;
+
+        &:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+    }
+}
+
+/* Add Button Styles */
+.add-button {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+
+    &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+    }
+}
+
+/* Table Styles */
+.table-container {
+    .table {
+        margin-bottom: 0;
+
+        thead th {
+            background-color: #f8fafc;
+            color: #4a5568;
+            font-weight: 600;
+            border-bottom: 2px solid #e2e8f0;
+            padding: 1rem;
+            white-space: nowrap;
+        }
+
+        tbody {
+            td {
+                padding: 1rem;
+                vertical-align: middle;
+                border-bottom: 1px solid #e2e8f0;
+            }
+
+            tr:hover {
+                background-color: #f8fafc;
+            }
+        }
+    }
+}
+
+/* Image Styles */
+.item-image {
+    width: 100px;
+    height: 60px;
+    border-radius: 8px;
+    overflow: hidden;
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+}
+
+/* Item Info Styles */
+.item-name {
+    font-weight: 500;
+    color: #2d3748;
+}
+
+.item-description {
+    color: #718096;
+    font-size: 0.875rem;
+}
+
+.item-price {
+    font-weight: 600;
+    color: #2d3748;
+}
+
+/* Status Badge Styles */
+.status-badge {
+    padding: 0.5em 0.8em;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+
+    &.active {
+        background-color: #c6f6d5;
+        color: #2f855a;
+    }
+
+    &.locked {
+        background-color: #fed7d7;
+        color: #c53030;
+    }
+}
+
+/* Action Buttons Styles */
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+
+    .btn-action {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+
+        &.btn-info {
+            background-color: #ebf8ff;
+            color: #3182ce;
+            border: none;
+
+            &:hover {
+                background-color: #bee3f8;
+                color: #2c5282;
+            }
+        }
+
+        &.btn-danger {
+            background-color: #fff5f5;
+            color: #e53e3e;
+            border: none;
+
+            &:hover {
+                background-color: #fed7d7;
+                color: #c53030;
+            }
+        }
+    }
+}
+
+/* Modal Styles */
+.modal-content {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+
+    .modal-header {
+        border-bottom: 1px solid #e2e8f0;
+        padding: 1.25rem;
+
+        .modal-title {
+            font-weight: 600;
+            color: #2d3748;
+        }
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+
+        .form-label {
+            font-weight: 500;
+            color: #4a5568;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            padding: 0.625rem 0.875rem;
+
+            &:focus {
+                border-color: #667eea;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            }
+        }
+
+        .text-danger {
+            color: #e53e3e;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+    }
+
+    .modal-footer {
+        border-top: 1px solid #e2e8f0;
+        padding: 1.25rem;
+    }
+}
+
+/* Pagination Styles */
+.pagination {
+    margin-top: 1.5rem;
+    margin-bottom: 0;
+
+    .page-link {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #4a5568;
+        border: 1px solid #e2e8f0;
+        margin: 0 2px;
+        border-radius: 6px;
+        padding: 0;
+
+        &:hover {
+            background-color: #f8fafc;
+            color: #2d3748;
+            border-color: #cbd5e0;
+        }
+    }
+
+    .page-item.active .page-link {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-color: transparent;
+    }
+}
+
+/* Loading Spinner */
+.loading-container {
+    text-align: center;
+    padding: 3rem;
+
+    .spinner-border {
+        width: 3rem;
+        height: 3rem;
+        color: #667eea;
+    }
+
+    .loading-text {
+        margin-top: 1rem;
+        color: #4a5568;
+    }
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .page-container {
+        padding: 1rem;
+    }
+
+    .page-title {
+        font-size: 1.5rem;
+    }
+
+    .search-box {
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+
+    .add-button {
+        width: 100%;
+    }
+
+    .item-image {
+        width: 80px;
+        height: 48px;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+
+        .btn-action {
+            width: 100%;
+        }
+    }
+
+    .table-container {
+        .table {
+            thead th {
+                padding: 0.75rem;
+            }
+
+            tbody td {
+                padding: 0.75rem;
+            }
+        }
+    }
+} 

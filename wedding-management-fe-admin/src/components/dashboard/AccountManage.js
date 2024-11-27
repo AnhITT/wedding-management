@@ -1,7 +1,6 @@
 import { Card, CardBody, CardTitle, Button, Table } from "reactstrap";
 import React, { useEffect, useState } from "react";
 import ReactPaginate from "react-paginate";
-import "../../assets/scss/paging.css";
 import { Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
 import { accountApi } from "../../api/account";
 
@@ -19,12 +18,12 @@ const AccountManage = () => {
     const [successMessage, setSuccessMessage] = useState("");
 
     const [newUser, setNewUser] = useState({
-        email: "",
-        password: "",
-        firstName: "",
-        lastName: "",
-        phoneNumber: "",
-        roles: []
+        email: "user@gmail.com",
+        password: "Test@123456",
+        firstName: "Nguyễn",
+        lastName: "Văn",
+        phoneNumber: "0999999999",
+        roles: ["user"],
     });
 
     const [editUser, setEditUser] = useState({
@@ -33,7 +32,7 @@ const AccountManage = () => {
         lastName: "",
         email: "",
         phoneNumber: "",
-        roles: []
+        roles: [],
     });
     const [editUserModal, setEditUserModal] = useState(false);
 
@@ -68,7 +67,9 @@ const AccountManage = () => {
         const filteredResults = users.filter(
             (user) =>
                 user.email.toLowerCase().includes(term) ||
-                `${user.firstName} ${user.lastName}`.toLowerCase().includes(term)
+                `${user.firstName} ${user.lastName}`
+                    .toLowerCase()
+                    .includes(term)
         );
         setSearchResults(filteredResults);
     };
@@ -84,7 +85,9 @@ const AccountManage = () => {
         if (!newUser.password) {
             errors.push("Mật khẩu là bắt buộc");
         } else if (!isValidPassword(newUser.password)) {
-            errors.push("Mật khẩu phải có ít nhất 6 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt");
+            errors.push(
+                "Mật khẩu phải có ít nhất 6 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt"
+            );
         }
 
         if (!newUser.firstName) errors.push("Họ là bắt buộc");
@@ -100,7 +103,20 @@ const AccountManage = () => {
     };
 
     const isValidPassword = (password) => {
-        return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/.test(password);
+        return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/.test(
+            password
+        );
+    };
+
+    const resetNewUserForm = () => {
+        setNewUser({
+            email: "user@gmail.com",
+            password: "Test@123456",
+            firstName: "Nguyễn",
+            lastName: "Văn",
+            phoneNumber: "0999999999",
+            roles: ["user"],
+        });
     };
 
     const handleAddUser = async () => {
@@ -113,16 +129,44 @@ const AccountManage = () => {
             setSuccessModal(true);
             setAddUserModal(false);
             fetchUsers();
-            setNewUser({
-                email: "",
-                password: "",
-                firstName: "",
-                lastName: "",
-                phoneNumber: "",
-                roles: []
-            });
+            resetNewUserForm();
         } catch (error) {
-            setError([error.response?.data?.message || "Lỗi khi thêm người dùng"]);
+            if (error.response?.data) {
+                const errorData = error.response.data;
+                if (Array.isArray(errorData)) {
+                    const errorMessages = errorData.map((err) => {
+                        switch (err.code) {
+                            case "DuplicateUserName":
+                                return `Email '${
+                                    err.description.split("'")[1]
+                                }' đã được sử dụng.`;
+                            case "DuplicateEmail":
+                                return `Email này đã được đăng ký.`;
+                            case "PasswordTooShort":
+                                return "Mật khẩu quá ngắn.";
+                            case "PasswordRequiresNonAlphanumeric":
+                                return "Mật khẩu phải chứa ký tự đặc biệt.";
+                            case "PasswordRequiresDigit":
+                                return "Mật khẩu phải chứa ít nhất một số.";
+                            case "PasswordRequiresUpper":
+                                return "Mật khẩu phải chứa ít nhất một chữ hoa.";
+                            case "PasswordRequiresLower":
+                                return "Mật khẩu phải chứa ít nhất một chữ thường.";
+                            default:
+                                return err.description || "Lỗi không xác định.";
+                        }
+                    });
+                    setError(errorMessages);
+                } else if (typeof errorData === "string") {
+                    setError([errorData]);
+                } else if (errorData.message) {
+                    setError([errorData.message]);
+                } else {
+                    setError(["Có lỗi xảy ra khi thêm người dùng"]);
+                }
+            } else {
+                setError(["Có lỗi xảy ra khi kết nối đến server"]);
+            }
         } finally {
             setLoading(false);
         }
@@ -137,7 +181,7 @@ const AccountManage = () => {
                 lastName: user.lastName,
                 email: user.email,
                 phoneNumber: user.phoneNumber,
-                roles: user.roles
+                roles: user.roles || [],
             });
             setEditUserModal(true);
         } catch (error) {
@@ -148,13 +192,21 @@ const AccountManage = () => {
     const handleUpdateUser = async () => {
         try {
             setLoading(true);
-            await accountApi.update(editUser.id, editUser);
+            await accountApi.update(editUser.id, {
+                firstName: editUser.firstName,
+                lastName: editUser.lastName,
+                email: editUser.email,
+                phoneNumber: editUser.phoneNumber,
+                roles: editUser.roles,
+            });
             setSuccessMessage("Cập nhật thông tin thành công!");
             setSuccessModal(true);
             setEditUserModal(false);
             fetchUsers();
         } catch (error) {
-            setError([error.response?.data?.message || "Lỗi khi cập nhật thông tin"]);
+            setError([
+                error.response?.data?.message || "Lỗi khi cập nhật thông tin",
+            ]);
         } finally {
             setLoading(false);
         }
@@ -169,7 +221,9 @@ const AccountManage = () => {
             setConfirmationModal(false);
             fetchUsers();
         } catch (error) {
-            setError([error.response?.data?.message || "Lỗi khi xóa người dùng"]);
+            setError([
+                error.response?.data?.message || "Lỗi khi xóa người dùng",
+            ]);
         } finally {
             setLoading(false);
         }
@@ -179,25 +233,21 @@ const AccountManage = () => {
 
     const getRoleBadgeColor = (role) => {
         switch (role.toLowerCase()) {
-            case 'admin':
-                return 'danger';
-            case 'employee':
-                return 'success';
-            case 'administrator system':
-                return 'primary';
+            case "admin":
+                return "danger";
+            case "user":
+                return "success";
             default:
-                return 'secondary';
+                return "secondary";
         }
     };
 
     const formatRoleName = (role) => {
         switch (role.toLowerCase()) {
-            case 'admin':
-                return 'Quản trị viên';
-            case 'employee':
-                return 'Nhân viên';
-            case 'administrator system':
-                return 'Quản trị hệ thống';
+            case "admin":
+                return "Quản trị viên";
+            case "user":
+                return "Khách hàng";
             default:
                 return role;
         }
@@ -246,9 +296,11 @@ const AccountManage = () => {
                                         <td>{user.phoneNumber}</td>
                                         <td>
                                             {user.roles?.map((role, index) => (
-                                                <span 
-                                                    key={index} 
-                                                    className={`badge bg-${getRoleBadgeColor(role)} me-1`}
+                                                <span
+                                                    key={index}
+                                                    className={`badge bg-${getRoleBadgeColor(
+                                                        role
+                                                    )} me-1`}
                                                 >
                                                     {formatRoleName(role)}
                                                 </span>
@@ -259,7 +311,9 @@ const AccountManage = () => {
                                                 color="info"
                                                 size="sm"
                                                 className="me-2"
-                                                onClick={() => handleEditUser(user.id)}
+                                                onClick={() =>
+                                                    handleEditUser(user.id)
+                                                }
                                             >
                                                 Sửa
                                             </Button>
@@ -314,7 +368,12 @@ const AccountManage = () => {
                             type="email"
                             className="form-control"
                             value={newUser.email}
-                            onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                            onChange={(e) =>
+                                setNewUser({
+                                    ...newUser,
+                                    email: e.target.value,
+                                })
+                            }
                         />
                     </div>
                     <div className="mb-3">
@@ -323,7 +382,12 @@ const AccountManage = () => {
                             type="password"
                             className="form-control"
                             value={newUser.password}
-                            onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                            onChange={(e) =>
+                                setNewUser({
+                                    ...newUser,
+                                    password: e.target.value,
+                                })
+                            }
                         />
                     </div>
                     <div className="mb-3">
@@ -332,7 +396,12 @@ const AccountManage = () => {
                             type="text"
                             className="form-control"
                             value={newUser.firstName}
-                            onChange={(e) => setNewUser({ ...newUser, firstName: e.target.value })}
+                            onChange={(e) =>
+                                setNewUser({
+                                    ...newUser,
+                                    firstName: e.target.value,
+                                })
+                            }
                         />
                     </div>
                     <div className="mb-3">
@@ -341,7 +410,12 @@ const AccountManage = () => {
                             type="text"
                             className="form-control"
                             value={newUser.lastName}
-                            onChange={(e) => setNewUser({ ...newUser, lastName: e.target.value })}
+                            onChange={(e) =>
+                                setNewUser({
+                                    ...newUser,
+                                    lastName: e.target.value,
+                                })
+                            }
                         />
                     </div>
                     <div className="mb-3">
@@ -350,41 +424,58 @@ const AccountManage = () => {
                             type="text"
                             className="form-control"
                             value={newUser.phoneNumber}
-                            onChange={(e) => setNewUser({ ...newUser, phoneNumber: e.target.value })}
+                            onChange={(e) =>
+                                setNewUser({
+                                    ...newUser,
+                                    phoneNumber: e.target.value,
+                                })
+                            }
                         />
                     </div>
                     <div className="mb-3">
                         <label className="form-label">Vai trò</label>
                         <select
                             className="form-control"
-                            multiple
                             value={newUser.roles}
                             onChange={(e) => {
-                                const selectedRoles = Array.from(e.target.selectedOptions, option => option.value);
-                                setNewUser({ ...newUser, roles: selectedRoles });
+                                setNewUser({
+                                    ...newUser,
+                                    roles: [e.target.value],
+                                });
                             }}
                         >
+                            <option value="user">Khách hàng</option>
                             <option value="admin">Quản trị viên</option>
-                            <option value="employee">Nhân viên</option>
-                            <option value="administrator system">Quản trị hệ thống</option>
                         </select>
                     </div>
                     {error.map((err, index) => (
-                        <div key={index} className="text-danger">{err}</div>
+                        <div key={index} className="text-danger">
+                            {err}
+                        </div>
                     ))}
                 </ModalBody>
                 <ModalFooter>
-                    <Button color="primary" onClick={handleAddUser} disabled={loading}>
+                    <Button
+                        color="primary"
+                        onClick={handleAddUser}
+                        disabled={loading}
+                    >
                         {loading ? "Đang xử lý..." : "Thêm"}
                     </Button>
-                    <Button color="secondary" onClick={() => setAddUserModal(false)}>
+                    <Button
+                        color="secondary"
+                        onClick={() => setAddUserModal(false)}
+                    >
                         Hủy
                     </Button>
                 </ModalFooter>
             </Modal>
 
             {/* Edit User Modal */}
-            <Modal isOpen={editUserModal} toggle={() => setEditUserModal(false)}>
+            <Modal
+                isOpen={editUserModal}
+                toggle={() => setEditUserModal(false)}
+            >
                 <ModalHeader toggle={() => setEditUserModal(false)}>
                     Chỉnh sửa thông tin người dùng
                 </ModalHeader>
@@ -395,7 +486,12 @@ const AccountManage = () => {
                             type="email"
                             className="form-control"
                             value={editUser.email}
-                            onChange={(e) => setEditUser({ ...editUser, email: e.target.value })}
+                            onChange={(e) =>
+                                setEditUser({
+                                    ...editUser,
+                                    email: e.target.value,
+                                })
+                            }
                         />
                     </div>
                     <div className="mb-3">
@@ -404,7 +500,12 @@ const AccountManage = () => {
                             type="text"
                             className="form-control"
                             value={editUser.firstName}
-                            onChange={(e) => setEditUser({ ...editUser, firstName: e.target.value })}
+                            onChange={(e) =>
+                                setEditUser({
+                                    ...editUser,
+                                    firstName: e.target.value,
+                                })
+                            }
                         />
                     </div>
                     <div className="mb-3">
@@ -413,7 +514,12 @@ const AccountManage = () => {
                             type="text"
                             className="form-control"
                             value={editUser.lastName}
-                            onChange={(e) => setEditUser({ ...editUser, lastName: e.target.value })}
+                            onChange={(e) =>
+                                setEditUser({
+                                    ...editUser,
+                                    lastName: e.target.value,
+                                })
+                            }
                         />
                     </div>
                     <div className="mb-3">
@@ -422,49 +528,69 @@ const AccountManage = () => {
                             type="text"
                             className="form-control"
                             value={editUser.phoneNumber}
-                            onChange={(e) => setEditUser({ ...editUser, phoneNumber: e.target.value })}
+                            onChange={(e) =>
+                                setEditUser({
+                                    ...editUser,
+                                    phoneNumber: e.target.value,
+                                })
+                            }
                         />
                     </div>
                     <div className="mb-3">
                         <label className="form-label">Vai trò</label>
                         <select
                             className="form-control"
-                            multiple
-                            value={editUser.roles}
+                            value={editUser.roles[0]}
                             onChange={(e) => {
-                                const selectedRoles = Array.from(e.target.selectedOptions, option => option.value);
-                                setEditUser({ ...editUser, roles: selectedRoles });
+                                setEditUser({
+                                    ...editUser,
+                                    roles: [e.target.value],
+                                });
                             }}
                         >
+                            <option value="user">Khách hàng</option>
                             <option value="admin">Quản trị viên</option>
-                            <option value="employee">Nhân viên</option>
-                            <option value="administrator system">Quản trị hệ thống</option>
                         </select>
                     </div>
                 </ModalBody>
                 <ModalFooter>
-                    <Button color="primary" onClick={handleUpdateUser} disabled={loading}>
+                    <Button
+                        color="primary"
+                        onClick={handleUpdateUser}
+                        disabled={loading}
+                    >
                         {loading ? "Đang xử lý..." : "Cập nhật"}
                     </Button>
-                    <Button color="secondary" onClick={() => setEditUserModal(false)}>
+                    <Button
+                        color="secondary"
+                        onClick={() => setEditUserModal(false)}
+                    >
                         Hủy
                     </Button>
                 </ModalFooter>
             </Modal>
 
             {/* Confirmation Modal */}
-            <Modal isOpen={confirmationModal} toggle={() => setConfirmationModal(false)}>
+            <Modal
+                isOpen={confirmationModal}
+                toggle={() => setConfirmationModal(false)}
+            >
                 <ModalHeader toggle={() => setConfirmationModal(false)}>
                     Xác nhận xóa
                 </ModalHeader>
-                <ModalBody>
-                    Bạn có chắc chắn muốn xóa người dùng này?
-                </ModalBody>
+                <ModalBody>Bạn có chắc chắn muốn xóa người dùng này?</ModalBody>
                 <ModalFooter>
-                    <Button color="danger" onClick={handleDeleteUser} disabled={loading}>
+                    <Button
+                        color="danger"
+                        onClick={handleDeleteUser}
+                        disabled={loading}
+                    >
                         {loading ? "Đang xử lý..." : "Xóa"}
                     </Button>
-                    <Button color="secondary" onClick={() => setConfirmationModal(false)}>
+                    <Button
+                        color="secondary"
+                        onClick={() => setConfirmationModal(false)}
+                    >
                         Hủy
                     </Button>
                 </ModalFooter>
@@ -479,7 +605,10 @@ const AccountManage = () => {
                     </div>
                 </ModalBody>
                 <ModalFooter>
-                    <Button color="primary" onClick={() => setSuccessModal(false)}>
+                    <Button
+                        color="primary"
+                        onClick={() => setSuccessModal(false)}
+                    >
                         Đóng
                     </Button>
                 </ModalFooter>

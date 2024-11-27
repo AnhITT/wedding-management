@@ -93,6 +93,7 @@ namespace WebAPI.Controllers
             {
                 _currentInvoiceId = invoice.InvoiceID;
                 invoice.PaymentStatus = true;
+                invoice.OrderStatus = "Hoàn tất thanh toán";
                 _context.Update(invoice);
                 await _context.SaveChangesAsync();
                 SendMailPayment("HOÀN TẤT THANH TOÁN BẰNG VNPAY", invoice);
@@ -108,12 +109,16 @@ namespace WebAPI.Controllers
             var invoice =  _context.Invoice.FirstOrDefault(x => x.InvoiceID == id);
             if(invoice != null)
             {
-                if (!string.IsNullOrEmpty(invoice.OrderStatus))
+                if (invoice.OrderStatus == "Đã hủy đơn hàng")
                 {
                     return BadRequest(new { message = "Đã hủy đơn nên không thể thanh toán đầy đủ" });
                 }
+                if (invoice.OrderStatus == "Hoàn tất thanh toán")
+                {
+                    return BadRequest(new { message = "Đơn hàng đã được hoàn tất thanh toán" });
+                }
             }
-            return Ok(new { message = "Đã hủy đơn hàng" });
+            return Ok();
         }
 
         [HttpGet("/api/wallet/{userId}")]
@@ -212,6 +217,7 @@ namespace WebAPI.Controllers
                 PaymentStatus = false,
                 TimeHall = request.TimeHall,
                 DepositPayment = request.DepositPayment,
+                OrderStatus = "Đã đặt cọc"
             };
 
           
@@ -630,6 +636,278 @@ namespace WebAPI.Controllers
             return BadRequest("Mã giảm giá không hợp lệ hoặc đã hết lượt sử dụng.");
         }
 
-        
+        [HttpGet]
+        public async Task<IActionResult> GetAllInvoices()
+        {
+            try
+            {
+                var invoices = await _context.Invoice
+                    .Include(i => i.User)
+                    .Include(i => i.Branch)
+                    .Include(i => i.Hall)
+                    .Include(i => i.OrderMenus)
+                        .ThenInclude(om => om.MenuEntity)
+                    .Include(i => i.OrderServices)
+                        .ThenInclude(os => os.ServiceEntity)
+                    .Select(i => new
+                    {
+                        i.InvoiceID,
+                        i.InvoiceDate,
+                        i.AttendanceDate,
+                        i.TimeHall,
+                        i.Total,
+                        i.TotalBeforeDiscount,
+                        i.PaymentStatus,
+                        i.OrderStatus,
+                        i.DepositPayment,
+                        i.PaymentWallet,
+                        i.PaymentCompleteWallet,
+                        User = new
+                        {
+                            i.User.Id,
+                            i.User.Email,
+                            i.User.PhoneNumber,
+                            FullName = $"{i.User.FirstName} {i.User.LastName}"
+                        },
+                        Branch = new
+                        {
+                            i.Branch.BranchId,
+                            i.Branch.Name,
+                            i.Branch.Address
+                        },
+                        Hall = new
+                        {
+                            i.Hall.HallId,
+                            i.Hall.Name,
+                            i.Hall.Price
+                        },
+                        OrderMenus = i.OrderMenus.Select(om => new
+                        {
+                            om.MenuEntity.MenuId,
+                            om.MenuEntity.Name,
+                            om.MenuEntity.Price
+                        }),
+                        OrderServices = i.OrderServices.Select(os => new
+                        {
+                            os.ServiceEntity.ServiceId,
+                            os.ServiceEntity.Name,
+                            os.ServiceEntity.Price
+                        })
+                    })
+                    .OrderByDescending(i => i.InvoiceDate)
+                    .ToListAsync();
+
+                return Ok(invoices);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi khi lấy danh sách hóa đơn", error = ex.Message });
+            }
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetInvoiceById(int id)
+        {
+            try
+            {
+                var invoice = await _context.Invoice
+                    .Include(i => i.User)
+                    .Include(i => i.Branch)
+                    .Include(i => i.Hall)
+                    .Include(i => i.OrderMenus)
+                        .ThenInclude(om => om.MenuEntity)
+                    .Include(i => i.OrderServices)
+                        .ThenInclude(os => os.ServiceEntity)
+                    .Where(i => i.InvoiceID == id)
+                    .Select(i => new
+                    {
+                        i.InvoiceID,
+                        i.InvoiceDate,
+                        i.AttendanceDate,
+                        i.TimeHall,
+                        i.Total,
+                        i.TotalBeforeDiscount,
+                        i.PaymentStatus,
+                        i.OrderStatus,
+                        i.DepositPayment,
+                        i.PaymentWallet,
+                        i.PaymentCompleteWallet,
+                        User = new
+                        {
+                            i.User.Id,
+                            i.User.Email,
+                            i.User.PhoneNumber,
+                            FullName = $"{i.User.FirstName} {i.User.LastName}"
+                        },
+                        Branch = new
+                        {
+                            i.Branch.BranchId,
+                            i.Branch.Name,
+                            i.Branch.Address
+                        },
+                        Hall = new
+                        {
+                            i.Hall.HallId,
+                            i.Hall.Name,
+                            i.Hall.Price
+                        },
+                        OrderMenus = i.OrderMenus.Select(om => new
+                        {
+                            om.MenuEntity.MenuId,
+                            om.MenuEntity.Name,
+                            om.MenuEntity.Price
+                        }),
+                        OrderServices = i.OrderServices.Select(os => new
+                        {
+                            os.ServiceEntity.ServiceId,
+                            os.ServiceEntity.Name,
+                            os.ServiceEntity.Price
+                        })
+                    })
+                    .FirstOrDefaultAsync();
+
+                if (invoice == null)
+                {
+                    return NotFound(new { message = "Không tìm thấy hóa đơn" });
+                }
+
+                return Ok(invoice);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi khi lấy thông tin hóa đơn", error = ex.Message });
+            }
+        }
+
+        [HttpPut("{id}/update-status")]
+        public async Task<IActionResult> UpdateInvoiceStatus(int id, [FromBody] UpdateInvoiceStatusRequest request)
+        {
+            try
+            {
+                var invoice = await _context.Invoice.FindAsync(id);
+                if (invoice == null)
+                {
+                    return NotFound(new { message = "Không tìm thấy hóa đơn" });
+                }
+
+                // Cập nhật trạng thái thanh toán
+                if (request.PaymentStatus.HasValue)
+                {
+                    invoice.PaymentStatus = request.PaymentStatus.Value;
+                }
+
+                // Cập nhật trạng thái đơn hàng
+                if (!string.IsNullOrEmpty(request.OrderStatus))
+                {
+                    invoice.OrderStatus = request.OrderStatus;
+
+                    // Nếu hủy đơn, hoàn tiền vào ví
+                    if (request.OrderStatus == "Đã hủy")
+                    {
+                        var existingWallet = await _context.Wallet
+                            .FirstOrDefaultAsync(w => w.UserId == invoice.UserId);
+
+                        var refundAmount = invoice.PaymentStatus == true ? 
+                            invoice.Total : invoice.DepositPayment;
+
+                        if (existingWallet != null)
+                        {
+                            existingWallet.Coin = (existingWallet.Coin ?? 0) + refundAmount;
+                            _context.Update(existingWallet);
+                        }
+                        else
+                        {
+                            var wallet = new Wallet
+                            {
+                                UserId = invoice.UserId,
+                                Coin = refundAmount
+                            };
+                            _context.Add(wallet);
+                        }
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+
+                // Gửi email thông báo
+                if (request.PaymentStatus == true)
+                {
+                    SendMailPayment("HOÀN TẤT THANH TOÁN", invoice);
+                }
+
+                return Ok(new { message = "Cập nhật trạng thái hóa đơn thành công" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi khi cập nhật trạng thái hóa đơn", error = ex.Message });
+            }
+        }
+
+        [HttpGet("statistics")]
+        public async Task<IActionResult> GetInvoiceStatistics()
+        {
+            try
+            {
+                var today = DateTime.Today;
+                var firstDayOfMonth = new DateTime(today.Year, today.Month, 1);
+                var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
+
+                // Tổng số hóa đơn
+                var totalInvoices = await _context.Invoice.CountAsync();
+
+                // Tổng doanh thu
+                var totalRevenue = await _context.Invoice
+                    .Where(i => i.PaymentStatus == true)
+                    .SumAsync(i => i.Total) ?? 0;
+
+                // Doanh thu tháng hiện tại
+                var currentMonthRevenue = await _context.Invoice
+                    .Where(i => i.PaymentStatus == true &&
+                           i.InvoiceDate >= firstDayOfMonth &&
+                           i.InvoiceDate <= lastDayOfMonth)
+                    .SumAsync(i => i.Total) ?? 0;
+
+                // Số đơn chưa thanh toán
+                var unpaidInvoices = await _context.Invoice
+                    .CountAsync(i => i.PaymentStatus == false);
+
+                // Số đơn đã hủy
+                var cancelledInvoices = await _context.Invoice
+                    .CountAsync(i => i.OrderStatus == "Đã hủy");
+
+                // Doanh thu theo tháng trong năm hiện tại
+                var revenueByMonth = await _context.Invoice
+                    .Where(i => i.PaymentStatus == true &&
+                           i.InvoiceDate.Value.Year == today.Year)
+                    .GroupBy(i => i.InvoiceDate.Value.Month)
+                    .Select(g => new
+                    {
+                        Month = g.Key,
+                        Revenue = g.Sum(i => i.Total)
+                    })
+                    .OrderBy(x => x.Month)
+                    .ToListAsync();
+
+                return Ok(new
+                {
+                    totalInvoices,
+                    totalRevenue,
+                    currentMonthRevenue,
+                    unpaidInvoices,
+                    cancelledInvoices,
+                    revenueByMonth
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi khi lấy thống kê hóa đơn", error = ex.Message });
+            }
+        }
+
+        public class UpdateInvoiceStatusRequest
+        {
+            public bool? PaymentStatus { get; set; }
+            public string OrderStatus { get; set; }
+        }
     }
 }

@@ -36,7 +36,6 @@ const Header = () => {
     };
     const handleLogout = () => {
         AuthService.logout();
-        navigate("/login");
     };
     const toggleNotificationDropdown = () =>
         setNotificationDropdownOpen((prevState) => !prevState);

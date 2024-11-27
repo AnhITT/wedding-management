@@ -1,12 +1,14 @@
 import AccountManage from "../../components/dashboard/AccountManage";
-import React, { useState, useEffect } from "react";
-import { Row, Col, Table, Card, CardTitle, CardBody } from "reactstrap";
-import { GetAccountAPI } from "../../api/account";
+import React from "react";
+import { Row, Col, CardBody } from "reactstrap";
+
 const Accounts = () => {
     return (
         <Row>
             <Col lg="12">
-                <AccountManage />
+                <CardBody>
+                    <AccountManage />
+                </CardBody>
             </Col>
         </Row>
     );

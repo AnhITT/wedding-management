@@ -3,7 +3,6 @@ import { Row, Col, Table, Card, CardTitle, CardBody, Button } from "reactstrap";
 import { Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
 import ReactPaginate from "react-paginate";
 import { branchApi } from "../../api/branch";
-import "../../assets/scss/paging.css";
 
 const Branchs = () => {
     const [branches, setBranches] = useState([]);
@@ -24,7 +23,7 @@ const Branchs = () => {
         image: "",
         address: "",
         phone: "",
-        isLocked: false
+        isLocked: false,
     });
 
     const [editBranch, setEditBranch] = useState({
@@ -34,7 +33,7 @@ const Branchs = () => {
         image: "",
         address: "",
         phone: "",
-        isLocked: false
+        isLocked: false,
     });
     const [editBranchModal, setEditBranchModal] = useState(false);
 
@@ -101,10 +100,12 @@ const Branchs = () => {
                 image: "",
                 address: "",
                 phone: "",
-                isLocked: false
+                isLocked: false,
             });
         } catch (error) {
-            setError([error.response?.data?.message || "Lỗi khi thêm chi nhánh"]);
+            setError([
+                error.response?.data?.message || "Lỗi khi thêm chi nhánh",
+            ]);
         } finally {
             setLoading(false);
         }
@@ -120,7 +121,7 @@ const Branchs = () => {
                 image: branch.image,
                 address: branch.address,
                 phone: branch.phone,
-                isLocked: branch.isLocked
+                isLocked: branch.isLocked,
             });
             setEditBranchModal(true);
         } catch (error) {
@@ -137,7 +138,9 @@ const Branchs = () => {
             setEditBranchModal(false);
             fetchBranches();
         } catch (error) {
-            setError([error.response?.data?.message || "Lỗi khi cập nhật chi nhánh"]);
+            setError([
+                error.response?.data?.message || "Lỗi khi cập nhật chi nhánh",
+            ]);
         } finally {
             setLoading(false);
         }
@@ -152,7 +155,9 @@ const Branchs = () => {
             setConfirmationModal(false);
             fetchBranches();
         } catch (error) {
-            setError([error.response?.data?.message || "Lỗi khi xóa chi nhánh"]);
+            setError([
+                error.response?.data?.message || "Lỗi khi xóa chi nhánh",
+            ]);
         } finally {
             setLoading(false);
         }
@@ -201,18 +206,30 @@ const Branchs = () => {
                                     {displayItems.map((branch) => (
                                         <tr key={branch.branchId}>
                                             <td>
-                                                <img 
-                                                    src={branch.image} 
+                                                <img
+                                                    src={branch.image}
                                                     alt={branch.name}
-                                                    style={{ width: '100px', height: '60px', objectFit: 'cover' }}
+                                                    style={{
+                                                        width: "100px",
+                                                        height: "60px",
+                                                        objectFit: "cover",
+                                                    }}
                                                 />
                                             </td>
                                             <td>{branch.name}</td>
                                             <td>{branch.address}</td>
                                             <td>{branch.phone}</td>
                                             <td>
-                                                <span className={`badge ${branch.isLocked ? 'bg-danger' : 'bg-success'}`}>
-                                                    {branch.isLocked ? 'Đã khóa' : 'Đang hoạt động'}
+                                                <span
+                                                    className={`badge ${
+                                                        branch.isLocked
+                                                            ? "bg-danger"
+                                                            : "bg-success"
+                                                    }`}
+                                                >
+                                                    {branch.isLocked
+                                                        ? "Đã khóa"
+                                                        : "Đang hoạt động"}
                                                 </span>
                                             </td>
                                             <td>
@@ -220,7 +237,11 @@ const Branchs = () => {
                                                     color="info"
                                                     size="sm"
                                                     className="me-2"
-                                                    onClick={() => handleEditBranch(branch.branchId)}
+                                                    onClick={() =>
+                                                        handleEditBranch(
+                                                            branch.branchId
+                                                        )
+                                                    }
                                                 >
                                                     Sửa
                                                 </Button>
@@ -228,8 +249,12 @@ const Branchs = () => {
                                                     color="danger"
                                                     size="sm"
                                                     onClick={() => {
-                                                        setBranchIdToDelete(branch.branchId);
-                                                        setConfirmationModal(true);
+                                                        setBranchIdToDelete(
+                                                            branch.branchId
+                                                        );
+                                                        setConfirmationModal(
+                                                            true
+                                                        );
                                                     }}
                                                 >
                                                     Xóa
@@ -249,7 +274,9 @@ const Branchs = () => {
                             marginPagesDisplayed={2}
                             pageRangeDisplayed={5}
                             onPageChange={handlePageClick}
-                            containerClassName={"pagination justify-content-center"}
+                            containerClassName={
+                                "pagination justify-content-center"
+                            }
                             pageClassName={"page-item"}
                             pageLinkClassName={"page-link"}
                             previousClassName={"page-item"}
@@ -264,7 +291,10 @@ const Branchs = () => {
                 </Card>
 
                 {/* Add Branch Modal */}
-                <Modal isOpen={addBranchModal} toggle={() => setAddBranchModal(false)}>
+                <Modal
+                    isOpen={addBranchModal}
+                    toggle={() => setAddBranchModal(false)}
+                >
                     <ModalHeader toggle={() => setAddBranchModal(false)}>
                         Thêm chi nhánh mới
                     </ModalHeader>
@@ -275,7 +305,12 @@ const Branchs = () => {
                                 type="text"
                                 className="form-control"
                                 value={newBranch.name}
-                                onChange={(e) => setNewBranch({ ...newBranch, name: e.target.value })}
+                                onChange={(e) =>
+                                    setNewBranch({
+                                        ...newBranch,
+                                        name: e.target.value,
+                                    })
+                                }
                             />
                         </div>
                         <div className="mb-3">
@@ -283,7 +318,12 @@ const Branchs = () => {
                             <textarea
                                 className="form-control"
                                 value={newBranch.description}
-                                onChange={(e) => setNewBranch({ ...newBranch, description: e.target.value })}
+                                onChange={(e) =>
+                                    setNewBranch({
+                                        ...newBranch,
+                                        description: e.target.value,
+                                    })
+                                }
                             />
                         </div>
                         <div className="mb-3">
@@ -292,7 +332,12 @@ const Branchs = () => {
                                 type="text"
                                 className="form-control"
                                 value={newBranch.image}
-                                onChange={(e) => setNewBranch({ ...newBranch, image: e.target.value })}
+                                onChange={(e) =>
+                                    setNewBranch({
+                                        ...newBranch,
+                                        image: e.target.value,
+                                    })
+                                }
                             />
                         </div>
                         <div className="mb-3">
@@ -301,7 +346,12 @@ const Branchs = () => {
                                 type="text"
                                 className="form-control"
                                 value={newBranch.address}
-                                onChange={(e) => setNewBranch({ ...newBranch, address: e.target.value })}
+                                onChange={(e) =>
+                                    setNewBranch({
+                                        ...newBranch,
+                                        address: e.target.value,
+                                    })
+                                }
                             />
                         </div>
                         <div className="mb-3">
@@ -310,25 +360,42 @@ const Branchs = () => {
                                 type="text"
                                 className="form-control"
                                 value={newBranch.phone}
-                                onChange={(e) => setNewBranch({ ...newBranch, phone: e.target.value })}
+                                onChange={(e) =>
+                                    setNewBranch({
+                                        ...newBranch,
+                                        phone: e.target.value,
+                                    })
+                                }
                             />
                         </div>
                         {error.map((err, index) => (
-                            <div key={index} className="text-danger">{err}</div>
+                            <div key={index} className="text-danger">
+                                {err}
+                            </div>
                         ))}
                     </ModalBody>
                     <ModalFooter>
-                        <Button color="primary" onClick={handleAddBranch} disabled={loading}>
+                        <Button
+                            color="primary"
+                            onClick={handleAddBranch}
+                            disabled={loading}
+                        >
                             {loading ? "Đang xử lý..." : "Thêm"}
                         </Button>
-                        <Button color="secondary" onClick={() => setAddBranchModal(false)}>
+                        <Button
+                            color="secondary"
+                            onClick={() => setAddBranchModal(false)}
+                        >
                             Hủy
                         </Button>
                     </ModalFooter>
                 </Modal>
 
                 {/* Edit Branch Modal */}
-                <Modal isOpen={editBranchModal} toggle={() => setEditBranchModal(false)}>
+                <Modal
+                    isOpen={editBranchModal}
+                    toggle={() => setEditBranchModal(false)}
+                >
                     <ModalHeader toggle={() => setEditBranchModal(false)}>
                         Chỉnh sửa chi nhánh
                     </ModalHeader>
@@ -339,7 +406,12 @@ const Branchs = () => {
                                 type="text"
                                 className="form-control"
                                 value={editBranch.name}
-                                onChange={(e) => setEditBranch({ ...editBranch, name: e.target.value })}
+                                onChange={(e) =>
+                                    setEditBranch({
+                                        ...editBranch,
+                                        name: e.target.value,
+                                    })
+                                }
                             />
                         </div>
                         <div className="mb-3">
@@ -347,7 +419,12 @@ const Branchs = () => {
                             <textarea
                                 className="form-control"
                                 value={editBranch.description}
-                                onChange={(e) => setEditBranch({ ...editBranch, description: e.target.value })}
+                                onChange={(e) =>
+                                    setEditBranch({
+                                        ...editBranch,
+                                        description: e.target.value,
+                                    })
+                                }
                             />
                         </div>
                         <div className="mb-3">
@@ -356,7 +433,12 @@ const Branchs = () => {
                                 type="text"
                                 className="form-control"
                                 value={editBranch.image}
-                                onChange={(e) => setEditBranch({ ...editBranch, image: e.target.value })}
+                                onChange={(e) =>
+                                    setEditBranch({
+                                        ...editBranch,
+                                        image: e.target.value,
+                                    })
+                                }
                             />
                         </div>
                         <div className="mb-3">
@@ -365,7 +447,12 @@ const Branchs = () => {
                                 type="text"
                                 className="form-control"
                                 value={editBranch.address}
-                                onChange={(e) => setEditBranch({ ...editBranch, address: e.target.value })}
+                                onChange={(e) =>
+                                    setEditBranch({
+                                        ...editBranch,
+                                        address: e.target.value,
+                                    })
+                                }
                             />
                         </div>
                         <div className="mb-3">
@@ -374,7 +461,12 @@ const Branchs = () => {
                                 type="text"
                                 className="form-control"
                                 value={editBranch.phone}
-                                onChange={(e) => setEditBranch({ ...editBranch, phone: e.target.value })}
+                                onChange={(e) =>
+                                    setEditBranch({
+                                        ...editBranch,
+                                        phone: e.target.value,
+                                    })
+                                }
                             />
                         </div>
                         <div className="mb-3">
@@ -382,7 +474,12 @@ const Branchs = () => {
                             <select
                                 className="form-control"
                                 value={editBranch.isLocked}
-                                onChange={(e) => setEditBranch({ ...editBranch, isLocked: e.target.value === 'true' })}
+                                onChange={(e) =>
+                                    setEditBranch({
+                                        ...editBranch,
+                                        isLocked: e.target.value === "true",
+                                    })
+                                }
                             >
                                 <option value="false">Đang hoạt động</option>
                                 <option value="true">Khóa</option>
@@ -390,17 +487,27 @@ const Branchs = () => {
                         </div>
                     </ModalBody>
                     <ModalFooter>
-                        <Button color="primary" onClick={handleUpdateBranch} disabled={loading}>
+                        <Button
+                            color="primary"
+                            onClick={handleUpdateBranch}
+                            disabled={loading}
+                        >
                             {loading ? "Đang xử lý..." : "Cập nhật"}
                         </Button>
-                        <Button color="secondary" onClick={() => setEditBranchModal(false)}>
+                        <Button
+                            color="secondary"
+                            onClick={() => setEditBranchModal(false)}
+                        >
                             Hủy
                         </Button>
                     </ModalFooter>
                 </Modal>
 
                 {/* Confirmation Modal */}
-                <Modal isOpen={confirmationModal} toggle={() => setConfirmationModal(false)}>
+                <Modal
+                    isOpen={confirmationModal}
+                    toggle={() => setConfirmationModal(false)}
+                >
                     <ModalHeader toggle={() => setConfirmationModal(false)}>
                         Xác nhận xóa
                     </ModalHeader>
@@ -408,17 +515,27 @@ const Branchs = () => {
                         Bạn có chắc chắn muốn xóa chi nhánh này?
                     </ModalBody>
                     <ModalFooter>
-                        <Button color="danger" onClick={handleDeleteBranch} disabled={loading}>
+                        <Button
+                            color="danger"
+                            onClick={handleDeleteBranch}
+                            disabled={loading}
+                        >
                             {loading ? "Đang xử lý..." : "Xóa"}
                         </Button>
-                        <Button color="secondary" onClick={() => setConfirmationModal(false)}>
+                        <Button
+                            color="secondary"
+                            onClick={() => setConfirmationModal(false)}
+                        >
                             Hủy
                         </Button>
                     </ModalFooter>
                 </Modal>
 
                 {/* Success Modal */}
-                <Modal isOpen={successModal} toggle={() => setSuccessModal(false)}>
+                <Modal
+                    isOpen={successModal}
+                    toggle={() => setSuccessModal(false)}
+                >
                     <ModalBody>
                         <div className="text-center text-success">
                             <i className="bi bi-check-circle-fill fs-1"></i>
@@ -426,7 +543,10 @@ const Branchs = () => {
                         </div>
                     </ModalBody>
                     <ModalFooter>
-                        <Button color="primary" onClick={() => setSuccessModal(false)}>
+                        <Button
+                            color="primary"
+                            onClick={() => setSuccessModal(false)}
+                        >
                             Đóng
                         </Button>
                     </ModalFooter>

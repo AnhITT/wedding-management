@@ -8,6 +8,7 @@ import { ToastContainer, toast } from "react-toastify";
 import Rating from "react-rating";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar, faStarHalfAlt } from "@fortawesome/free-solid-svg-icons";
+import 'bootstrap-icons/font/bootstrap-icons.css';
 
 const ListBranch = () => {
     const [branches, setBranches] = useState([]);
@@ -43,6 +44,8 @@ const ListBranch = () => {
             .then((response) => response.json())
             .then((data) => {
                 setFeedbackData(data);
+        console.log("zx: ",  feedbackData);
+
             })
             .catch((error) => {
                 console.error("Lỗi khi tải danh sách phản hồi của chi nhánh:", error);
@@ -138,27 +141,30 @@ const ListBranch = () => {
                 size="lg"
                 className="feedback-modal"
             >
-                <Modal.Header closeButton>
+                <Modal.Header closeButton className="modal-header">
                     <Modal.Title>Phản Hồi Chi Nhánh</Modal.Title>
                 </Modal.Header>
-                <Modal.Body>
+                <Modal.Body className="modal-body">
                     <div className="feedback-list">
                         {feedbackData.map((feedback) => (
                             <div key={feedback.feedbackId} className="feedback-item">
                                 <div className="feedback-header">
-                                    <p className="user-email">{feedback.user.email}</p>
-                                    <p className="feedback-date">
+                                    <div className="user-info">
+                                        <span className="user-name">{`${feedback.user.firstName} ${feedback.user.lastName}`}</span>
+                                        <div className="text-warning">
+                                            {Array(Math.round(feedback.rating || 0))
+                                                .fill()
+                                                .map((_, i) => (
+                                                    <i key={i} className="bi bi-star-fill me-1"></i>
+                                                ))}
+                                        </div>
+                                    </div>
+                                    <span className="feedback-date">
                                         {new Date(feedback.feedbackDate).toLocaleString()}
-                                    </p>
+                                    </span>
                                 </div>
                                 <div className="feedback-content">
-                                    <p>{feedback.content}</p>
-                                    <Rating
-                                        initialRating={feedback.rating}
-                                        emptySymbol={<FaStar className="star empty" />}
-                                        fullSymbol={<FaStar className="star full" />}
-                                        readonly
-                                    />
+                                    <span className="content-text">{feedback.content}</span>
                                 </div>
                             </div>
                         ))}
@@ -166,12 +172,12 @@ const ListBranch = () => {
 
                     <div className="feedback-input-section">
                         <h4>Viết phản hồi của bạn</h4>
-                        <textarea
+                        <input
+                            type="text"
                             placeholder="Nhập phản hồi của bạn..."
-                            rows="4"
                             value={userFeedback}
                             onChange={(e) => setUserFeedback(e.target.value)}
-                            className="feedback-textarea"
+                            className="feedback-input"
                         />
                         <div className="rating-section">
                             <Rating

@@ -316,7 +316,15 @@ const History = () => {
             <div className="invoice-item" key={invoice.invoiceID} onClick={() => openModal(invoice)}>
               <div className="invoice-header">
                 <div className="invoice-id">Mã hóa đơn: {invoice.invoiceID}</div>
-                <div className={`status ${invoice.orderStatus === "Đã hủy đơn hàng" ? "cancelled" : ""}`}>
+                <div className={`status ${
+                    invoice.orderStatus === "Đã hủy đơn hàng" 
+                    ? "cancelled" 
+                    : invoice.orderStatus === "Hoàn tất thanh toán"
+                    ? "completed"
+                    : invoice.orderStatus === "Đã đặt cọc"
+                    ? "deposited"
+                    : ""
+                }`}>
                   {invoice.orderStatus}
                 </div>
               </div>

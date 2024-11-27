@@ -3,8 +3,6 @@ import { Row, Col, Table, Card, CardTitle, CardBody, Button } from "reactstrap";
 import { Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
 import ReactPaginate from "react-paginate";
 import { menuApi } from "../../api/menu";
-import { menuCategoryApi } from "../../api/menuCategory";
-import "../../assets/scss/paging.css";
 
 const Menus = () => {
     const [menus, setMenus] = useState([]);
@@ -25,7 +23,7 @@ const Menus = () => {
         description: "",
         price: 0,
         categoryId: "",
-        image: ""
+        image: "",
     });
 
     const [editMenu, setEditMenu] = useState({
@@ -34,7 +32,7 @@ const Menus = () => {
         description: "",
         price: 0,
         categoryId: "",
-        image: ""
+        image: "",
     });
     const [editMenuModal, setEditMenuModal] = useState(false);
 
@@ -110,7 +108,7 @@ const Menus = () => {
                 description: "",
                 price: 0,
                 categoryId: "",
-                image: ""
+                image: "",
             });
         } catch (error) {
             setError([error.response?.data?.message || "Lỗi khi thêm món ăn"]);
@@ -128,7 +126,7 @@ const Menus = () => {
                 description: menu.description,
                 price: menu.price,
                 categoryId: menu.categoryId,
-                image: menu.image
+                image: menu.image,
             });
             setEditMenuModal(true);
         } catch (error) {
@@ -145,7 +143,9 @@ const Menus = () => {
             setEditMenuModal(false);
             fetchMenus();
         } catch (error) {
-            setError([error.response?.data?.message || "Lỗi khi cập nhật món ăn"]);
+            setError([
+                error.response?.data?.message || "Lỗi khi cập nhật món ăn",
+            ]);
         } finally {
             setLoading(false);
         }
@@ -208,21 +208,32 @@ const Menus = () => {
                                     {displayItems.map((menu) => (
                                         <tr key={menu.menuId}>
                                             <td>
-                                                <img 
-                                                    src={menu.image} 
+                                                <img
+                                                    src={menu.image}
                                                     alt={menu.name}
-                                                    style={{ width: '100px', height: '60px', objectFit: 'cover' }}
+                                                    style={{
+                                                        width: "100px",
+                                                        height: "60px",
+                                                        objectFit: "cover",
+                                                    }}
                                                 />
                                             </td>
                                             <td>{menu.name}</td>
                                             <td>{menu.categoryName}</td>
-                                            <td>{menu.price.toLocaleString()} VND</td>
+                                            <td>
+                                                {menu.price.toLocaleString()}{" "}
+                                                VND
+                                            </td>
                                             <td>
                                                 <Button
                                                     color="info"
                                                     size="sm"
                                                     className="me-2"
-                                                    onClick={() => handleEditMenu(menu.menuId)}
+                                                    onClick={() =>
+                                                        handleEditMenu(
+                                                            menu.menuId
+                                                        )
+                                                    }
                                                 >
                                                     Sửa
                                                 </Button>
@@ -230,8 +241,12 @@ const Menus = () => {
                                                     color="danger"
                                                     size="sm"
                                                     onClick={() => {
-                                                        setMenuIdToDelete(menu.menuId);
-                                                        setConfirmationModal(true);
+                                                        setMenuIdToDelete(
+                                                            menu.menuId
+                                                        );
+                                                        setConfirmationModal(
+                                                            true
+                                                        );
                                                     }}
                                                 >
                                                     Xóa
@@ -251,7 +266,9 @@ const Menus = () => {
                             marginPagesDisplayed={2}
                             pageRangeDisplayed={5}
                             onPageChange={handlePageClick}
-                            containerClassName={"pagination justify-content-center"}
+                            containerClassName={
+                                "pagination justify-content-center"
+                            }
                             pageClassName={"page-item"}
                             pageLinkClassName={"page-link"}
                             previousClassName={"page-item"}
@@ -266,7 +283,10 @@ const Menus = () => {
                 </Card>
 
                 {/* Add Menu Modal */}
-                <Modal isOpen={addMenuModal} toggle={() => setAddMenuModal(false)}>
+                <Modal
+                    isOpen={addMenuModal}
+                    toggle={() => setAddMenuModal(false)}
+                >
                     <ModalHeader toggle={() => setAddMenuModal(false)}>
                         Thêm món ăn mới
                     </ModalHeader>
@@ -277,7 +297,12 @@ const Menus = () => {
                                 type="text"
                                 className="form-control"
                                 value={newMenu.name}
-                                onChange={(e) => setNewMenu({ ...newMenu, name: e.target.value })}
+                                onChange={(e) =>
+                                    setNewMenu({
+                                        ...newMenu,
+                                        name: e.target.value,
+                                    })
+                                }
                             />
                         </div>
                         <div className="mb-3">
@@ -285,7 +310,12 @@ const Menus = () => {
                             <textarea
                                 className="form-control"
                                 value={newMenu.description}
-                                onChange={(e) => setNewMenu({ ...newMenu, description: e.target.value })}
+                                onChange={(e) =>
+                                    setNewMenu({
+                                        ...newMenu,
+                                        description: e.target.value,
+                                    })
+                                }
                             />
                         </div>
                         <div className="mb-3">
@@ -294,7 +324,12 @@ const Menus = () => {
                                 type="text"
                                 className="form-control"
                                 value={newMenu.image}
-                                onChange={(e) => setNewMenu({ ...newMenu, image: e.target.value })}
+                                onChange={(e) =>
+                                    setNewMenu({
+                                        ...newMenu,
+                                        image: e.target.value,
+                                    })
+                                }
                             />
                         </div>
                         <div className="mb-3">
@@ -302,11 +337,19 @@ const Menus = () => {
                             <select
                                 className="form-control"
                                 value={newMenu.categoryId}
-                                onChange={(e) => setNewMenu({ ...newMenu, categoryId: parseInt(e.target.value) })}
+                                onChange={(e) =>
+                                    setNewMenu({
+                                        ...newMenu,
+                                        categoryId: parseInt(e.target.value),
+                                    })
+                                }
                             >
                                 <option value="">Chọn danh mục</option>
                                 {categories.map((category) => (
-                                    <option key={category.categoryId} value={category.categoryId}>
+                                    <option
+                                        key={category.categoryId}
+                                        value={category.categoryId}
+                                    >
                                         {category.name}
                                     </option>
                                 ))}
@@ -318,25 +361,42 @@ const Menus = () => {
                                 type="number"
                                 className="form-control"
                                 value={newMenu.price}
-                                onChange={(e) => setNewMenu({ ...newMenu, price: parseFloat(e.target.value) })}
+                                onChange={(e) =>
+                                    setNewMenu({
+                                        ...newMenu,
+                                        price: parseFloat(e.target.value),
+                                    })
+                                }
                             />
                         </div>
                         {error.map((err, index) => (
-                            <div key={index} className="text-danger">{err}</div>
+                            <div key={index} className="text-danger">
+                                {err}
+                            </div>
                         ))}
                     </ModalBody>
                     <ModalFooter>
-                        <Button color="primary" onClick={handleAddMenu} disabled={loading}>
+                        <Button
+                            color="primary"
+                            onClick={handleAddMenu}
+                            disabled={loading}
+                        >
                             {loading ? "Đang xử lý..." : "Thêm"}
                         </Button>
-                        <Button color="secondary" onClick={() => setAddMenuModal(false)}>
+                        <Button
+                            color="secondary"
+                            onClick={() => setAddMenuModal(false)}
+                        >
                             Hủy
                         </Button>
                     </ModalFooter>
                 </Modal>
 
                 {/* Edit Menu Modal */}
-                <Modal isOpen={editMenuModal} toggle={() => setEditMenuModal(false)}>
+                <Modal
+                    isOpen={editMenuModal}
+                    toggle={() => setEditMenuModal(false)}
+                >
                     <ModalHeader toggle={() => setEditMenuModal(false)}>
                         Chỉnh sửa món ăn
                     </ModalHeader>
@@ -347,7 +407,12 @@ const Menus = () => {
                                 type="text"
                                 className="form-control"
                                 value={editMenu.name}
-                                onChange={(e) => setEditMenu({ ...editMenu, name: e.target.value })}
+                                onChange={(e) =>
+                                    setEditMenu({
+                                        ...editMenu,
+                                        name: e.target.value,
+                                    })
+                                }
                             />
                         </div>
                         <div className="mb-3">
@@ -355,7 +420,12 @@ const Menus = () => {
                             <textarea
                                 className="form-control"
                                 value={editMenu.description}
-                                onChange={(e) => setEditMenu({ ...editMenu, description: e.target.value })}
+                                onChange={(e) =>
+                                    setEditMenu({
+                                        ...editMenu,
+                                        description: e.target.value,
+                                    })
+                                }
                             />
                         </div>
                         <div className="mb-3">
@@ -364,7 +434,12 @@ const Menus = () => {
                                 type="text"
                                 className="form-control"
                                 value={editMenu.image}
-                                onChange={(e) => setEditMenu({ ...editMenu, image: e.target.value })}
+                                onChange={(e) =>
+                                    setEditMenu({
+                                        ...editMenu,
+                                        image: e.target.value,
+                                    })
+                                }
                             />
                         </div>
                         <div className="mb-3">
@@ -372,11 +447,19 @@ const Menus = () => {
                             <select
                                 className="form-control"
                                 value={editMenu.categoryId}
-                                onChange={(e) => setEditMenu({ ...editMenu, categoryId: parseInt(e.target.value) })}
+                                onChange={(e) =>
+                                    setEditMenu({
+                                        ...editMenu,
+                                        categoryId: parseInt(e.target.value),
+                                    })
+                                }
                             >
                                 <option value="">Chọn danh mục</option>
                                 {categories.map((category) => (
-                                    <option key={category.categoryId} value={category.categoryId}>
+                                    <option
+                                        key={category.categoryId}
+                                        value={category.categoryId}
+                                    >
                                         {category.name}
                                     </option>
                                 ))}
@@ -388,40 +471,63 @@ const Menus = () => {
                                 type="number"
                                 className="form-control"
                                 value={editMenu.price}
-                                onChange={(e) => setEditMenu({ ...editMenu, price: parseFloat(e.target.value) })}
+                                onChange={(e) =>
+                                    setEditMenu({
+                                        ...editMenu,
+                                        price: parseFloat(e.target.value),
+                                    })
+                                }
                             />
                         </div>
                     </ModalBody>
                     <ModalFooter>
-                        <Button color="primary" onClick={handleUpdateMenu} disabled={loading}>
+                        <Button
+                            color="primary"
+                            onClick={handleUpdateMenu}
+                            disabled={loading}
+                        >
                             {loading ? "Đang xử lý..." : "Cập nhật"}
                         </Button>
-                        <Button color="secondary" onClick={() => setEditMenuModal(false)}>
+                        <Button
+                            color="secondary"
+                            onClick={() => setEditMenuModal(false)}
+                        >
                             Hủy
                         </Button>
                     </ModalFooter>
                 </Modal>
 
                 {/* Confirmation Modal */}
-                <Modal isOpen={confirmationModal} toggle={() => setConfirmationModal(false)}>
+                <Modal
+                    isOpen={confirmationModal}
+                    toggle={() => setConfirmationModal(false)}
+                >
                     <ModalHeader toggle={() => setConfirmationModal(false)}>
                         Xác nhận xóa
                     </ModalHeader>
-                    <ModalBody>
-                        Bạn có chắc chắn muốn xóa món ăn này?
-                    </ModalBody>
+                    <ModalBody>Bạn có chắc chắn muốn xóa món ăn này?</ModalBody>
                     <ModalFooter>
-                        <Button color="danger" onClick={handleDeleteMenu} disabled={loading}>
+                        <Button
+                            color="danger"
+                            onClick={handleDeleteMenu}
+                            disabled={loading}
+                        >
                             {loading ? "Đang xử lý..." : "Xóa"}
                         </Button>
-                        <Button color="secondary" onClick={() => setConfirmationModal(false)}>
+                        <Button
+                            color="secondary"
+                            onClick={() => setConfirmationModal(false)}
+                        >
                             Hủy
                         </Button>
                     </ModalFooter>
                 </Modal>
 
                 {/* Success Modal */}
-                <Modal isOpen={successModal} toggle={() => setSuccessModal(false)}>
+                <Modal
+                    isOpen={successModal}
+                    toggle={() => setSuccessModal(false)}
+                >
                     <ModalBody>
                         <div className="text-center text-success">
                             <i className="bi bi-check-circle-fill fs-1"></i>
@@ -429,7 +535,10 @@ const Menus = () => {
                         </div>
                     </ModalBody>
                     <ModalFooter>
-                        <Button color="primary" onClick={() => setSuccessModal(false)}>
+                        <Button
+                            color="primary"
+                            onClick={() => setSuccessModal(false)}
+                        >
                             Đóng
                         </Button>
                     </ModalFooter>
@@ -439,4 +548,4 @@ const Menus = () => {
     );
 };
 
-export default Menus; 
+export default Menus;

@@ -26,14 +26,16 @@ namespace WebAPI.Controllers
         private readonly ApplicationDbContext _context;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IConfiguration _configuration;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public AccountsController(IAccountRepository repo, UserManager<ApplicationUser> userManager, ApplicationDbContext context, SignInManager<ApplicationUser> signInManager, IConfiguration configuration)
+        public AccountsController(IAccountRepository repo, UserManager<ApplicationUser> userManager, ApplicationDbContext context, SignInManager<ApplicationUser> signInManager, IConfiguration configuration, RoleManager<IdentityRole> roleManager)
         {
             accountRepo = repo;
             _userManager = userManager;
             _context = context;
             _signInManager = signInManager;
             _configuration = configuration;
+            _roleManager = roleManager;
         }
 
         // GET: api/account
@@ -73,80 +75,168 @@ namespace WebAPI.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserById(string id)
         {
-            var user = await _context.ApplicationUser
-                .Select(u => new
-                {
-                    u.Id,
-                    u.FirstName,
-                    u.LastName,
-                    u.Email,
-                    u.PhoneNumber,
-                    u.Avatar,
-                    u.UserName
-                })
-                .FirstOrDefaultAsync(u => u.Id == id);
-
-            if (user == null)
+            try
             {
-                return NotFound("Không tìm thấy người dùng");
-            }
+                var user = await _userManager.FindByIdAsync(id);
+                if (user == null)
+                {
+                    return NotFound("Không tìm thấy người dùng");
+                }
 
-            return Ok(user);
+                // Lấy roles của user
+                var roles = await _userManager.GetRolesAsync(user);
+
+                var userDto = new
+                {
+                    user.Id,
+                    user.FirstName,
+                    user.LastName,
+                    user.Email,
+                    user.PhoneNumber,
+                    user.UserName,
+                    Roles = roles.ToArray() 
+                };
+
+                return Ok(userDto);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi server: " + ex.Message });
+            }
         }
 
         // POST: api/account/create
         [HttpPost("create")]
         public async Task<IActionResult> CreateUser([FromBody] CreateUserModel model)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
+                // Kiểm tra user đã tồn tại
+                var existingUser = await _userManager.FindByEmailAsync(model.Email);
+                if (existingUser != null)
+                {
+                    return BadRequest(new[] { new { code = "DuplicateUserName", description = $"Username '{model.Email}' is already taken." } });
+                }
+
+                // Tạo user mới
+                var user = new ApplicationUser
+                {
+                    UserName = model.Email,
+                    Email = model.Email,
+                    FirstName = model.FirstName,
+                    LastName = model.LastName,
+                    PhoneNumber = model.PhoneNumber,
+                    EmailConfirmed = true // Tự động xác nhận email
+                };
+
+                // Tạo user với password
+                var result = await _userManager.CreateAsync(user, model.Password);
+                if (!result.Succeeded)
+                {
+                    return BadRequest(result.Errors);
+                }
+
+                // Thêm role cho user
+                if (model.Roles != null && model.Roles.Any())
+                {
+                    // Kiểm tra role có tồn tại
+                    foreach (var role in model.Roles)
+                    {
+                        var roleExists = await _roleManager.RoleExistsAsync(role);
+                        if (!roleExists)
+                        {
+                            // Tạo role mới nếu chưa tồn tại
+                            await _roleManager.CreateAsync(new IdentityRole(role));
+                        }
+                    }
+
+                    // Thêm user vào role
+                    var addToRolesResult = await _userManager.AddToRolesAsync(user, model.Roles);
+                    if (!addToRolesResult.Succeeded)
+                    {
+                        // Nếu thêm role thất bại, xóa user đã tạo
+                        await _userManager.DeleteAsync(user);
+                        return BadRequest(addToRolesResult.Errors);
+                    }
+                }
+                else
+                {
+                    // Nếu không có role được chỉ định, thêm role mặc định "user"
+                    var defaultRole = "user";
+                    var roleExists = await _roleManager.RoleExistsAsync(defaultRole);
+                    if (!roleExists)
+                    {
+                        await _roleManager.CreateAsync(new IdentityRole(defaultRole));
+                    }
+                    await _userManager.AddToRoleAsync(user, defaultRole);
+                }
+
+                return Ok(new { message = "Tạo tài khoản thành công" });
             }
-
-            var user = new ApplicationUser
+            catch (Exception ex)
             {
-                UserName = model.Email,
-                Email = model.Email,
-                FirstName = model.FirstName,
-                LastName = model.LastName,
-                PhoneNumber = model.PhoneNumber
-            };
-
-            var result = await _userManager.CreateAsync(user, model.Password);
-
-            if (result.Succeeded)
-            {
-                return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, user);
+                return StatusCode(500, new { message = "Lỗi server: " + ex.Message });
             }
-
-            return BadRequest(result.Errors);
         }
 
         // PUT: api/account/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(string id, [FromBody] UpdateUserModel model)
         {
-            var user = await _userManager.FindByIdAsync(id);
-
-            if (user == null)
+            try
             {
-                return NotFound("Không tìm thấy người dùng");
+                var user = await _userManager.FindByIdAsync(id);
+                if (user == null)
+                {
+                    return NotFound("Không tìm thấy người dùng");
+                }
+
+                // Cập nhật thông tin cơ bản
+                user.FirstName = model.FirstName ?? user.FirstName;
+                user.LastName = model.LastName ?? user.LastName;
+                user.PhoneNumber = model.PhoneNumber ?? user.PhoneNumber;
+                user.Email = model.Email ?? user.Email;
+                user.UserName = model.Email ?? user.UserName;
+
+                var result = await _userManager.UpdateAsync(user);
+                if (!result.Succeeded)
+                {
+                    return BadRequest(result.Errors);
+                }
+
+                // Cập nhật roles nếu có thay đổi
+                if (model.Roles != null && model.Roles.Any())
+                {
+                    // Lấy roles hiện tại của user
+                    var currentRoles = await _userManager.GetRolesAsync(user);
+                    
+                    // Xóa tất cả roles hiện tại
+                    await _userManager.RemoveFromRolesAsync(user, currentRoles);
+
+                    // Thêm roles mới
+                    foreach (var role in model.Roles)
+                    {
+                        var roleExists = await _roleManager.RoleExistsAsync(role);
+                        if (!roleExists)
+                        {
+                            await _roleManager.CreateAsync(new IdentityRole(role));
+                        }
+                    }
+                    
+                    // Gán roles mới cho user
+                    var addToRolesResult = await _userManager.AddToRolesAsync(user, model.Roles);
+                    if (!addToRolesResult.Succeeded)
+                    {
+                        return BadRequest(addToRolesResult.Errors);
+                    }
+                }
+
+                return Ok(new { message = "Cập nhật thông tin thành công" });
             }
-
-            user.FirstName = model.FirstName ?? user.FirstName;
-            user.LastName = model.LastName ?? user.LastName;
-            user.PhoneNumber = model.PhoneNumber ?? user.PhoneNumber;
-            user.Email = model.Email ?? user.Email;
-            user.UserName = model.Email ?? user.UserName;
-
-            var result = await _userManager.UpdateAsync(user);
-
-            if (result.Succeeded)
+            catch (Exception ex)
             {
-                return NoContent();
+                return StatusCode(500, new { message = "Lỗi server: " + ex.Message });
             }
-
-            return BadRequest(result.Errors);
         }
 
         // DELETE: api/account/{id}
@@ -213,7 +303,7 @@ namespace WebAPI.Controllers
             await _context.SaveChangesAsync();
 
             // Return the user's avatar URL or any other relevant information
-            return Ok(new { avatar = user.Avatar });
+            return Ok();
         }
 
         [HttpGet("GetAvatar")]
@@ -279,7 +369,7 @@ namespace WebAPI.Controllers
 
             if (user == null)
             {
-                return null; // Trả về null nếu không tìm thấy thông tin ngư���i dùng
+                return null; // Trả về null nếu không tìm thấy thông tin người dùng
             }
 
             // Chuyển đổi thông tin người dùng thành đối tượng UserInfo
@@ -377,6 +467,7 @@ namespace WebAPI.Controllers
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string PhoneNumber { get; set; }
+        public string[] Roles { get; set; }
     }
 
     public class UpdateUserModel
@@ -385,6 +476,7 @@ namespace WebAPI.Controllers
         public string LastName { get; set; }
         public string Email { get; set; }
         public string PhoneNumber { get; set; }
+        public string[] Roles { get; set; }
     }
 
     public class ChangePasswordModel

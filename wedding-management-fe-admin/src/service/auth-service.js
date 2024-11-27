@@ -6,15 +6,17 @@ const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("roles");
     // Xóa header Authorization
-    delete axios.defaults.headers.common['Authorization'];
+    delete axios.defaults.headers.common["Authorization"];
     // Chuyển hướng về trang login
-    window.location.href = "/login";
+    window.location.href = "/#/login";
 };
 
 const checkRoleUser = () => {
     try {
         const token = localStorage.getItem("token");
         const roles = JSON.parse(localStorage.getItem("roles") || "[]");
+        console.log("Token:", token);
+        console.log("roles:", roles);
 
         if (!token || !roles.length) {
             return false;
@@ -30,7 +32,7 @@ const checkRoleUser = () => {
 
         // Kiểm tra xem người dùng có một trong các role được phép không
         const allowedRoles = ["employee", "administrator system", "admin"];
-        const hasValidRole = roles.some(role => allowedRoles.includes(role));
+        const hasValidRole = roles.some((role) => allowedRoles.includes(role));
 
         if (!hasValidRole) {
             logout(); // Gọi hàm logout nếu không có quyền

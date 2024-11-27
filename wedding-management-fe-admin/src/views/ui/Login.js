@@ -4,7 +4,6 @@ import { useNavigate } from "react-router";
 import AuthService from "../../service/auth-service";
 import { Button, Form, FormGroup, Label, Input, Alert } from "reactstrap";
 import "./login.css";
-import { setAuthToken } from "../../service/auth-header";
 
 const Login = () => {
     const [username, setUsername] = useState("");
@@ -14,7 +13,6 @@ const Login = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Kiểm tra nếu đã có token thì chuyển hướng về trang chủ
         const token = localStorage.getItem("token");
         if (token) {
             navigate("/");
@@ -86,51 +84,81 @@ const Login = () => {
     };
 
     return (
-        <div className="login-container">
-            <div className="login-box">
-                <h1 className="text-center mb-4">Đăng nhập quản trị</h1>
-                {error && <Alert color="danger">{error}</Alert>}
-                <Form onSubmit={handleLogin}>
-                    <FormGroup>
-                        <Label for="username">Email</Label>
-                        <Input
-                            type="email"
-                            name="username"
-                            id="username"
-                            placeholder="Nhập email của bạn"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            disabled={loading}
-                        />
-                    </FormGroup>
-                    <FormGroup>
-                        <Label for="password">Mật khẩu</Label>
-                        <Input
-                            type="password"
-                            name="password"
-                            id="password"
-                            placeholder="Nhập mật khẩu của bạn"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            disabled={loading}
-                        />
-                    </FormGroup>
+        <div className="login-page">
+            <div className="login-container">
+                <div className="login-box">
+                    <div className="login-header">
+                        <h2 className="text-center">Wedding Management</h2>
+                        <p className="text-center text-muted">Đăng nhập vào hệ thống quản trị</p>
+                    </div>
 
-                    <Button
-                        color="primary"
-                        className="w-100"
-                        disabled={loading}
-                    >
-                        {loading ? (
-                            <span>
-                                <i className="fas fa-spinner fa-spin me-2"></i>
-                                Đang xử lý...
-                            </span>
-                        ) : (
-                            "Đăng nhập"
-                        )}
-                    </Button>
-                </Form>
+                    {error && (
+                        <Alert color="danger" className="mb-4">
+                            <i className="bi bi-exclamation-circle me-2"></i>
+                            {error}
+                        </Alert>
+                    )}
+
+                    <Form onSubmit={handleLogin}>
+                        <FormGroup className="mb-4">
+                            <Label for="username" className="form-label-custom">
+                                <i className="bi bi-envelope me-2"></i>
+                                Email
+                            </Label>
+                            <Input
+                                type="email"
+                                name="username"
+                                id="username"
+                                placeholder="Nhập email của bạn"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                                disabled={loading}
+                                className="form-input-custom"
+                            />
+                        </FormGroup>
+
+                        <FormGroup className="mb-4">
+                            <Label for="password" className="form-label-custom">
+                                <i className="bi bi-lock me-2"></i>
+                                Mật khẩu
+                            </Label>
+                            <Input
+                                type="password"
+                                name="password"
+                                id="password"
+                                placeholder="Nhập mật khẩu của bạn"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                disabled={loading}
+                                className="form-input-custom"
+                            />
+                        </FormGroup>
+
+                        <Button
+                            color="primary"
+                            className="w-100 btn-custom"
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <span>
+                                    <i className="bi bi-arrow-clockwise spin me-2"></i>
+                                    Đang xử lý...
+                                </span>
+                            ) : (
+                                <span>
+                                    <i className="bi bi-box-arrow-in-right me-2"></i>
+                                    Đăng nhập
+                                </span>
+                            )}
+                        </Button>
+                    </Form>
+
+                    <div className="text-center mt-4">
+                        <p className="text-muted">
+                            © 2024 Wedding Management. All rights reserved.
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
     );

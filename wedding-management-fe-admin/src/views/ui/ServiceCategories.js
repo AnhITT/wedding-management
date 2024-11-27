@@ -3,7 +3,6 @@ import { Row, Col, Table, Card, CardTitle, CardBody, Button } from "reactstrap";
 import { Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
 import ReactPaginate from "react-paginate";
 import { serviceCategoryApi } from "../../api/serviceCategory";
-import "../../assets/scss/paging.css";
 
 const ServiceCategories = () => {
     const [categories, setCategories] = useState([]);
@@ -20,13 +19,13 @@ const ServiceCategories = () => {
 
     const [newCategory, setNewCategory] = useState({
         name: "",
-        description: ""
+        description: "",
     });
 
     const [editCategory, setEditCategory] = useState({
         id: "",
         name: "",
-        description: ""
+        description: "",
     });
     const [editCategoryModal, setEditCategoryModal] = useState(false);
 
@@ -87,10 +86,12 @@ const ServiceCategories = () => {
             fetchCategories();
             setNewCategory({
                 name: "",
-                description: ""
+                description: "",
             });
         } catch (error) {
-            setError([error.response?.data?.message || "Lỗi khi thêm danh mục"]);
+            setError([
+                error.response?.data?.message || "Lỗi khi thêm danh mục",
+            ]);
         } finally {
             setLoading(false);
         }
@@ -102,7 +103,7 @@ const ServiceCategories = () => {
             setEditCategory({
                 id: category.categoryId,
                 name: category.name,
-                description: category.description
+                description: category.description,
             });
             setEditCategoryModal(true);
         } catch (error) {
@@ -116,14 +117,16 @@ const ServiceCategories = () => {
             await serviceCategoryApi.update(editCategory.id, {
                 categoryId: editCategory.id,
                 name: editCategory.name,
-                description: editCategory.description
+                description: editCategory.description,
             });
             setSuccessMessage("Cập nhật danh mục thành công!");
             setSuccessModal(true);
             setEditCategoryModal(false);
             fetchCategories();
         } catch (error) {
-            setError([error.response?.data?.message || "Lỗi khi cập nhật danh mục"]);
+            setError([
+                error.response?.data?.message || "Lỗi khi cập nhật danh mục",
+            ]);
         } finally {
             setLoading(false);
         }
@@ -190,7 +193,11 @@ const ServiceCategories = () => {
                                                     color="info"
                                                     size="sm"
                                                     className="me-2"
-                                                    onClick={() => handleEditCategory(category.categoryId)}
+                                                    onClick={() =>
+                                                        handleEditCategory(
+                                                            category.categoryId
+                                                        )
+                                                    }
                                                 >
                                                     Sửa
                                                 </Button>
@@ -198,8 +205,12 @@ const ServiceCategories = () => {
                                                     color="danger"
                                                     size="sm"
                                                     onClick={() => {
-                                                        setCategoryIdToDelete(category.categoryId);
-                                                        setConfirmationModal(true);
+                                                        setCategoryIdToDelete(
+                                                            category.categoryId
+                                                        );
+                                                        setConfirmationModal(
+                                                            true
+                                                        );
                                                     }}
                                                 >
                                                     Xóa
@@ -219,7 +230,9 @@ const ServiceCategories = () => {
                             marginPagesDisplayed={2}
                             pageRangeDisplayed={5}
                             onPageChange={handlePageClick}
-                            containerClassName={"pagination justify-content-center"}
+                            containerClassName={
+                                "pagination justify-content-center"
+                            }
                             pageClassName={"page-item"}
                             pageLinkClassName={"page-link"}
                             previousClassName={"page-item"}
@@ -234,7 +247,10 @@ const ServiceCategories = () => {
                 </Card>
 
                 {/* Add Category Modal */}
-                <Modal isOpen={addCategoryModal} toggle={() => setAddCategoryModal(false)}>
+                <Modal
+                    isOpen={addCategoryModal}
+                    toggle={() => setAddCategoryModal(false)}
+                >
                     <ModalHeader toggle={() => setAddCategoryModal(false)}>
                         Thêm danh mục mới
                     </ModalHeader>
@@ -245,7 +261,12 @@ const ServiceCategories = () => {
                                 type="text"
                                 className="form-control"
                                 value={newCategory.name}
-                                onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
+                                onChange={(e) =>
+                                    setNewCategory({
+                                        ...newCategory,
+                                        name: e.target.value,
+                                    })
+                                }
                             />
                         </div>
                         <div className="mb-3">
@@ -253,25 +274,42 @@ const ServiceCategories = () => {
                             <textarea
                                 className="form-control"
                                 value={newCategory.description}
-                                onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
+                                onChange={(e) =>
+                                    setNewCategory({
+                                        ...newCategory,
+                                        description: e.target.value,
+                                    })
+                                }
                             />
                         </div>
                         {error.map((err, index) => (
-                            <div key={index} className="text-danger">{err}</div>
+                            <div key={index} className="text-danger">
+                                {err}
+                            </div>
                         ))}
                     </ModalBody>
                     <ModalFooter>
-                        <Button color="primary" onClick={handleAddCategory} disabled={loading}>
+                        <Button
+                            color="primary"
+                            onClick={handleAddCategory}
+                            disabled={loading}
+                        >
                             {loading ? "Đang xử lý..." : "Thêm"}
                         </Button>
-                        <Button color="secondary" onClick={() => setAddCategoryModal(false)}>
+                        <Button
+                            color="secondary"
+                            onClick={() => setAddCategoryModal(false)}
+                        >
                             Hủy
                         </Button>
                     </ModalFooter>
                 </Modal>
 
                 {/* Edit Category Modal */}
-                <Modal isOpen={editCategoryModal} toggle={() => setEditCategoryModal(false)}>
+                <Modal
+                    isOpen={editCategoryModal}
+                    toggle={() => setEditCategoryModal(false)}
+                >
                     <ModalHeader toggle={() => setEditCategoryModal(false)}>
                         Chỉnh sửa danh mục
                     </ModalHeader>
@@ -282,7 +320,12 @@ const ServiceCategories = () => {
                                 type="text"
                                 className="form-control"
                                 value={editCategory.name}
-                                onChange={(e) => setEditCategory({ ...editCategory, name: e.target.value })}
+                                onChange={(e) =>
+                                    setEditCategory({
+                                        ...editCategory,
+                                        name: e.target.value,
+                                    })
+                                }
                             />
                         </div>
                         <div className="mb-3">
@@ -290,22 +333,37 @@ const ServiceCategories = () => {
                             <textarea
                                 className="form-control"
                                 value={editCategory.description}
-                                onChange={(e) => setEditCategory({ ...editCategory, description: e.target.value })}
+                                onChange={(e) =>
+                                    setEditCategory({
+                                        ...editCategory,
+                                        description: e.target.value,
+                                    })
+                                }
                             />
                         </div>
                     </ModalBody>
                     <ModalFooter>
-                        <Button color="primary" onClick={handleUpdateCategory} disabled={loading}>
+                        <Button
+                            color="primary"
+                            onClick={handleUpdateCategory}
+                            disabled={loading}
+                        >
                             {loading ? "Đang xử lý..." : "Cập nhật"}
                         </Button>
-                        <Button color="secondary" onClick={() => setEditCategoryModal(false)}>
+                        <Button
+                            color="secondary"
+                            onClick={() => setEditCategoryModal(false)}
+                        >
                             Hủy
                         </Button>
                     </ModalFooter>
                 </Modal>
 
                 {/* Confirmation Modal */}
-                <Modal isOpen={confirmationModal} toggle={() => setConfirmationModal(false)}>
+                <Modal
+                    isOpen={confirmationModal}
+                    toggle={() => setConfirmationModal(false)}
+                >
                     <ModalHeader toggle={() => setConfirmationModal(false)}>
                         Xác nhận xóa
                     </ModalHeader>
@@ -313,17 +371,27 @@ const ServiceCategories = () => {
                         Bạn có chắc chắn muốn xóa danh mục này?
                     </ModalBody>
                     <ModalFooter>
-                        <Button color="danger" onClick={handleDeleteCategory} disabled={loading}>
+                        <Button
+                            color="danger"
+                            onClick={handleDeleteCategory}
+                            disabled={loading}
+                        >
                             {loading ? "Đang xử lý..." : "Xóa"}
                         </Button>
-                        <Button color="secondary" onClick={() => setConfirmationModal(false)}>
+                        <Button
+                            color="secondary"
+                            onClick={() => setConfirmationModal(false)}
+                        >
                             Hủy
                         </Button>
                     </ModalFooter>
                 </Modal>
 
                 {/* Success Modal */}
-                <Modal isOpen={successModal} toggle={() => setSuccessModal(false)}>
+                <Modal
+                    isOpen={successModal}
+                    toggle={() => setSuccessModal(false)}
+                >
                     <ModalBody>
                         <div className="text-center text-success">
                             <i className="bi bi-check-circle-fill fs-1"></i>
@@ -331,7 +399,10 @@ const ServiceCategories = () => {
                         </div>
                     </ModalBody>
                     <ModalFooter>
-                        <Button color="primary" onClick={() => setSuccessModal(false)}>
+                        <Button
+                            color="primary"
+                            onClick={() => setSuccessModal(false)}
+                        >
                             Đóng
                         </Button>
                     </ModalFooter>
@@ -341,4 +412,4 @@ const ServiceCategories = () => {
     );
 };
 
-export default ServiceCategories; 
+export default ServiceCategories;

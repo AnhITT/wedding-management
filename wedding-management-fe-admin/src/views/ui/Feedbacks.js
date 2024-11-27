@@ -4,7 +4,6 @@ import { Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
 import ReactPaginate from "react-paginate";
 import { feedbackApi } from "../../api/feedback";
 import { branchApi } from "../../api/branch";
-import "../../assets/scss/paging.css";
 
 const Feedbacks = () => {
     const [feedbacks, setFeedbacks] = useState([]);
@@ -93,7 +92,7 @@ const Feedbacks = () => {
     const displayItems = searchTerm ? searchResults : currentItems;
 
     const formatDate = (dateString) => {
-        return new Date(dateString).toLocaleString('vi-VN');
+        return new Date(dateString).toLocaleString("vi-VN");
     };
 
     return (
@@ -115,10 +114,15 @@ const Feedbacks = () => {
                                 <select
                                     className="form-control"
                                     value={selectedBranch}
-                                    onChange={(e) => setSelectedBranch(e.target.value)}
+                                    onChange={(e) =>
+                                        setSelectedBranch(e.target.value)
+                                    }
                                 >
                                     {branches.map((branch) => (
-                                        <option key={branch.branchId} value={branch.branchId}>
+                                        <option
+                                            key={branch.branchId}
+                                            value={branch.branchId}
+                                        >
                                             {branch.name}
                                         </option>
                                     ))}
@@ -143,13 +147,26 @@ const Feedbacks = () => {
                                     {displayItems.map((feedback) => (
                                         <tr key={feedback.feedbackId}>
                                             <td>{feedback.user?.email}</td>
-                                            <td>{formatDate(feedback.feedbackDate)}</td>
+                                            <td>
+                                                {formatDate(
+                                                    feedback.feedbackDate
+                                                )}
+                                            </td>
                                             <td>{feedback.content}</td>
                                             <td>
                                                 <div className="text-warning">
-                                                    {Array(Math.round(feedback.rating || 0)).fill().map((_, i) => (
-                                                        <i key={i} className="bi bi-star-fill me-1"></i>
-                                                    ))}
+                                                    {Array(
+                                                        Math.round(
+                                                            feedback.rating || 0
+                                                        )
+                                                    )
+                                                        .fill()
+                                                        .map((_, i) => (
+                                                            <i
+                                                                key={i}
+                                                                className="bi bi-star-fill me-1"
+                                                            ></i>
+                                                        ))}
                                                 </div>
                                             </td>
                                             <td>
@@ -157,8 +174,12 @@ const Feedbacks = () => {
                                                     color="danger"
                                                     size="sm"
                                                     onClick={() => {
-                                                        setFeedbackIdToDelete(feedback.feedbackId);
-                                                        setConfirmationModal(true);
+                                                        setFeedbackIdToDelete(
+                                                            feedback.feedbackId
+                                                        );
+                                                        setConfirmationModal(
+                                                            true
+                                                        );
                                                     }}
                                                 >
                                                     Ẩn
@@ -178,7 +199,9 @@ const Feedbacks = () => {
                             marginPagesDisplayed={2}
                             pageRangeDisplayed={5}
                             onPageChange={handlePageClick}
-                            containerClassName={"pagination justify-content-center"}
+                            containerClassName={
+                                "pagination justify-content-center"
+                            }
                             pageClassName={"page-item"}
                             pageLinkClassName={"page-link"}
                             previousClassName={"page-item"}
@@ -193,7 +216,10 @@ const Feedbacks = () => {
                 </Card>
 
                 {/* Confirmation Modal */}
-                <Modal isOpen={confirmationModal} toggle={() => setConfirmationModal(false)}>
+                <Modal
+                    isOpen={confirmationModal}
+                    toggle={() => setConfirmationModal(false)}
+                >
                     <ModalHeader toggle={() => setConfirmationModal(false)}>
                         Xác nhận ẩn
                     </ModalHeader>
@@ -201,17 +227,27 @@ const Feedbacks = () => {
                         Bạn có chắc chắn muốn ẩn đánh giá này?
                     </ModalBody>
                     <ModalFooter>
-                        <Button color="danger" onClick={handleDeleteFeedback} disabled={loading}>
+                        <Button
+                            color="danger"
+                            onClick={handleDeleteFeedback}
+                            disabled={loading}
+                        >
                             {loading ? "Đang xử lý..." : "Ẩn"}
                         </Button>
-                        <Button color="secondary" onClick={() => setConfirmationModal(false)}>
+                        <Button
+                            color="secondary"
+                            onClick={() => setConfirmationModal(false)}
+                        >
                             Hủy
                         </Button>
                     </ModalFooter>
                 </Modal>
 
                 {/* Success Modal */}
-                <Modal isOpen={successModal} toggle={() => setSuccessModal(false)}>
+                <Modal
+                    isOpen={successModal}
+                    toggle={() => setSuccessModal(false)}
+                >
                     <ModalBody>
                         <div className="text-center text-success">
                             <i className="bi bi-check-circle-fill fs-1"></i>
@@ -219,7 +255,10 @@ const Feedbacks = () => {
                         </div>
                     </ModalBody>
                     <ModalFooter>
-                        <Button color="primary" onClick={() => setSuccessModal(false)}>
+                        <Button
+                            color="primary"
+                            onClick={() => setSuccessModal(false)}
+                        >
                             Đóng
                         </Button>
                     </ModalFooter>
@@ -229,4 +268,4 @@ const Feedbacks = () => {
     );
 };
 
-export default Feedbacks; 
+export default Feedbacks;
