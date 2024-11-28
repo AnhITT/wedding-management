@@ -193,25 +193,51 @@ const Bill = () => {
     }
   }, []);
 
-  const handleBranchCheckboxChange = (branchId) => {
+  const [hallsByBranch, setHallsByBranch] = useState([]);
+
+  const handleBranchCheckboxChange = async (branchId) => {
     setSelectedBranchId(branchId);
     setSelectedHallId(null); // Đặt hội trường về null khi thay đổi chi nhánh
     setSelectedHallIndex(null); // Đặt lại lựa chọn của hall khi chọn branch khác
     setSelectedHalls([]); // Xóa danh sách hội trường đã chọn
 
     localStorage.setItem("selectedBranchId", JSON.stringify(branchId));
-    toast.success(
-      `Đã chọn chi nhánh: ${branchs.find((branch) => branch.branchId === branchId).name
-      }`,
-      {
-        position: "top-right",
+    
+    try {
+      // Gọi API để lấy danh sách sảnh theo chi nhánh
+      const response = await fetch(
+        `https://localhost:7296/api/get-hall-by-branchid/${branchId}`
+      );
+      
+      if (!response.ok) {
+        throw new Error("Failed to fetch halls");
+      }
+      
+      const data = await response.json();
+      setHallsByBranch(data); // Lưu danh sách sảnh vào state
+      
+      toast.success(
+        `Đã chọn chi nhánh: ${branchs.find((branch) => branch.branchId === branchId).name}`,
+        {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        }
+      );
+    } catch (error) {
+      console.error("Error fetching halls:", error);
+      toast.error("Không thể tải danh sách sảnh cưới", {
+        position: "top-right", 
         autoClose: 3000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,
-      }
-    );
+      });
+    }
   };
 
   const handleHallCheckboxChange = (hallId) => {
@@ -684,7 +710,7 @@ const Bill = () => {
             // Chuyển đổi cả hai thời điểm sang dạng Date để so sánh
             const currentDate = new Date();
             const expiryDate = new Date(promoCode.expirationDate);
-            return expiryDate > currentDate; // Trả về true nếu mã giảm giá chưa hết hạn
+            return expiryDate > currentDate; // Trả về true nếu mã giảm giá chưa hết h���n
           });
           setPromoCodes(validPromoCodes);
         } else {
@@ -1293,37 +1319,44 @@ const Bill = () => {
               <Accordion.Item eventKey="1">
                 <Accordion.Header>Sảnh Cưới</Accordion.Header>
                 <Accordion.Body className="body">
-                  {halls.map((hall, index) => (
-                    <Card className="menu-card" key={index} style={{ width: "18rem" }}>
-                      <Card.Img
-                        className="image-fixed-height"
-                        variant="top"
-                        src={hall.image}
-                      />
-                      <Card.Body>
-                        <Card.Title>{hall.name}</Card.Title>
-                        <Card.Text>Sức chứa: {hall.capacity}</Card.Text>
-                        <Card.Text>
-                          Giá sảnh: {formatPrice(hall.price)}
-                        </Card.Text>
-                        <Card.Text>
-                          Thuộc chi nhánh: {hall.branchName}
-                        </Card.Text>
-                        <div className="form-check">
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            value=""
-                            id={`flexCheckHall-${index}`}
-                            checked={hall.hallId === selectedHallId}
-                            onChange={() =>
-                              handleHallCheckboxChange(hall.hallId)
-                            }
-                          />
-                        </div>
-                      </Card.Body>
-                    </Card>
-                  ))}
+                  {hallsByBranch.length > 0 ? (
+                    hallsByBranch.map((hall, index) => (
+                      <Card className="menu-card" key={index} style={{ width: "18rem" }}>
+                        <Card.Img
+                          className="image-fixed-height"
+                          variant="top"
+                          src={hall.image}
+                        />
+                        <Card.Body>
+                          <Card.Title>{hall.name}</Card.Title>
+                          <Card.Text>Sức chứa: {hall.capacity}</Card.Text>
+                          <Card.Text>
+                            Giá sảnh: {formatPrice(hall.price)}
+                          </Card.Text>
+                          <Card.Text>
+                            Thuộc chi nhánh: {hall.branchName}
+                          </Card.Text>
+                          <div className="form-check">
+                            <input
+                              className="form-check-input"
+                              type="checkbox"
+                              value=""
+                              id={`flexCheckHall-${index}`}
+                              checked={hall.hallId === selectedHallId}
+                              onChange={() =>
+                                handleHallCheckboxChange(hall.hallId)
+                              }
+                            />
+                          </div>
+                        </Card.Body>
+                      </Card>
+                    ))
+                  ) : (
+                    <div className="no-halls-message">
+                      <i className="fas fa-info-circle" style={{ fontSize: '24px', marginBottom: '10px', color: '#666' }}></i>
+                      <p>Không có sảnh cưới nào trong chi nhánh này</p>
+                    </div>
+                  )}
                 </Accordion.Body>
               </Accordion.Item>
               <h1 className="title section-title">Thực đơn</h1>

@@ -74,60 +74,6 @@ const Header = () => {
             </div>
             <div className="ml-auto d-flex align-items-center gap-3">
                 {" "}
-                {/* Added ml-auto class to move to the right */}
-                <Dropdown
-                    isOpen={notificationDropdownOpen}
-                    toggle={toggleNotificationDropdown}
-                >
-                    <DropdownToggle
-                        color="primary"
-                        className="position-relative"
-                    >
-                        <i class="fa-regular fa-bell"></i>
-                        <Badge
-                            color="danger"
-                            className="position-absolute top-0 start-100 translate-middle"
-                        >
-                            4 {/* Số thông báo */}
-                        </Badge>
-                    </DropdownToggle>
-                    <DropdownMenu>
-                        <DropdownItem header>Notifications</DropdownItem>
-                        <DropdownItem divider />
-                        <DropdownItem>
-                            <CustomDropdownItem
-                                title="Đăng ký dịch vụ"
-                                details="User 1 đã đăng ký sử dụng dịch vụ premium"
-                            />
-                        </DropdownItem>
-                        <DropdownItem>
-                            <CustomDropdownItem
-                                title="Đăng ký dịch vụ"
-                                details="User 1 đã đăng ký sử dụng dịch vụ premium"
-                            />
-                        </DropdownItem>
-                        <DropdownItem>
-                            <CustomDropdownItem
-                                title="Đăng ký dịch vụ"
-                                details="User 1 đã đăng ký sử dụng dịch vụ premium"
-                            />
-                        </DropdownItem>
-                        <DropdownItem divider />
-                        <DropdownItem>
-                            <div className="text-center">
-                                <Link
-                                    to="/notifications"
-                                    style={{
-                                        color: "black",
-                                        textDecoration: "none",
-                                    }}
-                                >
-                                    Xem tất cả thông báo
-                                </Link>
-                            </div>
-                        </DropdownItem>
-                    </DropdownMenu>
-                </Dropdown>
                 <Collapse navbar isOpen={isOpen}>
                     <Nav className="me-auto" navbar></Nav>
                     <Dropdown isOpen={dropdownOpen} toggle={toggle}>

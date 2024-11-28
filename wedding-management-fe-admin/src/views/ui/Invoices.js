@@ -4,6 +4,148 @@ import { Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
 import ReactPaginate from "react-paginate";
 import { invoiceApi } from "../../api/invoice";
 import { Accordion, Card as BCard } from "react-bootstrap";
+import "./Invoices.css";
+
+const styles = {
+    body: {
+        display: "flex",
+        flexWrap: "wrap",
+        gap: "1rem",
+        padding: "1rem",
+        maxHeight: "500px",
+        overflowY: "auto",
+    },
+    menuCard: {
+        flex: "0 0 auto",
+        marginBottom: "1rem",
+        border: "1px solid #ddd",
+        borderRadius: "8px",
+        transition: "all 0.3s ease",
+    },
+    imageFixedHeight: {
+        height: "200px",
+        objectFit: "cover",
+    },
+    selected: {
+        border: "2px solid #007bff",
+        boxShadow: "0 0 10px rgba(0,123,255,0.3)",
+    },
+    body: {
+        display: "flex",
+        flexDirection: "column",
+        gap: "1rem",
+        padding: "1rem",
+    },
+    branchSection: {
+        display: "flex",
+        flexWrap: "wrap",
+        gap: "1rem",
+        marginBottom: "2rem",
+    },
+    hallSection: {
+        display: "flex",
+        flexWrap: "wrap",
+        gap: "1rem",
+    },
+    card: {
+        width: "calc(33.333% - 1rem)",
+        minWidth: "300px",
+        marginBottom: "1rem",
+        border: "1px solid #ddd",
+        borderRadius: "8px",
+        transition: "all 0.3s ease",
+    },
+    selectedCard: {
+        border: "2px solid #007bff",
+        boxShadow: "0 0 10px rgba(0,123,255,0.3)",
+    },
+    cardImage: {
+        height: "200px",
+        objectFit: "cover",
+        borderTopLeftRadius: "8px",
+        borderTopRightRadius: "8px",
+    },
+    sectionTitle: {
+        width: "100%",
+        padding: "1rem",
+        backgroundColor: "#f8f9fa",
+        borderRadius: "8px",
+        marginBottom: "1rem",
+    },
+    infoRow: {
+        display: "flex",
+        justifyContent: "space-between",
+        marginBottom: "0.5rem",
+    },
+    label: {
+        fontWeight: "500",
+        color: "#666",
+    },
+    value: {
+        color: "#333",
+    },
+    checkboxContainer: {
+        marginTop: "1rem",
+        padding: "0.5rem",
+        backgroundColor: "#f8f9fa",
+        borderRadius: "4px",
+    },
+    editContainer: {
+        display: "flex",
+        gap: "1rem",
+        padding: "1rem",
+        height: "80vh",
+    },
+    section: {
+        flex: "1",
+        minWidth: "250px",
+        backgroundColor: "#fff",
+        borderRadius: "8px",
+        border: "1px solid #dee2e6",
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        overflow: "hidden",
+    },
+    sectionHeader: {
+        padding: "0.75rem 1rem",
+        backgroundColor: "#f8f9fa",
+        borderBottom: "1px solid #dee2e6",
+        borderTopLeftRadius: "8px",
+        borderTopRightRadius: "8px",
+    },
+    sectionContent: {
+        padding: "1rem",
+        overflowY: "auto",
+        flex: 1,
+    },
+    card: {
+        marginBottom: "1rem",
+        border: "1px solid #dee2e6",
+        borderRadius: "8px",
+        backgroundColor: "#fff",
+    },
+    selectedCard: {
+        border: "2px solid #007bff",
+        boxShadow: "0 0 10px rgba(0,123,255,0.3)",
+    },
+    cardImage: {
+        height: "150px",
+        width: "100%",
+        objectFit: "cover",
+        borderTopLeftRadius: "8px",
+        borderTopRightRadius: "8px",
+    },
+    cardBody: {
+        padding: "1rem",
+    },
+    infoRow: {
+        display: "flex",
+        justifyContent: "space-between",
+        marginBottom: "0.5rem",
+        fontSize: "0.9rem",
+    },
+};
 
 const Invoices = () => {
     const [invoices, setInvoices] = useState([]);
@@ -26,6 +168,9 @@ const Invoices = () => {
     const [selectedHall, setSelectedHall] = useState(null);
     const [selectedMenus, setSelectedMenus] = useState([]);
     const [selectedServices, setSelectedServices] = useState([]);
+    const [hallsByBranch, setHallsByBranch] = useState([]);
+    const [loadingHalls, setLoadingHalls] = useState(false);
+    const [selectedStatus, setSelectedStatus] = useState("");
 
     useEffect(() => {
         fetchInvoices();
@@ -44,13 +189,14 @@ const Invoices = () => {
 
                 const branchesData = await branchesRes.json();
                 const hallsData = await hallsRes.json();
-                const menusData = await menusRes.json();
-                const servicesData = await servicesRes.json();
+
+                console.log("Branches data:", branchesData);
+                console.log("Halls data:", hallsData);
 
                 setBranches(branchesData);
                 setHalls(hallsData);
-                setMenus(menusData);
-                setServices(servicesData);
+                setMenus(await menusRes.json());
+                setServices(await servicesRes.json());
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
@@ -58,6 +204,46 @@ const Invoices = () => {
 
         fetchData();
     }, []);
+
+    useEffect(() => {
+        if (selectedBranch) {
+            console.log("Selected branch:", selectedBranch);
+            const filteredHalls = halls.filter(
+                (hall) => hall.branchId === selectedBranch.branchId
+            );
+            console.log("Filtered halls for branch:", filteredHalls);
+        }
+    }, [selectedBranch, halls]);
+
+    useEffect(() => {
+        const fetchHallsByBranch = async () => {
+            if (selectedBranch) {
+                setLoadingHalls(true);
+                try {
+                    const response = await fetch(
+                        `https://localhost:7296/api/get-hall-by-branchid/${selectedBranch.branchId}`
+                    );
+                    const data = await response.json();
+                    setHallsByBranch(data);
+                } catch (error) {
+                    console.error("Error fetching halls for branch:", error);
+                    setHallsByBranch([]);
+                } finally {
+                    setLoadingHalls(false);
+                }
+            } else {
+                setHallsByBranch([]);
+            }
+        };
+
+        fetchHallsByBranch();
+    }, [selectedBranch]);
+
+    useEffect(() => {
+        if (selectedInvoice) {
+            setSelectedStatus(selectedInvoice.orderStatus);
+        }
+    }, [selectedInvoice]);
 
     const fetchInvoices = async () => {
         try {
@@ -95,14 +281,25 @@ const Invoices = () => {
     const handleUpdateStatus = async () => {
         try {
             setLoading(true);
-            await invoiceApi.updateStatus(selectedInvoice.invoiceID, {
-                paymentStatus: selectedInvoice.paymentStatus,
-                orderStatus: selectedInvoice.orderStatus,
-            });
-            setSuccessMessage("Cập nhật trạng thái thành công!");
+            const response = await fetch(
+                `https://localhost:7296/api/invoice/${selectedInvoice.invoiceID}/updateStatus?request=${selectedStatus}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("Failed to update status");
+            }
+
+            const result = await response.json();
+            setSuccessMessage(result.message);
             setSuccessModal(true);
             setUpdateStatusModal(false);
-            fetchInvoices();
+            fetchInvoices(); // Refresh danh sách hóa đơn
         } catch (error) {
             setError(
                 error.response?.data?.message || "Lỗi khi cập nhật trạng thái"
@@ -195,6 +392,288 @@ const Invoices = () => {
         }
     };
 
+    const renderBranches = () => (
+        <div style={styles.section}>
+            <div style={styles.sectionHeader}>
+                <h6 className="mb-0">
+                    <i className="bi bi-building me-2"></i>
+                    Chi Nhánh
+                </h6>
+            </div>
+            <div style={styles.sectionContent}>
+                {branches.map((branch) => (
+                    <div
+                        key={branch.branchId}
+                        style={{
+                            ...styles.card,
+                            ...(selectedBranch?.branchId === branch.branchId
+                                ? styles.selectedCard
+                                : {}),
+                        }}
+                    >
+                        <img
+                            src={branch.image}
+                            style={styles.cardImage}
+                            onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src =
+                                    "https://via.placeholder.com/300x200?text=No+Image";
+                            }}
+                            alt={branch.name}
+                        />
+                        <div style={styles.cardBody}>
+                            <h6>{branch.name}</h6>
+                            <div style={styles.infoRow}>
+                                <span>Địa chỉ:</span>
+                                <span>{branch.address}</span>
+                            </div>
+                            <div className="form-check mt-2">
+                                <input
+                                    type="radio"
+                                    className="form-check-input"
+                                    checked={
+                                        selectedBranch?.branchId ===
+                                        branch.branchId
+                                    }
+                                    onChange={() => setSelectedBranch(branch)}
+                                    name="branchSelection"
+                                />
+                                <label className="form-check-label">
+                                    Chọn chi nhánh này
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+
+    const renderHalls = () => (
+        <div style={styles.section}>
+            <div style={styles.sectionHeader}>
+                <h6 className="mb-0">
+                    <i className="bi bi-house-heart me-2"></i>
+                    Sảnh Cưới
+                </h6>
+            </div>
+            <div style={styles.sectionContent}>
+                {!selectedBranch ? (
+                    <div className="alert alert-info">
+                        Vui lòng chọn chi nhánh
+                    </div>
+                ) : loadingHalls ? (
+                    <div className="text-center">
+                        <div className="spinner-border text-primary" />
+                    </div>
+                ) : hallsByBranch.length > 0 ? (
+                    hallsByBranch.map((hall) => (
+                        <div
+                            key={hall.hallId}
+                            style={{
+                                ...styles.card,
+                                ...(selectedHall?.hallId === hall.hallId
+                                    ? styles.selectedCard
+                                    : {}),
+                            }}
+                        >
+                            <img
+                                src={hall.image}
+                                style={styles.cardImage}
+                                alt={hall.name}
+                                onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.src =
+                                        "https://via.placeholder.com/300x200?text=No+Image";
+                                }}
+                            />
+                            <div style={styles.cardBody}>
+                                <h6>{hall.name}</h6>
+                                <div style={styles.infoRow}>
+                                    <span>Sức chứa:</span>
+                                    <span>{hall.capacity} khách</span>
+                                </div>
+                                <div style={styles.infoRow}>
+                                    <span>Giá:</span>
+                                    <span>{formatCurrency(hall.price)}</span>
+                                </div>
+                                <div className="form-check mt-2">
+                                    <input
+                                        type="radio"
+                                        className="form-check-input"
+                                        checked={
+                                            selectedHall?.hallId === hall.hallId
+                                        }
+                                        onChange={() => setSelectedHall(hall)}
+                                        name="hallSelection"
+                                    />
+                                    <label className="form-check-label">
+                                        Chọn sảnh này
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    ))
+                ) : (
+                    <div className="alert alert-warning">
+                        Không có sảnh cưới
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+
+    const renderMenus = () => (
+        <div style={styles.section}>
+            <div style={styles.sectionHeader}>
+                <h6 className="mb-0">
+                    <i className="bi bi-menu-button-wide me-2"></i>
+                    Thực Đơn
+                </h6>
+            </div>
+            <div style={styles.sectionContent}>
+                {menus.map((menu) => (
+                    <div
+                        key={menu.menuId}
+                        style={{
+                            ...styles.card,
+                            ...(selectedMenus.includes(menu.menuId)
+                                ? styles.selectedCard
+                                : {}),
+                        }}
+                    >
+                        <img
+                            src={menu.image}
+                            style={styles.cardImage}
+                            alt={menu.name}
+                            onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src =
+                                    "https://via.placeholder.com/300x200?text=No+Image";
+                            }}
+                        />
+                        <div style={styles.cardBody}>
+                            <h6>{menu.name}</h6>
+                            <div style={styles.infoRow}>
+                                <span>Mô tả:</span>
+                                <span>{menu.description}</span>
+                            </div>
+                            <div style={styles.infoRow}>
+                                <span>Giá:</span>
+                                <span>{formatCurrency(menu.price)}</span>
+                            </div>
+                            <div className="form-check mt-2">
+                                <input
+                                    type="checkbox"
+                                    className="form-check-input"
+                                    checked={selectedMenus.includes(
+                                        menu.menuId
+                                    )}
+                                    onChange={() => {
+                                        if (
+                                            selectedMenus.includes(menu.menuId)
+                                        ) {
+                                            setSelectedMenus(
+                                                selectedMenus.filter(
+                                                    (id) => id !== menu.menuId
+                                                )
+                                            );
+                                        } else {
+                                            setSelectedMenus([
+                                                ...selectedMenus,
+                                                menu.menuId,
+                                            ]);
+                                        }
+                                    }}
+                                />
+                                <label className="form-check-label">
+                                    Chọn món này
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+
+    const renderServices = () => (
+        <div style={styles.section}>
+            <div style={styles.sectionHeader}>
+                <h6 className="mb-0">
+                    <i className="bi bi-gear me-2"></i>
+                    Dịch Vụ
+                </h6>
+            </div>
+            <div style={styles.sectionContent}>
+                {services.map((service) => (
+                    <div
+                        key={service.serviceId}
+                        style={{
+                            ...styles.card,
+                            ...(selectedServices.includes(service.serviceId)
+                                ? styles.selectedCard
+                                : {}),
+                        }}
+                    >
+                        <img
+                            src={service.image}
+                            style={styles.cardImage}
+                            alt={service.name}
+                            onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src =
+                                    "https://via.placeholder.com/300x200?text=No+Image";
+                            }}
+                        />
+                        <div style={styles.cardBody}>
+                            <h6>{service.name}</h6>
+                            <div style={styles.infoRow}>
+                                <span>Mô tả:</span>
+                                <span>{service.description}</span>
+                            </div>
+                            <div style={styles.infoRow}>
+                                <span>Giá:</span>
+                                <span>{formatCurrency(service.price)}</span>
+                            </div>
+                            <div className="form-check mt-2">
+                                <input
+                                    type="checkbox"
+                                    className="form-check-input"
+                                    checked={selectedServices.includes(
+                                        service.serviceId
+                                    )}
+                                    onChange={() => {
+                                        if (
+                                            selectedServices.includes(
+                                                service.serviceId
+                                            )
+                                        ) {
+                                            setSelectedServices(
+                                                selectedServices.filter(
+                                                    (id) =>
+                                                        id !== service.serviceId
+                                                )
+                                            );
+                                        } else {
+                                            setSelectedServices([
+                                                ...selectedServices,
+                                                service.serviceId,
+                                            ]);
+                                        }
+                                    }}
+                                />
+                                <label className="form-check-label">
+                                    Chọn dịch vụ này
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+
     return (
         <div className="page-container">
             <div className="page-header mb-4">
@@ -254,7 +733,7 @@ const Invoices = () => {
                                                 <th>Mã HĐ</th>
                                                 <th>Khách hàng</th>
                                                 <th>Ngày đặt</th>
-                                                <th>Ngày tổ chức</th>
+                                                <th>Ngày t chức</th>
                                                 <th>Tổng tiền</th>
                                                 <th>Trạng thái</th>
                                                 <th>Thao tác</th>
@@ -588,41 +1067,28 @@ const Invoices = () => {
                         <div>
                             <div className="mb-3">
                                 <label className="form-label">
-                                    Trạng thái thanh toán
-                                </label>
-                                <select
-                                    className="form-control"
-                                    value={selectedInvoice.paymentStatus}
-                                    onChange={(e) =>
-                                        setSelectedInvoice({
-                                            ...selectedInvoice,
-                                            paymentStatus:
-                                                e.target.value === "true",
-                                        })
-                                    }
-                                >
-                                    <option value={false}>
-                                        Chưa thanh toán
-                                    </option>
-                                    <option value={true}>Đã thanh toán</option>
-                                </select>
-                            </div>
-                            <div className="mb-3">
-                                <label className="form-label">
                                     Trạng thái đơn hàng
                                 </label>
                                 <select
                                     className="form-control"
-                                    value={selectedInvoice.orderStatus || ""}
-                                    onChange={(e) =>
+                                    value={selectedStatus}
+                                    onChange={(e) => {
+                                        setSelectedStatus(e.target.value);
                                         setSelectedInvoice({
                                             ...selectedInvoice,
                                             orderStatus: e.target.value,
-                                        })
-                                    }
+                                        });
+                                    }}
                                 >
-                                    <option value="">Đang xử lý</option>
-                                    <option value="Đã hủy">Đã hủy</option>
+                                    <option value="Đã đặt cọc">
+                                        Đã đặt cọc
+                                    </option>
+                                    <option value="Đã hủy đơn hàng">
+                                        Đã hủy đơn hàng
+                                    </option>
+                                    <option value="Hoàn tất thanh toán">
+                                        Hoàn tất thanh toán
+                                    </option>
                                 </select>
                             </div>
                         </div>
@@ -679,288 +1145,19 @@ const Invoices = () => {
                 toggle={() => setEditModal(false)}
                 size="xl"
                 className="edit-invoice-modal"
+                style={{ maxWidth: "95%", margin: "1rem auto" }}
             >
                 <ModalHeader toggle={() => setEditModal(false)}>
-                    <i className="fas fa-edit me-2"></i>
+                    <i className="bi bi-pencil-square me-2"></i>
                     Chỉnh sửa hóa đơn #{selectedInvoice?.invoiceID}
                 </ModalHeader>
-                <ModalBody>
+                <ModalBody className="p-0">
                     {selectedInvoice && (
-                        <div className="edit-form">
-                            <Accordion defaultActiveKey="0">
-                                <Accordion.Item eventKey="0">
-                                    <Accordion.Header>
-                                        Chi Nhánh
-                                    </Accordion.Header>
-                                    <Accordion.Body className="body">
-                                        {branches.map((branch) => (
-                                            <BCard
-                                                className={`menu-card ${
-                                                    selectedBranch?.branchId ===
-                                                    branch.branchId
-                                                        ? "selected"
-                                                        : ""
-                                                }`}
-                                                key={branch.branchId}
-                                                style={{ width: "18rem" }}
-                                            >
-                                                <BCard.Img
-                                                    className="image-fixed-height"
-                                                    variant="top"
-                                                    src={branch.image}
-                                                />
-                                                <BCard.Body>
-                                                    <BCard.Title>
-                                                        {branch.name}
-                                                    </BCard.Title>
-                                                    <BCard.Text>
-                                                        Mô tả:{" "}
-                                                        {branch.description}
-                                                    </BCard.Text>
-                                                    <BCard.Text>
-                                                        Địa chỉ:{" "}
-                                                        {branch.address}
-                                                    </BCard.Text>
-                                                    <BCard.Text>
-                                                        SDT: {branch.phone}
-                                                    </BCard.Text>
-                                                    <div className="form-check">
-                                                        <input
-                                                            className="form-check-input"
-                                                            type="checkbox"
-                                                            checked={
-                                                                selectedBranch?.branchId ===
-                                                                branch.branchId
-                                                            }
-                                                            onChange={() =>
-                                                                setSelectedBranch(
-                                                                    branch
-                                                                )
-                                                            }
-                                                        />
-                                                    </div>
-                                                </BCard.Body>
-                                            </BCard>
-                                        ))}
-                                    </Accordion.Body>
-                                </Accordion.Item>
-
-                                <Accordion.Item eventKey="1">
-                                    <Accordion.Header>
-                                        Sảnh Cưới
-                                    </Accordion.Header>
-                                    <Accordion.Body className="body">
-                                        {halls
-                                            .filter(
-                                                (hall) =>
-                                                    hall.branchId ===
-                                                    selectedBranch?.branchId
-                                            )
-                                            .map((hall) => (
-                                                <BCard
-                                                    className={`menu-card ${
-                                                        selectedHall?.hallId ===
-                                                        hall.hallId
-                                                            ? "selected"
-                                                            : ""
-                                                    }`}
-                                                    key={hall.hallId}
-                                                    style={{ width: "18rem" }}
-                                                >
-                                                    <BCard.Img
-                                                        className="image-fixed-height"
-                                                        variant="top"
-                                                        src={hall.image}
-                                                    />
-                                                    <BCard.Body>
-                                                        <BCard.Title>
-                                                            {hall.name}
-                                                        </BCard.Title>
-                                                        <BCard.Text>
-                                                            Sức chứa:{" "}
-                                                            {hall.capacity}
-                                                        </BCard.Text>
-                                                        <BCard.Text>
-                                                            Giá sảnh:{" "}
-                                                            {formatCurrency(
-                                                                hall.price
-                                                            )}
-                                                        </BCard.Text>
-                                                        <div className="form-check">
-                                                            <input
-                                                                className="form-check-input"
-                                                                type="checkbox"
-                                                                checked={
-                                                                    selectedHall?.hallId ===
-                                                                    hall.hallId
-                                                                }
-                                                                onChange={() =>
-                                                                    setSelectedHall(
-                                                                        hall
-                                                                    )
-                                                                }
-                                                            />
-                                                        </div>
-                                                    </BCard.Body>
-                                                </BCard>
-                                            ))}
-                                    </Accordion.Body>
-                                </Accordion.Item>
-
-                                <Accordion.Item eventKey="2">
-                                    <Accordion.Header>
-                                        Thực Đơn
-                                    </Accordion.Header>
-                                    <Accordion.Body className="body">
-                                        {menus.map((menu) => (
-                                            <BCard
-                                                className={`menu-card ${
-                                                    selectedMenus.includes(
-                                                        menu.menuId
-                                                    )
-                                                        ? "selected"
-                                                        : ""
-                                                }`}
-                                                key={menu.menuId}
-                                                style={{ width: "18rem" }}
-                                            >
-                                                <BCard.Img
-                                                    className="image-fixed-height"
-                                                    variant="top"
-                                                    src={menu.image}
-                                                />
-                                                <BCard.Body>
-                                                    <BCard.Title>
-                                                        {menu.name}
-                                                    </BCard.Title>
-                                                    <BCard.Text>
-                                                        {menu.description}
-                                                    </BCard.Text>
-                                                    <BCard.Text>
-                                                        {formatCurrency(
-                                                            menu.price
-                                                        )}
-                                                    </BCard.Text>
-                                                    <div className="form-check">
-                                                        <input
-                                                            className="form-check-input"
-                                                            type="checkbox"
-                                                            checked={selectedMenus.includes(
-                                                                menu.menuId
-                                                            )}
-                                                            onChange={() => {
-                                                                if (
-                                                                    selectedMenus.includes(
-                                                                        menu.menuId
-                                                                    )
-                                                                ) {
-                                                                    setSelectedMenus(
-                                                                        (
-                                                                            prev
-                                                                        ) =>
-                                                                            prev.filter(
-                                                                                (
-                                                                                    id
-                                                                                ) =>
-                                                                                    id !==
-                                                                                    menu.menuId
-                                                                            )
-                                                                    );
-                                                                } else {
-                                                                    setSelectedMenus(
-                                                                        (
-                                                                            prev
-                                                                        ) => [
-                                                                            ...prev,
-                                                                            menu.menuId,
-                                                                        ]
-                                                                    );
-                                                                }
-                                                            }}
-                                                        />
-                                                    </div>
-                                                </BCard.Body>
-                                            </BCard>
-                                        ))}
-                                    </Accordion.Body>
-                                </Accordion.Item>
-
-                                <Accordion.Item eventKey="3">
-                                    <Accordion.Header>Dịch Vụ</Accordion.Header>
-                                    <Accordion.Body className="body">
-                                        {services.map((service) => (
-                                            <BCard
-                                                className={`menu-card ${
-                                                    selectedServices.includes(
-                                                        service.serviceId
-                                                    )
-                                                        ? "selected"
-                                                        : ""
-                                                }`}
-                                                key={service.serviceId}
-                                                style={{ width: "18rem" }}
-                                            >
-                                                <BCard.Img
-                                                    className="image-fixed-height"
-                                                    variant="top"
-                                                    src={service.image}
-                                                />
-                                                <BCard.Body>
-                                                    <BCard.Title>
-                                                        {service.name}
-                                                    </BCard.Title>
-                                                    <BCard.Text>
-                                                        {service.description}
-                                                    </BCard.Text>
-                                                    <BCard.Text>
-                                                        {formatCurrency(
-                                                            service.price
-                                                        )}
-                                                    </BCard.Text>
-                                                    <div className="form-check">
-                                                        <input
-                                                            className="form-check-input"
-                                                            type="checkbox"
-                                                            checked={selectedServices.includes(
-                                                                service.serviceId
-                                                            )}
-                                                            onChange={() => {
-                                                                if (
-                                                                    selectedServices.includes(
-                                                                        service.serviceId
-                                                                    )
-                                                                ) {
-                                                                    setSelectedServices(
-                                                                        (
-                                                                            prev
-                                                                        ) =>
-                                                                            prev.filter(
-                                                                                (
-                                                                                    id
-                                                                                ) =>
-                                                                                    id !==
-                                                                                    service.serviceId
-                                                                            )
-                                                                    );
-                                                                } else {
-                                                                    setSelectedServices(
-                                                                        (
-                                                                            prev
-                                                                        ) => [
-                                                                            ...prev,
-                                                                            service.serviceId,
-                                                                        ]
-                                                                    );
-                                                                }
-                                                            }}
-                                                        />
-                                                    </div>
-                                                </BCard.Body>
-                                            </BCard>
-                                        ))}
-                                    </Accordion.Body>
-                                </Accordion.Item>
-                            </Accordion>
+                        <div style={styles.editContainer}>
+                            {renderBranches()}
+                            {renderHalls()}
+                            {renderMenus()}
+                            {renderServices()}
                         </div>
                     )}
                 </ModalBody>

@@ -9,6 +9,7 @@ using System.Net;
 using System.Text;
 using Newtonsoft.Json.Linq;
 using static MudBlazor.CategoryTypes;
+using System.ComponentModel.DataAnnotations;
 
 namespace WebAPI.Controllers
 {
@@ -106,8 +107,8 @@ namespace WebAPI.Controllers
         [HttpPost("/api/invoice/check-repayment/{id}")]
         public async Task<IActionResult> Repayment(int id)
         {
-            var invoice =  _context.Invoice.FirstOrDefault(x => x.InvoiceID == id);
-            if(invoice != null)
+            var invoice = _context.Invoice.FirstOrDefault(x => x.InvoiceID == id);
+            if (invoice != null)
             {
                 if (invoice.OrderStatus == "Đã hủy đơn hàng")
                 {
@@ -124,7 +125,7 @@ namespace WebAPI.Controllers
         [HttpGet("/api/wallet/{userId}")]
         public async Task<IActionResult> WalletByUserId(string userId)
         {
-            var wallet = await _context.Wallet.Where(x=> x.UserId == userId).FirstOrDefaultAsync();
+            var wallet = await _context.Wallet.Where(x => x.UserId == userId).FirstOrDefaultAsync();
             return Ok(wallet);
         }
 
@@ -144,7 +145,7 @@ namespace WebAPI.Controllers
 
             if (existingWallet != null)
             {
-                if(existingWallet.Coin == null)
+                if (existingWallet.Coin == null)
                 {
                     existingWallet.Coin = 0;
                 }
@@ -152,17 +153,17 @@ namespace WebAPI.Controllers
                 _context.Update(existingWallet);
             }
             else
+            {
+                var wallet = new Wallet()
                 {
-                    var wallet = new Wallet()
-                    {
-                        UserId = invoice.UserId,
-                        Coin = coinAmount,
-                    };
-                    _context.Add(wallet);
-                
+                    UserId = invoice.UserId,
+                    Coin = coinAmount,
+                };
+                _context.Add(wallet);
+
                 await _context.SaveChangesAsync();
             }
-           
+
 
             _context.Update(invoice);
             await _context.SaveChangesAsync();
@@ -176,7 +177,7 @@ namespace WebAPI.Controllers
             var existingInvoice = _context.Invoice.FirstOrDefault(i =>
                 i.AttendanceDate.Value.Date == request.AttendanceDate.Date &&
                 i.BranchId == request.BranchId &&
-                i.HallId == request.HallId && 
+                i.HallId == request.HallId &&
                 i.TimeHall == request.TimeHall && string.IsNullOrEmpty(i.OrderStatus)
                );
 
@@ -220,7 +221,7 @@ namespace WebAPI.Controllers
                 OrderStatus = "Đã đặt cọc"
             };
 
-          
+
             if (request.AttendanceDate.HasValue)
             {
                 TimeSpan difference = request.AttendanceDate.Value - DateTime.Now;
@@ -245,7 +246,7 @@ namespace WebAPI.Controllers
                         return BadRequest(new { message = "Số dư trong ví không đủ để thanh toán." });
                     }
                     invoice.PaymentWallet = true;
-                    existingWallet.Coin -= ((invoice.Total)/2);
+                    existingWallet.Coin -= ((invoice.Total) / 2);
                     _context.Update(existingWallet);
                     await _context.SaveChangesAsync();
                 }
@@ -284,10 +285,10 @@ namespace WebAPI.Controllers
 
             _context.OrderService.AddRange(orderServices);
             await _context.SaveChangesAsync();
-            SendMail("HOÀN TẤT ĐẶT CỌC" ,request, invoice, orderMenus, orderServices);
+            SendMail("HOÀN TẤT ĐẶT CỌC", request, invoice, orderMenus, orderServices);
 
 
-         
+
             // Tạo danh sách các đối tượng InvoiceCode và thêm thông tin mã giảm giá
             var invoiceCodes = request.InvoiceCodeRequest.Select(codeId => new InvoiceCode
             {
@@ -337,9 +338,9 @@ namespace WebAPI.Controllers
 
             return Ok(bookedHalls);
         }
-        void SendMailPayment(string title,Invoice invoiceRecv)
+        void SendMailPayment(string title, Invoice invoiceRecv)
         {
-            var invoice = _context.Invoice.Include(x => x.Branch).Include(x=> x.Hall).Include(x=> x.User).FirstOrDefault(x => x.InvoiceID == invoiceRecv.InvoiceID);
+            var invoice = _context.Invoice.Include(x => x.Branch).Include(x => x.Hall).Include(x => x.User).FirstOrDefault(x => x.InvoiceID == invoiceRecv.InvoiceID);
 
             StringBuilder body = new StringBuilder();
             body.AppendLine("<html><head>");
@@ -385,7 +386,7 @@ namespace WebAPI.Controllers
 
 
             body.AppendLine("<table>");
-            body.AppendLine("<tr><th>Hình ảnh</th><th>Tên sản phẩm</th><th>Giá bán</th></tr>");
+            body.AppendLine("<tr><th>Hình nh</th><th>Tên sản phẩm</th><th>Giá bán</th></tr>");
 
             body.AppendLine($"<tr>");
             body.AppendLine($"<td style='width: 150px'><img src='{invoice.Hall.Image}' alt='Logo' style='width: 100%; height: 120px;' /></td>");
@@ -561,7 +562,7 @@ namespace WebAPI.Controllers
             mail.To.Add("minhnguyen20020524@gmail.com"); // email người nhận 
 
             mail.From = new MailAddress("duatreodaiduongden@gmail.com");// email người gửi 
-            mail.Subject = $"{ title} - CHI TIẾT ĐƠN HÀNG";
+            mail.Subject = $"{title} - CHI TIẾT ĐƠN HÀNG";
             mail.Body = body.ToString();
             mail.IsBodyHtml = true; // Bật chế độ HTML
 
@@ -807,7 +808,7 @@ namespace WebAPI.Controllers
                         var existingWallet = await _context.Wallet
                             .FirstOrDefaultAsync(w => w.UserId == invoice.UserId);
 
-                        var refundAmount = invoice.PaymentStatus == true ? 
+                        var refundAmount = invoice.PaymentStatus == true ?
                             invoice.Total : invoice.DepositPayment;
 
                         if (existingWallet != null)
@@ -904,10 +905,148 @@ namespace WebAPI.Controllers
             }
         }
 
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateInvoice(int id, [FromBody] UpdateInvoiceRequest request)
+        {
+            try
+            {
+                var invoice = await _context.Invoice
+                    .Include(i => i.OrderMenus)
+                    .Include(i => i.OrderServices)
+                    .FirstOrDefaultAsync(i => i.InvoiceID == id);
+
+                if (invoice == null)
+                {
+                    return NotFound(new { message = "Không tìm thấy hóa đơn" });
+                }
+
+                // Lưu lại tiền cọc cũ
+                var originalDeposit = invoice.DepositPayment;
+
+                // Cập nhật thông tin cơ bản
+                invoice.BranchId = request.BranchId;
+                invoice.HallId = request.HallId;
+                invoice.TimeHall = request.TimeHall;
+
+                // Xóa các OrderMenu cũ
+                _context.OrderMenu.RemoveRange(invoice.OrderMenus);
+
+                // Thêm OrderMenu mới
+                var newOrderMenus = request.OrderMenus.Select(om => new OrderMenu
+                {
+                    InvoiceID = invoice.InvoiceID,
+                    MenuId = om.MenuId
+                }).ToList();
+                await _context.OrderMenu.AddRangeAsync(newOrderMenus);
+
+                // Xóa các OrderService cũ
+                _context.OrderService.RemoveRange(invoice.OrderServices);
+
+                // Thêm OrderService mới
+                var newOrderServices = request.OrderServices.Select(os => new OrderService
+                {
+                    InvoiceID = invoice.InvoiceID,
+                    ServiceId = os.ServiceId
+                }).ToList();
+                await _context.OrderService.AddRangeAsync(newOrderServices);
+
+                // Tính toán lại tổng tiền
+                var hallPrice = await _context.Hall
+                    .Where(h => h.HallId == request.HallId)
+                    .Select(h => h.Price ?? 0)
+                    .FirstOrDefaultAsync();
+
+                var menuPrices = await _context.MenuEntity
+                    .Where(m => request.OrderMenus.Select(om => om.MenuId).Contains(m.MenuId))
+                    .SumAsync(m => m.Price ?? 0);
+
+                var servicePrices = await _context.ServiceEntity
+                    .Where(s => request.OrderServices.Select(os => os.ServiceId).Contains(s.ServiceId))
+                    .SumAsync(s => s.Price ?? 0);
+
+                invoice.TotalBeforeDiscount = hallPrice + menuPrices + servicePrices;
+                invoice.Total = invoice.TotalBeforeDiscount;
+
+                // Giữ nguyên tiền cọc ban đầu
+                invoice.DepositPayment = originalDeposit;
+
+                await _context.SaveChangesAsync();
+
+                return Ok(new
+                {
+                    message = "Cập nhật hóa đơn thành công",
+                    data = new
+                    {
+                        totalBeforeDiscount = invoice.TotalBeforeDiscount,
+                        total = invoice.Total,
+                        depositPayment = invoice.DepositPayment,
+                        remainingPayment = invoice.Total - invoice.DepositPayment
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi khi cập nhật hóa đơn", error = ex.Message });
+            }
+        }
+        [HttpPut("{id}/updateStatus")]
+        public async Task<IActionResult> UpdateStatusInvoice(int id, string request)
+        {
+            try
+            {
+                var invoice = await _context.Invoice
+                    .Include(i => i.OrderMenus)
+                    .Include(i => i.OrderServices)
+                    .FirstOrDefaultAsync(i => i.InvoiceID == id);
+
+                if (invoice == null)
+                {
+                    return NotFound(new { message = "Không tìm thấy hóa đơn" });
+                }
+                invoice.OrderStatus = request;
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = "Cập nhật hóa đơn thành công" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi khi cập nhật hóa đơn", error = ex.Message });
+            }
+        }
         public class UpdateInvoiceStatusRequest
         {
             public bool? PaymentStatus { get; set; }
             public string OrderStatus { get; set; }
+        }
+
+        public class UpdateInvoiceRequest
+        {
+            [Required]
+            public int BranchId { get; set; }
+            
+            [Required] 
+            public int HallId { get; set; }
+            
+            [Required]
+            public string TimeHall { get; set; }
+            
+            [Required]
+            public List<OrderMenuRequest> OrderMenus { get; set; }
+            
+            [Required]
+            public List<OrderServiceRequest> OrderServices { get; set; }
+        }
+
+        public class OrderMenuRequest
+        {
+            [Required]
+            public int MenuId { get; set; }
+        }
+
+        public class OrderServiceRequest
+        {
+            [Required]
+            public int ServiceId { get; set; }
         }
     }
 }

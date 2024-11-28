@@ -1,0 +1,12 @@
+.edit-invoice-modal {
+    max-width: 95% !important;
+    margin: 1rem auto;
+}
+
+.edit-invoice-modal .modal-body {
+    padding: 0;
+}
+
+.edit-invoice-modal .modal-content {
+    height: 90vh;
+} 
